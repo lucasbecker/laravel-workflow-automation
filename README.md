@@ -1,5 +1,7 @@
 # Laravel Workflow Automation
 
+> English | **[Türkçe](README.tr.md)**
+
 Define multi-step business logic as visual, configurable graphs — then let Laravel execute them. Instead of scattering if/else chains, queue jobs, and event listeners across your codebase, you describe the entire flow once: trigger, conditions, actions, loops, delays. The engine handles execution, retries, logging, and human-in-the-loop pauses. Think N8N, but as a Laravel package you own and extend.
 
 ## Installation

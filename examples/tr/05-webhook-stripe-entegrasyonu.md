@@ -1,21 +1,21 @@
-# Stripe Webhook Handler
+# Stripe Webhook İşleyici
 
-> English | **[Türkçe](tr/05-webhook-stripe-entegrasyonu.md)**
+> [English](../05-webhook-stripe-integration.md) | Türkçe
 
-Receive Stripe webhook events, route them by event type, update the order in your database, and send the right email. This example shows the `webhook` trigger, `switch` routing, `update_model`, and `delay` nodes.
+Stripe webhook eventlerini al, event tipine göre yönlendir, veritabanındaki siparişi güncelle ve doğru e-postayı gönder. Bu örnek `webhook` tetikleyici, `switch` yönlendirme, `update_model` ve `delay` node'larını gösterir.
 
-## Flow
+## Akış
 
 ```
-[Webhook Trigger] → [Switch: event type]
-                        ├─ payment_succeeded → [Update Model: paid]    → [Send Mail: receipt]
-                        ├─ payment_failed    → [Update Model: failed]  → [Send Mail: retry notice] → [Delay: 1h] → [HTTP: retry charge]
-                        └─ refund            → [Update Model: refunded] → [Send Mail: refund confirmation]
+[Webhook Tetikleyici] → [Switch: event tipi]
+                            ├─ ödeme başarılı → [Model Güncelle: ödendi]    → [E-posta: makbuz]
+                            ├─ ödeme başarısız → [Model Güncelle: başarısız] → [E-posta: yeniden deneme] → [Gecikme: 1sa] → [HTTP: tekrar tahsil]
+                            └─ iade           → [Model Güncelle: iade edildi] → [E-posta: iade onayı]
 ```
 
-## Step 1 — Define the Workflow
+## Adım 1 — Workflow'u Tanımla
 
-Create an artisan command and run it once with `php artisan workflow:setup-stripe`.
+Bir artisan komutu oluşturup `php artisan workflow:setup-stripe` ile bir kez çalıştırın.
 
 ```php
 // app/Console/Commands/SetupStripeWorkflow.php
@@ -26,7 +26,7 @@ use Illuminate\Console\Command;
 class SetupStripeWorkflow extends Command
 {
     protected $signature = 'workflow:setup-stripe';
-    protected $description = 'Create the Stripe webhook handler workflow';
+    protected $description = 'Stripe webhook handler workflow\'unu oluştur';
 
     public function handle(): void
     {
@@ -46,7 +46,7 @@ class SetupStripeWorkflow extends Command
             ],
         ], name: 'Route by Event');
 
-        // ── Payment succeeded ─────────────────────────────────
+        // ── Ödeme başarılı ────────────────────────────────────
 
         $markPaid = Workflow::addNode($workflow, 'update_model', [
             'model'      => 'App\\Models\\Order',
@@ -61,7 +61,7 @@ class SetupStripeWorkflow extends Command
             'body'    => 'Your payment of ${{ item.data.object.amount / 100 }} has been confirmed.',
         ], name: 'Send Receipt');
 
-        // ── Payment failed ────────────────────────────────────
+        // ── Ödeme başarısız ───────────────────────────────────
 
         $markFailed = Workflow::addNode($workflow, 'update_model', [
             'model'      => 'App\\Models\\Order',
@@ -77,7 +77,7 @@ class SetupStripeWorkflow extends Command
         ], name: 'Retry Notice');
 
         $delay = Workflow::addNode($workflow, 'delay', [
-            'delay_seconds' => 3600, // 1 hour
+            'delay_seconds' => 3600, // 1 saat
         ], name: 'Wait 1 Hour');
 
         $retryCharge = Workflow::addNode($workflow, 'http_request', [
@@ -85,7 +85,7 @@ class SetupStripeWorkflow extends Command
             'method' => 'POST',
         ], name: 'Retry Charge');
 
-        // ── Refund ────────────────────────────────────────────
+        // ── İade ──────────────────────────────────────────────
 
         $markRefunded = Workflow::addNode($workflow, 'update_model', [
             'model'      => 'App\\Models\\Order',
@@ -100,7 +100,7 @@ class SetupStripeWorkflow extends Command
             'body'    => 'Your refund of ${{ item.data.object.amount_refunded / 100 }} has been processed.',
         ], name: 'Refund Confirmation');
 
-        // Edges
+        // Edge'ler
         Workflow::connect($trigger->id, $switchEvent->id);
 
         Workflow::connect($switchEvent->id, $markPaid->id, sourcePort: 'case_succeeded');
@@ -121,9 +121,9 @@ class SetupStripeWorkflow extends Command
 }
 ```
 
-## Step 2 — Get the Webhook URL
+## Adım 2 — Webhook URL'ini Al
 
-After running the command, the `webhook` node generates a unique UUID path:
+Komutu çalıştırdıktan sonra, `webhook` node'u benzersiz bir UUID yolu oluşturur:
 
 ```php
 use Aftandilmmd\WorkflowAutomation\Models\WorkflowNode;
@@ -133,36 +133,36 @@ $url = url("workflow-webhook/{$node->config['path']}");
 // → https://yourapp.com/workflow-webhook/a1b2c3d4-e5f6-...
 ```
 
-Point Stripe's webhook settings to this URL. No code needed in your app — the package handles the incoming request, validates auth, and runs the workflow.
+Stripe'ın webhook ayarlarını bu URL'e yönlendirin. Uygulamanızda kod yazmanıza gerek yok — paket gelen isteği alır, kimlik doğrulamasını yapar ve workflow'u çalıştırır.
 
-## What Happens
+## Ne Olur
 
 **`payment_intent.succeeded`:**
 
-1. **Switch** → matches `case_succeeded`
-2. **Update Model** → Finds `Order` by `stripe_payment_intent`, sets `status: paid`
-3. **Send Mail** → Customer gets receipt
+1. **Switch** → `case_succeeded` eşleşir
+2. **Model Güncelle** → `Order`'ı `stripe_payment_intent` ile bulur, `status: paid` ayarlar
+3. **E-posta** → Müşteri makbuz alır
 
 **`payment_intent.payment_failed`:**
 
-1. **Switch** → matches `case_failed`
-2. **Update Model** → Sets `status: payment_failed`
-3. **Send Mail** → Customer gets retry notice
-4. **Delay** → Workflow pauses for 1 hour (queue-based, non-blocking)
-5. **HTTP Request** → Retries the charge via Stripe API
+1. **Switch** → `case_failed` eşleşir
+2. **Model Güncelle** → `status: payment_failed` ayarlar
+3. **E-posta** → Müşteri yeniden deneme bildirimi alır
+4. **Gecikme** → Workflow 1 saat duraklar (kuyruk tabanlı, non-blocking)
+5. **HTTP İsteği** → Stripe API üzerinden ödemeyi yeniden dener
 
 **`charge.refunded`:**
 
-1. **Switch** → matches `case_refund`
-2. **Update Model** → Sets `status: refunded`
-3. **Send Mail** → Customer gets refund confirmation
+1. **Switch** → `case_refund` eşleşir
+2. **Model Güncelle** → `status: refunded` ayarlar
+3. **E-posta** → Müşteri iade onayı alır
 
-## Concepts Demonstrated
+## Gösterilen Kavramlar
 
-| Concept | How |
-|---------|-----|
-| Webhook trigger | External service (Stripe) sends POST to a generated URL |
-| Multi-way routing | `switch` routes by event type to different branches |
-| Database updates | `update_model` finds and updates Eloquent models |
-| Non-blocking delay | `delay` uses Laravel queues — the worker is free during the wait |
-| Expression nesting | `{{ item.data.object.metadata.order_id }}` accesses deeply nested data |
+| Kavram | Nasıl |
+|--------|-------|
+| Webhook tetikleyici | Dış servis (Stripe) oluşturulan URL'e POST gönderir |
+| Çok yönlü yönlendirme | `switch` event tipine göre farklı dallara yönlendirir |
+| Veritabanı güncelleme | `update_model` Eloquent modelleri bulur ve günceller |
+| Non-blocking gecikme | `delay` Laravel kuyruklarını kullanır — worker bekleme süresinde serbesttir |
+| İç içe ifadeler | `{{ item.data.object.metadata.order_id }}` derin iç içe veriye erişir |

@@ -1,20 +1,20 @@
-# E-Commerce Order Processing
+# E-Ticaret Sipariş İşleme
 
-> English | **[Türkçe](tr/01-e-ticaret-siparis-isleme.md)**
+> [English](../01-ecommerce-order-processing.md) | Türkçe
 
-When a customer places an order, check if it's high-value, notify the VIP team if it is, and update inventory for each item. This example shows branching (`if_condition`), looping (`loop`), and calling external APIs (`http_request`).
+Müşteri sipariş verdiğinde, yüksek değerli mi kontrol et, öyleyse VIP ekibini bilgilendir ve her ürün için envanter güncelle. Bu örnek dallanma (`if_condition`), döngü (`loop`) ve dış API çağrısı (`http_request`) gösterir.
 
-## Flow
+## Akış
 
 ```
-[Manual Trigger] → [IF: total > 500]
-                       ├─ true  → [Send Mail: VIP notice] → [Loop: items] → [HTTP: update stock]
-                       └─ false → [Loop: items] → [HTTP: update stock]
+[Manuel Tetikleyici] → [IF: total > 500]
+                           ├─ true  → [E-posta: VIP bildirimi] → [Döngü: ürünler] → [HTTP: stok güncelle]
+                           └─ false → [Döngü: ürünler] → [HTTP: stok güncelle]
 ```
 
-## Step 1 — Define the Workflow
+## Adım 1 — Workflow'u Tanımla
 
-Create an artisan command and run it once with `php artisan workflow:setup-orders`.
+Bir artisan komutu oluşturup `php artisan workflow:setup-orders` ile bir kez çalıştırın.
 
 ```php
 // app/Console/Commands/SetupOrderWorkflow.php
@@ -25,7 +25,7 @@ use Illuminate\Console\Command;
 class SetupOrderWorkflow extends Command
 {
     protected $signature = 'workflow:setup-orders';
-    protected $description = 'Create the order processing workflow';
+    protected $description = 'Sipariş işleme workflow\'unu oluştur';
 
     public function handle(): void
     {
@@ -58,7 +58,7 @@ class SetupOrderWorkflow extends Command
             ],
         ], name: 'Update Stock');
 
-        // Edges
+        // Edge'ler
         Workflow::connect($trigger->id, $checkAmount->id);
         Workflow::connect($checkAmount->id, $notifyVip->id, sourcePort: 'true');
         Workflow::connect($notifyVip->id, $loop->id);
@@ -72,9 +72,9 @@ class SetupOrderWorkflow extends Command
 }
 ```
 
-Both branches converge on the same `$loop` node — VIP orders get an email first, then both paths update stock. No need to duplicate nodes.
+Her iki dal da aynı `$loop` node'una birleşir — VIP siparişler önce e-posta alır, sonra her iki yol da stok günceller. Node'ları çoğaltmaya gerek yok.
 
-## Step 2 — Trigger from a Controller
+## Adım 2 — Controller'dan Tetikle
 
 ```php
 // app/Http/Controllers/OrderController.php
@@ -105,22 +105,22 @@ class OrderController extends Controller
 }
 ```
 
-## What Happens
+## Ne Olur
 
-Given an order with `total: 750` and 2 items:
+`total: 750` ve 2 ürünlü bir sipariş verildiğinde:
 
-1. **IF Condition** — `750 > 500` = true → VIP path
-2. **Send Mail** — VIP team gets notified
-3. **Loop** — Iterates over `items` array (2 items)
-4. **HTTP Request** — Calls inventory API twice, once per item
+1. **IF Koşulu** — `750 > 500` = true → VIP yolu
+2. **E-posta** — VIP ekibi bilgilendirilir
+3. **Döngü** — `items` dizisi üzerinde iterasyon (2 ürün)
+4. **HTTP İsteği** — Envanter API'si ürün başına bir kez, toplam 2 kez çağrılır
 
-If the order were $200, it skips the email and goes straight to the loop.
+Sipariş $200 olsaydı, e-postayı atlayıp doğrudan döngüye giderdi.
 
-## Concepts Demonstrated
+## Gösterilen Kavramlar
 
-| Concept | How |
-|---------|-----|
-| Branching | `if_condition` with `sourcePort: 'true'` / `'false'` |
-| Converging branches | Both paths connect to the same `$loop` node |
-| Looping | `loop` node expands an array, processes each via `loop_item` port |
-| External API calls | `http_request` with expression-based body |
+| Kavram | Nasıl |
+|--------|-------|
+| Dallanma | `if_condition` ile `sourcePort: 'true'` / `'false'` |
+| Dalların birleşmesi | Her iki yol aynı `$loop` node'una bağlanır |
+| Döngü | `loop` node'u diziyi genişletir, her birini `loop_item` portundan işler |
+| Dış API çağrıları | İfade tabanlı body ile `http_request` |

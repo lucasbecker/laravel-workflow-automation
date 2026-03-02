@@ -1,18 +1,18 @@
-# Scheduled Daily Report
+# Zamanlanmış Günlük Rapor
 
-> English | **[Türkçe](tr/06-zamanlanmis-raporlama.md)**
+> [English](../06-scheduled-reporting.md) | Türkçe
 
-Every morning at 8 AM, fetch yesterday's sales data, filter out zero-revenue entries, aggregate by department, and email the summary. This example shows the `schedule` trigger and a linear data processing pipeline.
+Her sabah saat 8'de dünkü satış verilerini çek, sıfır gelirli kayıtları filtrele, departmana göre topla ve özeti e-postayla gönder. Bu örnek `schedule` tetikleyicisini ve doğrusal veri işleme pipeline'ını gösterir.
 
-## Flow
+## Akış
 
 ```
-[Schedule: 8 AM daily] → [HTTP: fetch sales] → [Filter: non-zero] → [Aggregate: by department] → [Send Mail: report]
+[Zamanlama: günlük 8:00] → [HTTP: satış çek] → [Filtre: sıfır olmayan] → [Toplama: departmana göre] → [E-posta: rapor]
 ```
 
-## Step 1 — Define the Workflow
+## Adım 1 — Workflow'u Tanımla
 
-Create an artisan command and run it once with `php artisan workflow:setup-daily-report`.
+Bir artisan komutu oluşturup `php artisan workflow:setup-daily-report` ile bir kez çalıştırın.
 
 ```php
 // app/Console/Commands/SetupDailyReport.php
@@ -23,7 +23,7 @@ use Illuminate\Console\Command;
 class SetupDailyReport extends Command
 {
     protected $signature = 'workflow:setup-daily-report';
-    protected $description = 'Create the daily sales report workflow';
+    protected $description = 'Günlük satış raporu workflow\'unu oluştur';
 
     public function handle(): void
     {
@@ -31,7 +31,7 @@ class SetupDailyReport extends Command
 
         $trigger = Workflow::addNode($workflow, 'schedule', [
             'interval_type' => 'custom_cron',
-            'cron'          => '0 8 * * *', // Every day at 8:00 AM
+            'cron'          => '0 8 * * *', // Her gün saat 8:00'de
         ], name: 'Daily 8 AM');
 
         $fetchData = Workflow::addNode($workflow, 'http_request', [
@@ -56,10 +56,10 @@ class SetupDailyReport extends Command
         $sendReport = Workflow::addNode($workflow, 'send_mail', [
             'to'      => 'team@company.com',
             'subject' => 'Daily Sales Report — {{ date_format(now(), "M d, Y") }}',
-            'body'    => 'Daily sales report attached.',
+            'body'    => 'Günlük satış raporu ektedir.',
         ], name: 'Email Report');
 
-        // Edges
+        // Edge'ler
         Workflow::connect($trigger->id, $fetchData->id);
         Workflow::connect($fetchData->id, $filterNonZero->id);
         Workflow::connect($filterNonZero->id, $aggregate->id);
@@ -72,73 +72,73 @@ class SetupDailyReport extends Command
 }
 ```
 
-## Step 2 — Enable the Schedule Runner
+## Adım 2 — Zamanlama Çalıştırıcısını Etkinleştir
 
-The package provides `workflow:schedule-run`, which checks all schedule triggers every minute. Add it to your Laravel scheduler:
+Paket, her dakika tüm zamanlama tetikleyicilerini kontrol eden `workflow:schedule-run` komutu sağlar. Laravel zamanlayıcınıza ekleyin:
 
 ```php
 // routes/console.php
 Schedule::command('workflow:schedule-run')->everyMinute();
 ```
 
-Make sure the Laravel scheduler itself is running:
+Laravel zamanlayıcısının kendisinin çalıştığından emin olun:
 
 ```bash
-* * * * * cd /path-to-project && php artisan schedule:run >> /dev/null 2>&1
+* * * * * cd /proje-yolu && php artisan schedule:run >> /dev/null 2>&1
 ```
 
-That's it. At 8:00 AM every day, the workflow runs automatically.
+Bu kadar. Her gün saat 8:00'de workflow otomatik çalışır.
 
-## Example Data Flow
+## Örnek Veri Akışı
 
-**API returns:**
+**API şunları döner:**
 
-| department | revenue | transactions |
-|------------|---------|--------------|
-| Electronics | 15000 | 42 |
-| Clothing | 8500 | 67 |
-| Books | 0 | 0 |
-| Electronics | 3200 | 15 |
+| departman | gelir | işlem sayısı |
+|-----------|-------|--------------|
+| Elektronik | 15000 | 42 |
+| Giyim | 8500 | 67 |
+| Kitap | 0 | 0 |
+| Elektronik | 3200 | 15 |
 
-**After Filter** — removes Books (zero revenue).
+**Filtre sonrası** — Kitap kaldırılır (sıfır gelir).
 
-**After Aggregate** — grouped by department:
+**Toplama sonrası** — departmana göre gruplanır:
 
 ```json
 [
-    {"department": "Electronics", "total_revenue": 18200, "total_transactions": 57},
-    {"department": "Clothing",    "total_revenue": 8500,  "total_transactions": 67}
+    {"department": "Elektronik", "total_revenue": 18200, "total_transactions": 57},
+    {"department": "Giyim",      "total_revenue": 8500,  "total_transactions": 67}
 ]
 ```
 
-## Other Schedule Options
+## Diğer Zamanlama Seçenekleri
 
 ```php
-// Every 5 minutes
+// Her 5 dakikada bir
 Workflow::addNode($workflow, 'schedule', [
     'interval_type'  => 'minutes',
     'interval_value' => 5,
 ], name: 'Every 5 Min');
 
-// Weekdays at 9 AM
+// Hafta içi saat 9'da
 Workflow::addNode($workflow, 'schedule', [
     'interval_type' => 'custom_cron',
     'cron'          => '0 9 * * 1-5',
 ], name: 'Weekday 9 AM');
 
-// First day of each month
+// Her ayın ilk günü
 Workflow::addNode($workflow, 'schedule', [
     'interval_type' => 'custom_cron',
     'cron'          => '0 0 1 * *',
 ], name: 'Monthly');
 ```
 
-## Concepts Demonstrated
+## Gösterilen Kavramlar
 
-| Concept | How |
-|---------|-----|
-| Cron-based trigger | `schedule` with `custom_cron` runs at a specific time |
-| No manual trigger | `workflow:schedule-run` dispatches automatically |
-| Data filtering | `filter` removes zero-revenue entries |
-| Aggregation | `aggregate` groups and sums by department |
-| Built-in functions | `{{ date_format(now(), "Y-m-d") }}` in expressions |
+| Kavram | Nasıl |
+|--------|-------|
+| Cron tabanlı tetikleyici | `schedule` ile `custom_cron` belirli bir saatte çalışır |
+| Manuel tetikleme yok | `workflow:schedule-run` otomatik dispatch eder |
+| Veri filtreleme | `filter` sıfır gelirli kayıtları kaldırır |
+| Toplama | `aggregate` departmana göre gruplar ve toplar |
+| Yerleşik fonksiyonlar | İfadelerde `{{ date_format(now(), "Y-m-d") }}` |

@@ -1,21 +1,21 @@
-# User Onboarding
+# Kullanıcı Kayıt Akışı
 
-> English | **[Türkçe](tr/02-kullanici-kayit.md)**
+> [English](../02-user-onboarding.md) | Türkçe
 
-When a new user registers, send a different welcome email depending on how they signed up (organic, referral, or ad campaign). If they came via referral, also credit the referrer. This example shows automatic model-event triggering and multi-way branching with `switch`.
+Yeni kullanıcı kayıt olduğunda, nasıl kaydolduğuna göre (organik, referans veya reklam kampanyası) farklı bir hoş geldin e-postası gönder. Referansla geldiyse, referans vereni de ödüllendir. Bu örnek otomatik model-event tetikleme ve `switch` ile çok yönlü dallanma gösterir.
 
-## Flow
+## Akış
 
 ```
-[Model Event: User created] → [Switch: source]
-                                  ├─ case_organic  → [Send Mail: organic welcome]
-                                  ├─ case_referral → [Send Mail: referral welcome] → [HTTP: credit referrer]
-                                  └─ default       → [Send Mail: generic welcome]
+[Model Event: User created] → [Switch: kaynak]
+                                  ├─ case_organic  → [E-posta: organik hoş geldin]
+                                  ├─ case_referral → [E-posta: referans hoş geldin] → [HTTP: referans ödülü]
+                                  └─ default       → [E-posta: genel hoş geldin]
 ```
 
-## Step 1 — Define the Workflow
+## Adım 1 — Workflow'u Tanımla
 
-Create an artisan command and run it once with `php artisan workflow:setup-onboarding`.
+Bir artisan komutu oluşturup `php artisan workflow:setup-onboarding` ile bir kez çalıştırın.
 
 ```php
 // app/Console/Commands/SetupOnboardingWorkflow.php
@@ -26,7 +26,7 @@ use Illuminate\Console\Command;
 class SetupOnboardingWorkflow extends Command
 {
     protected $signature = 'workflow:setup-onboarding';
-    protected $description = 'Create the user onboarding workflow';
+    protected $description = 'Kullanıcı kayıt workflow\'unu oluştur';
 
     public function handle(): void
     {
@@ -72,7 +72,7 @@ class SetupOnboardingWorkflow extends Command
             'body'    => 'We are glad to have you.',
         ], name: 'Welcome (Generic)');
 
-        // Edges
+        // Edge'ler
         Workflow::connect($trigger->id, $switchSource->id);
         Workflow::connect($switchSource->id, $welcomeOrganic->id, sourcePort: 'case_organic');
         Workflow::connect($switchSource->id, $welcomeReferral->id, sourcePort: 'case_referral');
@@ -86,9 +86,9 @@ class SetupOnboardingWorkflow extends Command
 }
 ```
 
-## Step 2 — Register the Model Event Listener
+## Adım 2 — Model Event Listener'ı Kaydet
 
-Add one line to your `AppServiceProvider`. This tells the package to watch for Eloquent events:
+`AppServiceProvider`'ınıza tek satır ekleyin. Bu, pakete Eloquent eventlerini izlemesini söyler:
 
 ```php
 // app/Providers/AppServiceProvider.php
@@ -101,12 +101,12 @@ public function boot(): void
 }
 ```
 
-## Step 3 — It Just Works
+## Adım 3 — Kendiliğinden Çalışır
 
-No `Workflow::run()` needed. When a user registers, the workflow fires automatically:
+`Workflow::run()` gerekmez. Kullanıcı kayıt olduğunda workflow otomatik tetiklenir:
 
 ```php
-// Anywhere in your app
+// Uygulamanızın herhangi bir yerinde
 User::create([
     'name'          => 'Alice',
     'email'         => 'alice@example.com',
@@ -114,25 +114,25 @@ User::create([
     'source'        => 'referral',
     'referral_code' => 'BOB123',
 ]);
-// → Workflow runs: referral welcome email + credit referrer API call
+// → Workflow çalışır: referans hoş geldin e-postası + referans API çağrısı
 ```
 
-## What Happens
+## Ne Olur
 
-When `User::create(['source' => 'referral', ...])` is called:
+`User::create(['source' => 'referral', ...])` çağrıldığında:
 
-1. **Model Event** fires on `User::created`
-2. **Switch** checks `source` → matches `case_referral`
-3. **Send Mail** → Referral welcome email sent to the user
-4. **HTTP Request** → Calls the referral API to credit the referrer
+1. **Model Event** — `User::created` üzerinde tetiklenir
+2. **Switch** — `source` alanını kontrol eder → `case_referral` eşleşir
+3. **E-posta** — Referans hoş geldin e-postası kullanıcıya gönderilir
+4. **HTTP İsteği** — Referans API'si çağrılarak referans veren ödüllendirilir
 
-If `source = 'organic'` → organic welcome. If `source = 'google_ads'` → no case matches → `default` port → generic welcome.
+`source = 'organic'` ise → organik hoş geldin. `source = 'google_ads'` ise → hiçbir case eşleşmez → `default` portu → genel hoş geldin.
 
-## Concepts Demonstrated
+## Gösterilen Kavramlar
 
-| Concept | How |
-|---------|-----|
-| Automatic triggering | `model_event` fires on `User::created` — no manual call |
-| Multi-way branching | `switch` with named ports (`case_organic`, `case_referral`, `default`) |
-| Sequential actions | Referral welcome → credit referrer (connected in sequence) |
-| Fallback routing | Unmatched cases go to `default` port |
+| Kavram | Nasıl |
+|--------|-------|
+| Otomatik tetikleme | `model_event` — `User::created`'da tetiklenir, manuel çağrı gerekmez |
+| Çok yönlü dallanma | İsimli portlarla `switch` (`case_organic`, `case_referral`, `default`) |
+| Sıralı aksiyonlar | Referans hoş geldin → referans ödülü (sırayla bağlı) |
+| Yedek yönlendirme | Eşleşmeyen case'ler `default` portuna gider |

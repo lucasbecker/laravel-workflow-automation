@@ -1,18 +1,18 @@
-# Data Pipeline (ETL)
+# Veri Hattı (ETL)
 
-> English | **[Türkçe](tr/03-veri-hatti-etl.md)**
+> [English](../03-data-pipeline-etl.md) | Türkçe
 
-Fetch sales data from an external API, filter out incomplete records, calculate net revenue, and aggregate totals by region. This example shows how to build an ETL pipeline using `http_request`, `filter`, `code`, and `aggregate` nodes.
+Dış API'den satış verilerini çek, eksik kayıtları filtrele, net geliri hesapla ve bölgeye göre toplamları al. Bu örnek `http_request`, `filter`, `code` ve `aggregate` node'larıyla ETL pipeline nasıl kurulur gösterir.
 
-## Flow
+## Akış
 
 ```
-[Manual Trigger] → [HTTP: fetch sales] → [Filter: completed only] → [Code: net revenue] → [Aggregate: by region] → [HTTP: push report]
+[Manuel Tetikleyici] → [HTTP: satış çek] → [Filtre: tamamlananlar] → [Kod: net gelir] → [Toplama: bölgeye göre] → [HTTP: rapor gönder]
 ```
 
-## Step 1 — Define the Workflow
+## Adım 1 — Workflow'u Tanımla
 
-Create an artisan command and run it once with `php artisan workflow:setup-sales-pipeline`.
+Bir artisan komutu oluşturup `php artisan workflow:setup-sales-pipeline` ile bir kez çalıştırın.
 
 ```php
 // app/Console/Commands/SetupSalesPipeline.php
@@ -23,7 +23,7 @@ use Illuminate\Console\Command;
 class SetupSalesPipeline extends Command
 {
     protected $signature = 'workflow:setup-sales-pipeline';
-    protected $description = 'Create the sales data pipeline workflow';
+    protected $description = 'Satış veri hattı workflow\'unu oluştur';
 
     public function handle(): void
     {
@@ -63,7 +63,7 @@ class SetupSalesPipeline extends Command
             'body'   => ['report_type' => 'daily_sales', 'date' => '{{ payload.date }}'],
         ], name: 'Push Report');
 
-        // Edges — a straight pipeline
+        // Edge'ler — düz bir pipeline
         Workflow::connect($trigger->id, $fetchData->id);
         Workflow::connect($fetchData->id, $filterCompleted->id);
         Workflow::connect($filterCompleted->id, $calcRevenue->id);
@@ -77,46 +77,46 @@ class SetupSalesPipeline extends Command
 }
 ```
 
-## Step 2 — Trigger It
+## Adım 2 — Tetikle
 
-From a controller, another command, or anywhere:
+Controller, başka bir komut veya herhangi bir yerden:
 
 ```php
 $workflow = WorkflowModel::where('name', 'Sales Pipeline')->firstOrFail();
 Workflow::run($workflow, [['date' => '2025-03-01']]);
 ```
 
-Or schedule it to run daily:
+Veya günlük çalışacak şekilde zamanlayın:
 
 ```php
 // routes/console.php
 Schedule::command('pipeline:sales')->dailyAt('06:00');
 ```
 
-## Example Data Flow
+## Örnek Veri Akışı
 
-**API returns 4 transactions:**
+**API 4 işlem döner:**
 
-| id | region | amount | discount | status |
-|----|--------|--------|----------|--------|
+| id | bölge | tutar | indirim | durum |
+|----|-------|-------|---------|-------|
 | 1 | US | 100 | 10 | completed |
 | 2 | EU | 200 | 0 | completed |
 | 3 | US | 50 | 0 | refunded |
 | 4 | US | 150 | 20 | completed |
 
-**After Filter** — removes tx #3 (refunded):
+**Filtre sonrası** — tx #3 (iade) kaldırılır:
 
-3 transactions remain.
+3 işlem kalır.
 
-**After Code** — calculates net revenue:
+**Kod sonrası** — net gelir hesaplanır:
 
-| id | region | net revenue |
-|----|--------|-------------|
+| id | bölge | net gelir |
+|----|-------|-----------|
 | 1 | US | $90 (100 × 0.9) |
 | 2 | EU | $200 (200 × 1.0) |
 | 4 | US | $120 (150 × 0.8) |
 
-**After Aggregate** — grouped by region:
+**Toplama sonrası** — bölgeye göre gruplanır:
 
 ```json
 [
@@ -125,12 +125,12 @@ Schedule::command('pipeline:sales')->dailyAt('06:00');
 ]
 ```
 
-## Concepts Demonstrated
+## Gösterilen Kavramlar
 
-| Concept | How |
-|---------|-----|
-| Linear pipeline | Nodes connected in a straight chain — no branching |
-| Filtering | `filter` removes records that don't match conditions |
-| Expression-based transform | `code` node calculates values without PHP eval |
-| Aggregation | `aggregate` groups items and applies sum/count |
-| Payload access | `{{ payload.date }}` reads the original trigger data |
+| Kavram | Nasıl |
+|--------|-------|
+| Doğrusal pipeline | Node'lar düz bir zincirde bağlı — dallanma yok |
+| Filtreleme | `filter` koşullara uymayan kayıtları kaldırır |
+| İfade tabanlı dönüşüm | `code` node'u PHP eval olmadan değer hesaplar |
+| Toplama | `aggregate` öğeleri gruplar ve sum/count uygular |
+| Payload erişimi | `{{ payload.date }}` orijinal tetikleyici verisini okur |
