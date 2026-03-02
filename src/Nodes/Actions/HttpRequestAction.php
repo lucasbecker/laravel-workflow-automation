@@ -1,0 +1,69 @@
+<?php
+
+namespace Aftandilmmd\WorkflowAutomation\Nodes\Actions;
+
+use Aftandilmmd\WorkflowAutomation\Attributes\AsWorkflowNode;
+use Aftandilmmd\WorkflowAutomation\DTOs\NodeInput;
+use Aftandilmmd\WorkflowAutomation\DTOs\NodeOutput;
+use Aftandilmmd\WorkflowAutomation\Enums\NodeType;
+use Aftandilmmd\WorkflowAutomation\Nodes\BaseNode;
+use Illuminate\Support\Facades\Http;
+
+#[AsWorkflowNode(key: 'http_request', type: NodeType::Action, label: 'HTTP Request')]
+class HttpRequestAction extends BaseNode
+{
+    public static function configSchema(): array
+    {
+        return [
+            ['key' => 'url', 'type' => 'string', 'label' => 'URL', 'required' => true, 'supports_expression' => true],
+            ['key' => 'method', 'type' => 'select', 'label' => 'Method', 'required' => true, 'options' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']],
+            ['key' => 'headers', 'type' => 'keyvalue', 'label' => 'Headers', 'required' => false, 'supports_expression' => true],
+            ['key' => 'body', 'type' => 'json', 'label' => 'Body (JSON)', 'required' => false, 'supports_expression' => true],
+            ['key' => 'timeout', 'type' => 'integer', 'label' => 'Timeout (seconds)', 'required' => false],
+            ['key' => 'include_response', 'type' => 'boolean', 'label' => 'Include response in output', 'required' => false],
+        ];
+    }
+
+    public function execute(NodeInput $input, array $config): NodeOutput
+    {
+        $results = [];
+
+        foreach ($input->items as $item) {
+            try {
+                $http = Http::timeout($config['timeout'] ?? 30);
+
+                if (! empty($config['headers'])) {
+                    $http = $http->withHeaders($config['headers']);
+                }
+
+                $response = match (strtoupper($config['method'])) {
+                    'GET'    => $http->get($config['url']),
+                    'POST'   => $http->post($config['url'], $config['body'] ?? []),
+                    'PUT'    => $http->put($config['url'], $config['body'] ?? []),
+                    'PATCH'  => $http->patch($config['url'], $config['body'] ?? []),
+                    'DELETE' => $http->delete($config['url']),
+                    default  => throw new \InvalidArgumentException("Unsupported HTTP method: {$config['method']}"),
+                };
+
+                $resultItem = $item;
+
+                if ($config['include_response'] ?? false) {
+                    $resultItem['http_response'] = [
+                        'status'  => $response->status(),
+                        'body'    => $response->json() ?? $response->body(),
+                        'headers' => $response->headers(),
+                    ];
+                }
+
+                $results[] = $resultItem;
+            } catch (\Throwable $e) {
+                return NodeOutput::ports([
+                    'main'  => $results,
+                    'error' => [array_merge($item, ['error' => $e->getMessage()])],
+                ]);
+            }
+        }
+
+        return NodeOutput::main($results);
+    }
+}

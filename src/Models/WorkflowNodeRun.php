@@ -1,0 +1,46 @@
+<?php
+
+namespace Aftandilmmd\WorkflowAutomation\Models;
+
+use Aftandilmmd\WorkflowAutomation\Enums\NodeRunStatus;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class WorkflowNodeRun extends Model
+{
+    use HasFactory;
+
+    protected $guarded = [];
+
+    public function getTable(): string
+    {
+        return config('workflow-automation.tables.node_runs', 'workflow_node_runs');
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'status'      => NodeRunStatus::class,
+            'input'       => 'array',
+            'output'      => 'array',
+            'executed_at' => 'datetime',
+        ];
+    }
+
+    public function workflowRun(): BelongsTo
+    {
+        return $this->belongsTo(
+            config('workflow-automation.models.run', WorkflowRun::class),
+            'workflow_run_id',
+        );
+    }
+
+    public function node(): BelongsTo
+    {
+        return $this->belongsTo(
+            config('workflow-automation.models.node', WorkflowNode::class),
+            'node_id',
+        );
+    }
+}

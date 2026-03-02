@@ -1,0 +1,106 @@
+<?php
+
+namespace Aftandilmmd\WorkflowAutomation\Http\Controllers;
+
+use Aftandilmmd\WorkflowAutomation\Http\Requests\StoreWorkflowRequest;
+use Aftandilmmd\WorkflowAutomation\Http\Requests\UpdateWorkflowRequest;
+use Aftandilmmd\WorkflowAutomation\Http\Resources\WorkflowResource;
+use Aftandilmmd\WorkflowAutomation\Http\Resources\WorkflowRunResource;
+use Aftandilmmd\WorkflowAutomation\Models\Workflow;
+use Aftandilmmd\WorkflowAutomation\Services\WorkflowService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Routing\Controller;
+
+class WorkflowController extends Controller
+{
+    public function __construct(
+        private readonly WorkflowService $service,
+    ) {}
+
+    public function index(Request $request): AnonymousResourceCollection
+    {
+        $workflows = Workflow::query()
+            ->when($request->boolean('active_only'), fn ($q) => $q->where('is_active', true))
+            ->latest()
+            ->paginate($request->integer('per_page', 15));
+
+        return WorkflowResource::collection($workflows);
+    }
+
+    public function store(StoreWorkflowRequest $request): WorkflowResource
+    {
+        $workflow = $this->service->create($request->validated());
+
+        return new WorkflowResource($workflow);
+    }
+
+    public function show(Workflow $workflow): WorkflowResource
+    {
+        $workflow->load(['nodes', 'edges']);
+
+        return new WorkflowResource($workflow);
+    }
+
+    public function update(UpdateWorkflowRequest $request, Workflow $workflow): WorkflowResource
+    {
+        $workflow = $this->service->update($workflow, $request->validated());
+
+        return new WorkflowResource($workflow);
+    }
+
+    public function destroy(Workflow $workflow): JsonResponse
+    {
+        $this->service->delete($workflow);
+
+        return response()->json(['message' => 'Workflow deleted.'], 200);
+    }
+
+    public function activate(Workflow $workflow): WorkflowResource
+    {
+        $workflow = $this->service->activate($workflow);
+
+        return new WorkflowResource($workflow);
+    }
+
+    public function deactivate(Workflow $workflow): WorkflowResource
+    {
+        $workflow = $this->service->deactivate($workflow);
+
+        return new WorkflowResource($workflow);
+    }
+
+    public function run(Request $request, Workflow $workflow): WorkflowRunResource|JsonResponse
+    {
+        $payload = $request->input('payload', []);
+
+        if ($workflow->run_async || config('workflow-automation.async', true)) {
+            $this->service->runAsync($workflow, $payload);
+
+            return response()->json(['message' => 'Workflow dispatched.'], 202);
+        }
+
+        $run = $this->service->run($workflow, $payload);
+
+        return new WorkflowRunResource($run->load('nodeRuns'));
+    }
+
+    public function duplicate(Workflow $workflow): WorkflowResource
+    {
+        $copy = $this->service->duplicate($workflow);
+
+        return new WorkflowResource($copy);
+    }
+
+    public function validateWorkflow(Workflow $workflow): JsonResponse
+    {
+        $errors = $this->service->validate($workflow);
+
+        if (empty($errors)) {
+            return response()->json(['valid' => true, 'errors' => []]);
+        }
+
+        return response()->json(['valid' => false, 'errors' => $errors], 422);
+    }
+}

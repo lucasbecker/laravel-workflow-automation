@@ -1,0 +1,83 @@
+<?php
+
+namespace Aftandilmmd\WorkflowAutomation;
+
+use Aftandilmmd\WorkflowAutomation\Contracts\ExpressionEvaluatorInterface;
+use Aftandilmmd\WorkflowAutomation\Engine\ExpressionEvaluator;
+use Aftandilmmd\WorkflowAutomation\Engine\GraphExecutor;
+use Aftandilmmd\WorkflowAutomation\Engine\GraphValidator;
+use Aftandilmmd\WorkflowAutomation\Engine\NodeRunner;
+use Aftandilmmd\WorkflowAutomation\Registry\NodeRegistry;
+use Aftandilmmd\WorkflowAutomation\Services\WorkflowService;
+use Illuminate\Support\ServiceProvider;
+
+class WorkflowAutomationServiceProvider extends ServiceProvider
+{
+    public function register(): void
+    {
+        $this->mergeConfigFrom(__DIR__.'/../config/workflow-automation.php', 'workflow-automation');
+
+        $this->app->singleton(NodeRegistry::class);
+        $this->app->singleton(NodeRunner::class);
+
+        $this->app->singleton(
+            ExpressionEvaluatorInterface::class,
+            ExpressionEvaluator::class,
+        );
+
+        $this->app->singleton(GraphValidator::class, fn ($app) => new GraphValidator(
+            $app->make(NodeRegistry::class),
+        ));
+
+        $this->app->singleton(GraphExecutor::class, fn ($app) => new GraphExecutor(
+            registry: $app->make(NodeRegistry::class),
+            nodeRunner: $app->make(NodeRunner::class),
+            expressionEvaluator: $app->make(ExpressionEvaluatorInterface::class),
+            graphValidator: $app->make(GraphValidator::class),
+        ));
+
+        $this->app->singleton(WorkflowService::class, fn ($app) => new WorkflowService(
+            executor: $app->make(GraphExecutor::class),
+            validator: $app->make(GraphValidator::class),
+        ));
+    }
+
+    public function boot(): void
+    {
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+
+        if (config('workflow-automation.routes', true)) {
+            $this->loadRoutesFrom(__DIR__.'/../routes/api.php');
+        }
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                Console\Commands\ScheduleRunCommand::class,
+                Console\Commands\CleanRunsCommand::class,
+                Console\Commands\ValidateWorkflowCommand::class,
+            ]);
+
+            $this->publishes([
+                __DIR__.'/../config/workflow-automation.php' => config_path('workflow-automation.php'),
+            ], 'workflow-automation-config');
+
+            $this->publishes([
+                __DIR__.'/../database/migrations' => database_path('migrations'),
+            ], 'workflow-automation-migrations');
+        }
+
+        $this->registerBuiltInNodes();
+    }
+
+    private function registerBuiltInNodes(): void
+    {
+        $registry = $this->app->make(NodeRegistry::class);
+        $registry->discoverNodes(__DIR__.'/Nodes');
+
+        foreach (config('workflow-automation.node_discovery.app_paths', []) as $path) {
+            if (is_dir($path)) {
+                $registry->discoverNodes($path);
+            }
+        }
+    }
+}
