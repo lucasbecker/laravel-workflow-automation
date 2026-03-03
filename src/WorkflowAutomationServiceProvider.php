@@ -64,6 +64,10 @@ class WorkflowAutomationServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__.'/../database/migrations' => database_path('migrations'),
             ], 'workflow-automation-migrations');
+
+            $this->publishes([
+                __DIR__.'/../ui/dist' => public_path('workflow-editor'),
+            ], 'workflow-automation-editor');
         }
 
         $this->registerBuiltInNodes();

@@ -49,6 +49,72 @@ if (config('workflow-automation.api_routes', true)) {
         });
 }
 
+// ── UI (SPA catch-all) ──────────────────────────────────────────
+if (config('workflow-automation.ui_routes', true)) {
+    // Static assets must be registered BEFORE the SPA catch-all
+    Route::get('workflow-editor/assets/{file}', function (string $file) {
+        $published = public_path("workflow-editor/assets/{$file}");
+        $packaged  = __DIR__."/../ui/dist/assets/{$file}";
+
+        $path = file_exists($published) ? $published : $packaged;
+
+        if (! file_exists($path)) {
+            abort(404);
+        }
+
+        $mime = match (pathinfo($file, PATHINFO_EXTENSION)) {
+            'js'  => 'application/javascript',
+            'css' => 'text/css',
+            'svg' => 'image/svg+xml',
+            'png' => 'image/png',
+            'ico' => 'image/x-icon',
+            'woff2' => 'font/woff2',
+            'woff'  => 'font/woff',
+            default => 'application/octet-stream',
+        };
+
+        return response()->file($path, ['Content-Type' => $mime]);
+    })->name('workflow.ui.assets');
+
+    // Favicon and other root-level static files
+    Route::get('workflow-editor/{file}', function (string $file) {
+        $published = public_path("workflow-editor/{$file}");
+        $packaged  = __DIR__."/../ui/dist/{$file}";
+
+        $path = file_exists($published) ? $published : $packaged;
+
+        if (! file_exists($path)) {
+            abort(404);
+        }
+
+        $mime = match (pathinfo($file, PATHINFO_EXTENSION)) {
+            'svg' => 'image/svg+xml',
+            'png' => 'image/png',
+            'ico' => 'image/x-icon',
+            default => 'application/octet-stream',
+        };
+
+        return response()->file($path, ['Content-Type' => $mime]);
+    })->where('file', '.+\\.(?:svg|png|ico|webp|jpg|jpeg)$')->name('workflow.ui.static');
+
+    // SPA catch-all — serves index.html for all non-asset routes
+    Route::get('workflow-editor/{any?}', function () {
+        $published = public_path('workflow-editor/index.html');
+        $packaged  = __DIR__.'/../ui/dist/index.html';
+
+        $path = file_exists($published) ? $published : $packaged;
+
+        if (! file_exists($path)) {
+            abort(404, 'Workflow UI not built. Run: cd vendor/aftandilmmd/laravel-workflow-automation/ui && npm install && npm run build');
+        }
+
+        return response()->file($path, ['Content-Type' => 'text/html']);
+    })
+        ->where('any', '.*')
+        ->middleware(config('workflow-automation.middleware', ['api']))
+        ->name('workflow.ui');
+}
+
 // ── Webhook (no auth middleware) ────────────────────────────────
 if (config('workflow-automation.webhook_routes', true)) {
     $webhookPrefix = config('workflow-automation.webhook_prefix', 'workflow-webhook');

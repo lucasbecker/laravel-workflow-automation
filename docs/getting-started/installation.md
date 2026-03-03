@@ -67,6 +67,16 @@ php artisan route:list --path=workflow-engine
 
 You should see endpoints for workflows, nodes, edges, runs, and the registry.
 
+## Visual Editor
+
+The package includes a built-in visual workflow editor at `/workflow-ui`:
+
+```txt
+http://your-app.test/workflow-editor
+```
+
+No extra setup needed — it works out of the box. See the [UI Editor](/ui-editor) docs for details.
+
 ## Next Steps
 
 Head to [Quick Start](/getting-started/quick-start) to build your first workflow in under 5 minutes.

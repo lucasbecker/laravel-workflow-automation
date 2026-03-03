@@ -1,0 +1,223 @@
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import {
+  Plus,
+  Copy,
+  Trash2,
+  ToggleLeft,
+  ToggleRight,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react'
+import { useWorkflowListStore } from '../../stores/useWorkflowListStore'
+import { LoadingSpinner } from '../shared/LoadingSpinner'
+import { ConfirmDialog } from '../shared/ConfirmDialog'
+
+export function WorkflowListPage() {
+  const navigate = useNavigate()
+  const {
+    workflows,
+    currentPage,
+    lastPage,
+    total,
+    isLoading,
+    fetchWorkflows,
+    createWorkflow,
+    deleteWorkflow,
+    duplicateWorkflow,
+    toggleActive,
+  } = useWorkflowListStore()
+
+  const [showCreate, setShowCreate] = useState(false)
+  const [newName, setNewName] = useState('')
+  const [newDesc, setNewDesc] = useState('')
+  const [deleteId, setDeleteId] = useState<number | null>(null)
+
+  useEffect(() => {
+    fetchWorkflows()
+  }, [fetchWorkflows])
+
+  const handleCreate = async () => {
+    if (!newName.trim()) return
+    const wf = await createWorkflow(newName.trim(), newDesc.trim() || undefined)
+    setShowCreate(false)
+    setNewName('')
+    setNewDesc('')
+    navigate(`/${wf.id}`)
+  }
+
+  const handleDelete = async () => {
+    if (deleteId === null) return
+    await deleteWorkflow(deleteId)
+    setDeleteId(null)
+  }
+
+  return (
+    <div className="mx-auto max-w-6xl px-6 py-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Workflows</h1>
+          <p className="mt-1 text-sm text-gray-500">{total} workflow{total !== 1 ? 's' : ''}</p>
+        </div>
+        <button
+          onClick={() => setShowCreate(true)}
+          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+        >
+          <Plus size={16} />
+          New Workflow
+        </button>
+      </div>
+
+      {isLoading ? (
+        <div className="mt-16 flex justify-center">
+          <LoadingSpinner />
+        </div>
+      ) : workflows.length === 0 ? (
+        <div className="mt-16 text-center text-gray-500">
+          <p className="text-lg">No workflows yet</p>
+          <p className="mt-1 text-sm">Create your first workflow to get started.</p>
+        </div>
+      ) : (
+        <>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {workflows.map((wf) => (
+              <div
+                key={wf.id}
+                className="group cursor-pointer rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition hover:border-blue-300 hover:shadow-md"
+                onClick={() => navigate(`/${wf.id}`)}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="truncate text-sm font-semibold text-gray-900">{wf.name}</h3>
+                    {wf.description && (
+                      <p className="mt-1 line-clamp-2 text-xs text-gray-500">{wf.description}</p>
+                    )}
+                  </div>
+                  <span
+                    className={`ml-2 inline-flex shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
+                      wf.is_active
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-gray-100 text-gray-500'
+                    }`}
+                  >
+                    {wf.is_active ? 'Active' : 'Inactive'}
+                  </span>
+                </div>
+
+                <div className="mt-3 text-xs text-gray-400">
+                  Updated {new Date(wf.updated_at).toLocaleDateString()}
+                </div>
+
+                <div
+                  className="mt-3 flex gap-1 opacity-0 transition group-hover:opacity-100"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    onClick={() => toggleActive(wf.id, wf.is_active)}
+                    className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                    title={wf.is_active ? 'Deactivate' : 'Activate'}
+                  >
+                    {wf.is_active ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
+                  </button>
+                  <button
+                    onClick={() => duplicateWorkflow(wf.id)}
+                    className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                    title="Duplicate"
+                  >
+                    <Copy size={14} />
+                  </button>
+                  <button
+                    onClick={() => setDeleteId(wf.id)}
+                    className="rounded p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600"
+                    title="Delete"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {lastPage > 1 && (
+            <div className="mt-6 flex items-center justify-center gap-2">
+              <button
+                disabled={currentPage <= 1}
+                onClick={() => fetchWorkflows(currentPage - 1)}
+                className="rounded p-1 text-gray-500 hover:bg-gray-100 disabled:opacity-30"
+              >
+                <ChevronLeft size={18} />
+              </button>
+              <span className="text-sm text-gray-600">
+                Page {currentPage} of {lastPage}
+              </span>
+              <button
+                disabled={currentPage >= lastPage}
+                onClick={() => fetchWorkflows(currentPage + 1)}
+                className="rounded p-1 text-gray-500 hover:bg-gray-100 disabled:opacity-30"
+              >
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Create Modal */}
+      {showCreate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+            <h2 className="text-lg font-semibold text-gray-900">New Workflow</h2>
+            <div className="mt-4 space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Name</label>
+                <input
+                  type="text"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  placeholder="My Workflow"
+                  autoFocus
+                  onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Description</label>
+                <input
+                  type="text"
+                  value={newDesc}
+                  onChange={(e) => setNewDesc(e.target.value)}
+                  className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  placeholder="Optional description"
+                  onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
+                />
+              </div>
+            </div>
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                onClick={() => setShowCreate(false)}
+                className="rounded-md px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreate}
+                disabled={!newName.trim()}
+                className="rounded-md bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+              >
+                Create
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <ConfirmDialog
+        open={deleteId !== null}
+        title="Delete Workflow"
+        message="This action cannot be undone. All nodes, edges, and run history will be permanently deleted."
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteId(null)}
+      />
+    </div>
+  )
+}

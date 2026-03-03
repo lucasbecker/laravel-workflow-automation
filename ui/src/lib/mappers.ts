@@ -1,0 +1,48 @@
+import type { Node, Edge } from '@xyflow/react'
+import type { WorkflowNode, WorkflowEdge, RegistryNode } from '../api/types'
+
+export interface CustomNodeData extends Record<string, unknown> {
+  apiNode: WorkflowNode
+  registryNode: RegistryNode | undefined
+  label: string
+  nodeKey: string
+  nodeType: string
+  inputPorts: string[]
+  outputPorts: string[]
+}
+
+export function apiNodeToRFNode(
+  apiNode: WorkflowNode,
+  registryNode?: RegistryNode,
+): Node<CustomNodeData> {
+  return {
+    id: String(apiNode.id),
+    type: 'custom',
+    position: {
+      x: apiNode.position_x ?? 0,
+      y: apiNode.position_y ?? 0,
+    },
+    data: {
+      apiNode,
+      registryNode,
+      label: apiNode.name || registryNode?.label || apiNode.node_key,
+      nodeKey: apiNode.node_key,
+      nodeType: apiNode.type,
+      inputPorts: registryNode?.input_ports ?? ['main'],
+      outputPorts: registryNode?.output_ports ?? ['main'],
+    },
+  }
+}
+
+export function apiEdgeToRFEdge(apiEdge: WorkflowEdge): Edge {
+  return {
+    id: String(apiEdge.id),
+    source: String(apiEdge.source_node_id),
+    target: String(apiEdge.target_node_id),
+    sourceHandle: apiEdge.source_port,
+    targetHandle: apiEdge.target_port,
+    type: 'smoothstep',
+    animated: false,
+    data: { apiEdge },
+  }
+}

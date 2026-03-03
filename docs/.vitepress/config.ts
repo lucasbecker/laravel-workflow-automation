@@ -27,7 +27,7 @@ const referenceSection = {
 
 export default defineConfig({
   title: 'Laravel Workflow Automation',
-  description: 'Build visual, configurable workflow graphs in Laravel',
+  description: 'Turn your Laravel app into a programmable automation platform — design workflows visually, let AI agents extend your app, and keep your core code clean.',
 
   head: [
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }],
@@ -37,6 +37,7 @@ export default defineConfig({
     nav: [
       { text: 'Guide', link: '/getting-started/installation' },
       { text: 'Nodes', link: '/nodes/send-mail' },
+      { text: 'Editor', link: '/ui-editor' },
       { text: 'Examples', link: '/examples/ecommerce-order' },
       { text: 'API', link: '/api/php-api' },
     ],
@@ -46,6 +47,7 @@ export default defineConfig({
         {
           text: 'Getting Started',
           items: [
+            { text: 'Why Use This?', link: '/getting-started/why-use-this' },
             { text: 'Installation', link: '/getting-started/installation' },
             { text: 'Quick Start', link: '/getting-started/quick-start' },
             { text: 'Core Concepts', link: '/getting-started/concepts' },
@@ -115,6 +117,12 @@ export default defineConfig({
           text: 'Expressions',
           items: [
             { text: 'Expression Engine', link: '/expressions/' },
+          ],
+        },
+        {
+          text: 'Visual Editor',
+          items: [
+            { text: 'UI Editor', link: '/ui-editor' },
           ],
         },
         advancedSection,

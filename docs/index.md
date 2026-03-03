@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: Laravel Workflow Automation
-  text: Graph-Based Workflow Engine
-  tagline: Build visual, configurable workflow graphs in Laravel — triggers, conditions, actions, loops, and more.
+  text: Automation Engine for Laravel
+  tagline: Turn your Laravel app into a programmable automation platform. Design workflows visually, let AI agents extend your app through the API, and keep your core code clean.
   actions:
     - theme: brand
       text: Get Started
@@ -60,3 +60,15 @@ $run = $workflow->start([
 ]);
 // $run->status === 'completed'
 ```
+
+## Why Workflow Automation?
+
+**Turn your Laravel app into a programmable automation platform — without touching your core code.**
+
+- **AI-Agent Friendly** — Expose a REST API that AI agents can use to build and modify workflows. Agents change your app's behavior without editing a single PHP file.
+- **No-Code Scenarios** — Non-technical team members build workflows from the visual editor. New business rule = new workflow, zero deployments.
+- **Core Stays Clean** — Workflows live outside your application code. Add, change, or disable scenarios without modifying controllers, models, or routes.
+- **Full Observability** — Every run is recorded with per-node input/output, duration, and errors. Trace failures, debug AI responses, replay any run.
+- **Extensible** — One PHP class = one custom node. Internal APIs, domain logic, third-party services — all become reusable workflow building blocks.
+
+[Learn more about when and why to use this package →](/getting-started/why-use-this)

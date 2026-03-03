@@ -27,6 +27,10 @@ docs/.vitepress/dist/
 docs/.vitepress/cache/
 docs/node_modules/
 
+# Workflow UI
+ui/node_modules/
+ui/dist/
+
 # Laravel test artifacts
 storage/
 bootstrap/cache/
