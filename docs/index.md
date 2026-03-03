@@ -15,8 +15,8 @@ hero:
 
 features:
   - icon: 🔗
-    title: 23 Built-in Nodes
-    details: Triggers, actions, conditions, transformers, control flow, and utility nodes ready to use out of the box.
+    title: 24 Built-in Nodes
+    details: Triggers, actions, conditions, transformers, control flow, utility, and AI nodes ready to use out of the box.
   - icon: ⚡
     title: Expression Engine
     details: "Powerful {{ expression }} syntax with 38+ functions — no eval(), fully sandboxed recursive descent parser."

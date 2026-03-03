@@ -65,6 +65,7 @@ export default defineConfig({
           text: 'Action Nodes',
           collapsed: false,
           items: [
+            { text: 'AI', link: '/nodes/ai' },
             { text: 'Send Mail', link: '/nodes/send-mail' },
             { text: 'HTTP Request', link: '/nodes/http-request' },
             { text: 'Update Model', link: '/nodes/update-model' },

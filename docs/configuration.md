@@ -66,6 +66,13 @@ return [
         'shell_enabled' => env('WORKFLOW_SHELL_ENABLED', true),
     ],
 
+    // AI node defaults (requires laravel/ai)
+    'ai' => [
+        'default_provider' => env('WORKFLOW_AI_PROVIDER'),
+        'default_model'    => env('WORKFLOW_AI_MODEL'),
+        'max_tokens'       => env('WORKFLOW_AI_MAX_TOKENS', 4096),
+    ],
+
     // Log retention (days, 0 = disabled)
     'log_retention_days' => env('WORKFLOW_LOG_RETENTION', 30),
 ];
@@ -93,6 +100,9 @@ return [
 | `node_discovery.app_paths` | array | `[]` | Directories to scan for custom nodes |
 | `run_command.allowed_commands` | array | `[]` | Whitelist of allowed commands (empty = all allowed) |
 | `run_command.shell_enabled` | bool | `true` | Set `false` to disable shell commands |
+| `ai.default_provider` | string | `null` | Default AI provider (e.g. `openai`, `anthropic`) |
+| `ai.default_model` | string | `null` | Default AI model (e.g. `gpt-4o`) |
+| `ai.max_tokens` | int | `4096` | Default max tokens for AI responses |
 | `log_retention_days` | int | `30` | Prune runs older than this (0 = disabled) |
 
 ## Environment Variables
@@ -106,6 +116,9 @@ return [
 | `WORKFLOW_WEBHOOK_ROUTES` | `webhook_routes` | `true` |
 | `WORKFLOW_MAX_EXECUTION` | `max_execution_time` | `300` |
 | `WORKFLOW_SHELL_ENABLED` | `run_command.shell_enabled` | `true` |
+| `WORKFLOW_AI_PROVIDER` | `ai.default_provider` | `null` |
+| `WORKFLOW_AI_MODEL` | `ai.default_model` | `null` |
+| `WORKFLOW_AI_MAX_TOKENS` | `ai.max_tokens` | `4096` |
 | `WORKFLOW_LOG_RETENTION` | `log_retention_days` | `30` |
 
 ## Extending Models

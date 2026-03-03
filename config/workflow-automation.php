@@ -150,6 +150,25 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | AI Node
+    |--------------------------------------------------------------------------
+    |
+    | Default settings for the AI action node. Requires the laravel/ai package.
+    |
+    | 'default_provider' — Default provider when not set per-node.
+    | 'default_model'    — Default model when not set per-node.
+    | 'max_tokens'       — Default max tokens limit.
+    |
+    */
+
+    'ai' => [
+        'default_provider' => env('WORKFLOW_AI_PROVIDER'),
+        'default_model'    => env('WORKFLOW_AI_MODEL'),
+        'max_tokens'       => env('WORKFLOW_AI_MAX_TOKENS', 4096),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Log Retention
     |--------------------------------------------------------------------------
     |
