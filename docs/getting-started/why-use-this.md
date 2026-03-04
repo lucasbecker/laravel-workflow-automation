@@ -102,117 +102,33 @@ The automation moves into a workflow — created once via PHP, the visual editor
 ```php
 $workflow = Workflow::create(['name' => 'Order Automation']);
 
-// Trigger: fires when an Order is created
-$trigger = $workflow->addNode('Order Created', 'model_event', [
-    'model'  => Order::class,
-    'events' => ['created'],
-]);
-
-// Send confirmation email
-$confirm = $workflow->addNode('Confirmation Email', 'send_mail', [
-    'to'      => '{{ item.user.email }}',
-    'subject' => 'Order #{{ item.id }} confirmed',
-    'body'    => 'Thanks for your order!',
-]);
-
-// Fraud check
-$fraudCheck = $workflow->addNode('Fraud Check', 'http_request', [
-    'url'    => 'https://fraud.example.com/check',
-    'method' => 'POST',
-    'body'   => '{"email":"{{ item.user.email }}","total":{{ item.total }}}',
-]);
-
-// Is it high-risk?
-$fraudGate = $workflow->addNode('High Risk?', 'if_condition', [
-    'field'    => '{{ nodes.Fraud Check.risk }}',
-    'operator' => '==',
-    'value'    => 'high',
-]);
-
-// High-risk path: hold order & alert security
-$holdOrder = $workflow->addNode('Hold Order', 'update_model', [
-    'model'  => Order::class,
-    'id'     => '{{ item.id }}',
-    'fields' => ['status' => 'on_hold'],
-]);
-$securityAlert = $workflow->addNode('Alert Security', 'send_mail', [
-    'to'      => 'security@company.com',
-    'subject' => 'Fraud alert: Order #{{ item.id }}',
-    'body'    => 'Risk flagged as high. Review required.',
-]);
-
-// Normal path continues: tiered discount
-$discountCheck = $workflow->addNode('Discount Eligible?', 'if_condition', [
-    'field'    => '{{ item.total }}',
-    'operator' => '>',
-    'value'    => '200',
-]);
-
-// Notify Slack
-$slack = $workflow->addNode('Slack Notify', 'http_request', [
-    'url'    => 'https://hooks.slack.com/...',
-    'method' => 'POST',
-    'body'   => '{"text":"New order #{{ item.id }} — ${{ item.total }}"}',
-]);
-
-// High-value check → manager approval
-$highValue = $workflow->addNode('High Value?', 'if_condition', [
-    'field'    => '{{ item.total }}',
-    'operator' => '>',
-    'value'    => '1000',
-]);
-
-$notifyManager = $workflow->addNode('Notify Manager', 'send_mail', [
-    'to'      => 'manager@company.com',
-    'subject' => 'High-value order #{{ item.id }}',
-    'body'    => 'Order total: ${{ item.total }}. Approve or reject.',
-]);
-
-// Route to warehouse based on country
-$warehouseRoute = $workflow->addNode('US Customer?', 'if_condition', [
-    'field'    => '{{ item.shipping_country }}',
-    'operator' => '==',
-    'value'    => 'US',
-]);
-
-$warehouseUS = $workflow->addNode('Fulfill US', 'send_mail', [
-    'to'      => 'warehouse-us@company.com',
-    'subject' => 'Fulfill order #{{ item.id }}',
-    'body'    => 'Ship to: {{ item.shipping_address }}',
-]);
-
-$warehouseEU = $workflow->addNode('Fulfill EU', 'send_mail', [
-    'to'      => 'warehouse-eu@company.com',
-    'subject' => 'Fulfill order #{{ item.id }}',
-    'body'    => 'Ship to: {{ item.shipping_address }}',
-]);
-
-// Log to analytics
-$analytics = $workflow->addNode('Analytics', 'http_request', [
-    'url'    => 'https://analytics.example.com/events',
-    'method' => 'POST',
-    'body'   => '{"event":"order_created","id":{{ item.id }},"total":{{ item.total }}}',
-]);
+$trigger      = $workflow->addNode('Order Created',      'model_event',   ['model' => Order::class, 'events' => ['created']]);
+$confirm      = $workflow->addNode('Confirmation Email',  'send_mail',     ['to' => '{{ item.user.email }}', 'subject' => 'Order #{{ item.id }} confirmed']);
+$fraudCheck   = $workflow->addNode('Fraud Check',         'http_request',  ['url' => 'https://fraud.example.com/check', 'method' => 'POST']);
+$fraudGate    = $workflow->addNode('High Risk?',          'if_condition',  ['field' => '{{ nodes.Fraud Check.risk }}', 'operator' => '==', 'value' => 'high']);
+$holdOrder    = $workflow->addNode('Hold Order',          'update_model',  ['model' => Order::class, 'fields' => ['status' => 'on_hold']]);
+$securityMail = $workflow->addNode('Alert Security',      'send_mail',     ['to' => 'security@company.com', 'subject' => 'Fraud alert: Order #{{ item.id }}']);
+$slack        = $workflow->addNode('Slack Notify',        'http_request',  ['url' => 'https://hooks.slack.com/...', 'method' => 'POST']);
+$highValue    = $workflow->addNode('High Value?',         'if_condition',  ['field' => '{{ item.total }}', 'operator' => '>', 'value' => '1000']);
+$manager      = $workflow->addNode('Notify Manager',      'send_mail',     ['to' => 'manager@company.com', 'subject' => 'High-value order #{{ item.id }}']);
+$warehouse    = $workflow->addNode('US Customer?',        'if_condition',  ['field' => '{{ item.shipping_country }}', 'operator' => '==', 'value' => 'US']);
+$warehouseUS  = $workflow->addNode('Fulfill US',          'send_mail',     ['to' => 'warehouse-us@company.com']);
+$warehouseEU  = $workflow->addNode('Fulfill EU',          'send_mail',     ['to' => 'warehouse-eu@company.com']);
+$analytics    = $workflow->addNode('Analytics',           'http_request',  ['url' => 'https://analytics.example.com/events', 'method' => 'POST']);
 
 // Connect the flow
-$trigger->connect($confirm);
-$confirm->connect($fraudCheck);
-$fraudCheck->connect($fraudGate);
+$trigger->connect($confirm)->connect($fraudCheck)->connect($fraudGate);
 
-$fraudGate->connect($holdOrder, 'true');     // high-risk → hold & stop
-$holdOrder->connect($securityAlert);
+$fraudGate->connect($holdOrder, 'true');        // high-risk → hold & alert
+$holdOrder->connect($securityMail);
 
-$fraudGate->connect($discountCheck, 'false'); // normal → continue
-$discountCheck->connect($slack);
+$fraudGate->connect($slack, 'false');           // normal → continue
 $slack->connect($highValue);
-
-$highValue->connect($notifyManager, 'true');  // high-value → manager
-$notifyManager->connect($warehouseRoute);
-
-$highValue->connect($warehouseRoute, 'false'); // normal → warehouse
-
-$warehouseRoute->connect($warehouseUS, 'true');
-$warehouseRoute->connect($warehouseEU, 'false');
+$highValue->connect($manager, 'true');          // high-value → notify manager
+$manager->connect($warehouse);
+$highValue->connect($warehouse, 'false');       // normal → warehouse
+$warehouse->connect($warehouseUS, 'true');
+$warehouse->connect($warehouseEU, 'false');
 $warehouseUS->connect($analytics);
 $warehouseEU->connect($analytics);
 
