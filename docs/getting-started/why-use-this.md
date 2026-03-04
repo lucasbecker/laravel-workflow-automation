@@ -1,8 +1,18 @@
 # Why Use This?
 
+## Why Workflow Automation?
+
+**Turn your Laravel app into a programmable automation platform — without touching your core code.**
+
+- **AI-Agent Friendly** — Expose a REST API that AI agents can use to build and modify workflows. Agents change your app's behavior without editing a single PHP file.
+- **No-Code Scenarios** — Non-technical team members build workflows from the visual editor. New business rule = new workflow, zero deployments.
+- **Core Stays Clean** — Workflows live outside your application code. Add, change, or disable scenarios without modifying controllers, models, or routes.
+- **Full Observability** — Every run is recorded with per-node input/output, duration, and errors. Trace failures, debug AI responses, replay any run.
+- **Extensible** — One PHP class = one custom node. Internal APIs, domain logic, third-party services — all become reusable workflow building blocks.
+
 ## The Problem
 
-Most Laravel apps start with automation logic baked directly into controllers, services, or event listeners:
+Most Laravel apps start with automation logic baked directly into controllers, services, or event listeners. Over time the logic grows — fraud checks, tiered discounts, loyalty points, warehouse routing, Slack alerts — and a single method turns into hundreds of lines:
 
 ```php
 // Scattered across your codebase...
@@ -13,16 +23,51 @@ class OrderController {
         // Send confirmation email
         Mail::to($order->user)->send(new OrderConfirmation($order));
 
-        // Notify Slack
-        Http::post('https://hooks.slack.com/...', ['text' => "New order #{$order->id}"]);
+        // Fraud check via external API
+        $fraud = Http::post('https://fraud.example.com/check', [
+            'email' => $order->user->email,
+            'total' => $order->total,
+            'ip'    => $request->ip(),
+        ]);
 
-        // If high-value, notify manager
-        if ($order->total > 1000) {
-            Mail::to('manager@company.com')->send(new HighValueOrder($order));
+        if ($fraud->json('risk') === 'high') {
+            $order->update(['status' => 'on_hold']);
+            Mail::to('security@company.com')->send(new FraudAlert($order));
+            return response()->json($order);
         }
 
+        // Tiered discount: VIP customers get 10%, regulars get 5% on orders over $200
+        if ($order->total > 200) {
+            $discount = $order->user->is_vip ? 0.10 : 0.05;
+            $order->applyDiscount($discount);
+        }
+
+        // Award loyalty points
+        $order->user->increment('loyalty_points', (int) ($order->total / 10));
+
+        // Notify Slack
+        Http::post('https://hooks.slack.com/...', [
+            'text' => "New order #{$order->id} — \${$order->total}",
+        ]);
+
+        // If high-value, notify manager and require approval
+        if ($order->total > 1000) {
+            Mail::to('manager@company.com')->send(new HighValueOrder($order));
+            $order->update(['status' => 'pending_approval']);
+        }
+
+        // Route to the right warehouse
+        $warehouse = $order->shipping_country === 'US'
+            ? 'warehouse-us@company.com'
+            : 'warehouse-eu@company.com';
+        Mail::to($warehouse)->send(new FulfillmentRequest($order));
+
         // Log to analytics
-        Http::post('https://analytics.example.com/events', [...]);
+        Http::post('https://analytics.example.com/events', [
+            'event' => 'order_created',
+            'total' => $order->total,
+            'user'  => $order->user_id,
+        ]);
 
         return response()->json($order);
     }
@@ -31,11 +76,11 @@ class OrderController {
 
 This works — until it doesn't:
 
-- **Every change requires a developer.** Product wants to add a "send SMS for orders over $500" step? That's a code change, PR, review, deploy.
+- **Every change requires a developer.** Product wants to change the VIP discount from 10% to 15%? Add an SMS step for high-value orders? That's a code change, PR, review, deploy — every single time.
 - **Logic is invisible.** No one can see the full automation flow without reading code. Non-technical team members are locked out.
-- **No observability.** When the Slack notification fails, you find out from a user complaint, not a dashboard.
-- **Tightly coupled.** The controller now knows about emails, Slack, analytics, and business rules. Testing and refactoring become painful.
-- **AI can't help.** An AI agent can't safely modify your controller logic — one wrong edit could break your checkout flow.
+- **No observability.** When the fraud check API times out or the Slack notification fails silently, you find out from a user complaint — not a dashboard.
+- **Tightly coupled.** The controller now knows about emails, Slack, fraud APIs, loyalty points, warehouse routing, analytics, and business rules. Testing means mocking eight external services. Refactoring is terrifying.
+- **AI can't help.** An AI agent can't safely modify this method — one wrong edit in a 60-line controller could break your entire checkout flow.
 
 ## The Solution
 
@@ -59,8 +104,8 @@ $workflow = Workflow::create(['name' => 'Order Automation']);
 
 // Trigger: fires when an Order is created
 $trigger = $workflow->addNode('Order Created', 'model_event', [
-    'model' => Order::class,
-    'event' => ['created'],
+    'model'  => Order::class,
+    'events' => ['created'],
 ]);
 
 // Send confirmation email
@@ -70,41 +115,106 @@ $confirm = $workflow->addNode('Confirmation Email', 'send_mail', [
     'body'    => 'Thanks for your order!',
 ]);
 
+// Fraud check
+$fraudCheck = $workflow->addNode('Fraud Check', 'http_request', [
+    'url'    => 'https://fraud.example.com/check',
+    'method' => 'POST',
+    'body'   => '{"email":"{{ item.user.email }}","total":{{ item.total }}}',
+]);
+
+// Is it high-risk?
+$fraudGate = $workflow->addNode('High Risk?', 'if_condition', [
+    'field'    => '{{ nodes.Fraud Check.risk }}',
+    'operator' => '==',
+    'value'    => 'high',
+]);
+
+// High-risk path: hold order & alert security
+$holdOrder = $workflow->addNode('Hold Order', 'update_model', [
+    'model'  => Order::class,
+    'id'     => '{{ item.id }}',
+    'fields' => ['status' => 'on_hold'],
+]);
+$securityAlert = $workflow->addNode('Alert Security', 'send_mail', [
+    'to'      => 'security@company.com',
+    'subject' => 'Fraud alert: Order #{{ item.id }}',
+    'body'    => 'Risk flagged as high. Review required.',
+]);
+
+// Normal path continues: tiered discount
+$discountCheck = $workflow->addNode('Discount Eligible?', 'if_condition', [
+    'field'    => '{{ item.total }}',
+    'operator' => '>',
+    'value'    => '200',
+]);
+
 // Notify Slack
 $slack = $workflow->addNode('Slack Notify', 'http_request', [
     'url'    => 'https://hooks.slack.com/...',
     'method' => 'POST',
-    'body'   => '{"text": "New order #{{ item.id }} — ${{ item.total }}"}',
+    'body'   => '{"text":"New order #{{ item.id }} — ${{ item.total }}"}',
 ]);
 
-// Check if high-value
-$check = $workflow->addNode('High Value?', 'if_condition', [
+// High-value check → manager approval
+$highValue = $workflow->addNode('High Value?', 'if_condition', [
     'field'    => '{{ item.total }}',
     'operator' => '>',
     'value'    => '1000',
 ]);
 
-// Notify manager for high-value orders
-$manager = $workflow->addNode('Notify Manager', 'send_mail', [
+$notifyManager = $workflow->addNode('Notify Manager', 'send_mail', [
     'to'      => 'manager@company.com',
     'subject' => 'High-value order #{{ item.id }}',
-    'body'    => 'Order total: ${{ item.total }}',
+    'body'    => 'Order total: ${{ item.total }}. Approve or reject.',
+]);
+
+// Route to warehouse based on country
+$warehouseRoute = $workflow->addNode('US Customer?', 'if_condition', [
+    'field'    => '{{ item.shipping_country }}',
+    'operator' => '==',
+    'value'    => 'US',
+]);
+
+$warehouseUS = $workflow->addNode('Fulfill US', 'send_mail', [
+    'to'      => 'warehouse-us@company.com',
+    'subject' => 'Fulfill order #{{ item.id }}',
+    'body'    => 'Ship to: {{ item.shipping_address }}',
+]);
+
+$warehouseEU = $workflow->addNode('Fulfill EU', 'send_mail', [
+    'to'      => 'warehouse-eu@company.com',
+    'subject' => 'Fulfill order #{{ item.id }}',
+    'body'    => 'Ship to: {{ item.shipping_address }}',
 ]);
 
 // Log to analytics
 $analytics = $workflow->addNode('Analytics', 'http_request', [
     'url'    => 'https://analytics.example.com/events',
     'method' => 'POST',
-    'body'   => '{"event": "order", "id": {{ item.id }}}',
+    'body'   => '{"event":"order_created","id":{{ item.id }},"total":{{ item.total }}}',
 ]);
 
 // Connect the flow
 $trigger->connect($confirm);
-$confirm->connect($slack);
-$slack->connect($check);
-$check->connect($manager, 'true');   // high-value path
-$check->connect($analytics, 'false'); // normal path
-$manager->connect($analytics);
+$confirm->connect($fraudCheck);
+$fraudCheck->connect($fraudGate);
+
+$fraudGate->connect($holdOrder, 'true');     // high-risk → hold & stop
+$holdOrder->connect($securityAlert);
+
+$fraudGate->connect($discountCheck, 'false'); // normal → continue
+$discountCheck->connect($slack);
+$slack->connect($highValue);
+
+$highValue->connect($notifyManager, 'true');  // high-value → manager
+$notifyManager->connect($warehouseRoute);
+
+$highValue->connect($warehouseRoute, 'false'); // normal → warehouse
+
+$warehouseRoute->connect($warehouseUS, 'true');
+$warehouseRoute->connect($warehouseEU, 'false');
+$warehouseUS->connect($analytics);
+$warehouseEU->connect($analytics);
 
 $workflow->activate();
 ```
