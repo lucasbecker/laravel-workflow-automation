@@ -16,6 +16,7 @@ class WorkflowResource extends JsonResource
             'is_active'   => $this->is_active,
             'run_async'   => $this->run_async,
             'settings'    => $this->settings,
+            'created_via' => $this->created_via?->value,
             'created_at'  => $this->created_at?->toISOString(),
             'updated_at'  => $this->updated_at?->toISOString(),
             'nodes'       => WorkflowNodeResource::collection($this->whenLoaded('nodes')),

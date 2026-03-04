@@ -161,7 +161,7 @@ If you don't need shell commands, disable them entirely:
 
 Or via environment variable:
 
-```env
+```ini
 WORKFLOW_SHELL_ENABLED=false
 ```
 

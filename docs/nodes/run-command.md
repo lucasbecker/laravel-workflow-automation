@@ -114,7 +114,7 @@ To allow only artisan commands and block all shell execution:
 
 Or via environment variable:
 
-```env
+```ini
 WORKFLOW_SHELL_ENABLED=false
 ```
 

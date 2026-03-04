@@ -35,6 +35,32 @@ class NodeRegistry
     }
 
     /**
+     * Register a node class using its #[AsWorkflowNode] attribute for key/label/type.
+     *
+     * @param  class-string<NodeInterface>  $class
+     *
+     * @throws \InvalidArgumentException if class lacks the attribute or doesn't implement NodeInterface
+     */
+    public function registerClass(string $class): void
+    {
+        if (! is_a($class, NodeInterface::class, true)) {
+            throw new \InvalidArgumentException("{$class} does not implement NodeInterface.");
+        }
+
+        $attribute = $this->readAttribute($class);
+
+        if (! $attribute) {
+            throw new \InvalidArgumentException("{$class} is missing the #[AsWorkflowNode] attribute.");
+        }
+
+        $this->nodes[$attribute->key] = [
+            'class' => $class,
+            'label' => $attribute->label ?: $attribute->key,
+            'type'  => $attribute->type,
+        ];
+    }
+
+    /**
      * Scan a directory for classes with the #[AsWorkflowNode] attribute
      * and register them automatically.
      */

@@ -14,6 +14,8 @@ http://your-app.test/workflow-editor
 
 No extra setup is required — the UI is served directly from the package.
 
+![Workflow Editor](./screenshots/workflow-editor.png)
+
 ::: tip Build Required
 If you installed the package via Composer, the pre-built UI files are included. If you cloned the repository directly, you need to build the UI first:
 

@@ -123,6 +123,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Plugins
+    |--------------------------------------------------------------------------
+    |
+    | Register workflow plugins via config. Each entry should be a fully
+    | qualified class name implementing PluginInterface. Plugins registered
+    | here are loaded during boot, in addition to any plugins registered
+    | via WorkflowAutomation::plugin() in service providers.
+    |
+    */
+
+    'plugins' => [
+        // \Acme\WorkflowSlack\SlackPlugin::class,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Run Command Node
     |--------------------------------------------------------------------------
     |

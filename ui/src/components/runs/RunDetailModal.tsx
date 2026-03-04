@@ -1,8 +1,10 @@
-import { X, RotateCw, Ban } from 'lucide-react'
+import { X, RotateCw, Ban, AlertTriangle, Loader2 } from 'lucide-react'
 import type { WorkflowRun } from '../../api/types'
 import { RunStatusBadge, NodeRunStatusBadge } from '../shared/StatusBadge'
 import { JsonViewer } from '../shared/JsonViewer'
 import { useRunStore } from '../../stores/useRunStore'
+import { useWorkflowEditorStore } from '../../stores/useWorkflowEditorStore'
+import { useReactFlow } from '@xyflow/react'
 import { useState } from 'react'
 
 interface Props {
@@ -11,8 +13,22 @@ interface Props {
 }
 
 export function RunDetailModal({ run, onClose }: Props) {
-  const { cancelRun, replayRun } = useRunStore()
+  const { cancelRun, replayRun, isReplaying } = useRunStore()
+  const selectNode = useWorkflowEditorStore((s) => s.selectNode)
+  const rfNodes = useWorkflowEditorStore((s) => s.rfNodes)
+  const { fitView } = useReactFlow()
   const [expandedNode, setExpandedNode] = useState<number | null>(null)
+
+  const focusNode = (nodeId: number) => {
+    const nodeIdStr = String(nodeId)
+    const node = rfNodes.find((n) => n.id === nodeIdStr)
+    if (!node) return
+    selectNode(nodeIdStr)
+    onClose()
+    setTimeout(() => {
+      fitView({ nodes: [{ id: nodeIdStr }], duration: 400, padding: 0.5 })
+    }, 50)
+  }
 
   const canCancel = run.status === 'running' || run.status === 'waiting'
 
@@ -40,9 +56,11 @@ export function RunDetailModal({ run, onClose }: Props) {
             )}
             <button
               onClick={() => replayRun(run.id)}
-              className="flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 text-xs text-blue-600 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+              disabled={isReplaying}
+              className="flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 text-xs text-blue-600 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
             >
-              <RotateCw size={12} /> Replay
+              {isReplaying ? <Loader2 size={12} className="animate-spin" /> : <RotateCw size={12} />}
+              {isReplaying ? 'Replaying...' : 'Replay'}
             </button>
             <button onClick={onClose} className="rounded p-1 text-gray-400 hover:bg-gray-100 dark:text-gray-500 dark:hover:bg-gray-700">
               <X size={18} />
@@ -80,7 +98,23 @@ export function RunDetailModal({ run, onClose }: Props) {
                       className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
                       onClick={() => setExpandedNode(expandedNode === nr.id ? null : nr.id)}
                     >
-                      <td className="py-2 font-mono dark:text-gray-300">#{nr.node_id}</td>
+                      <td className="py-2 font-mono dark:text-gray-300">
+                        <span className="flex items-center gap-1">
+                          #{nr.node_id}
+                          {nr.status === 'failed' && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                focusNode(nr.node_id)
+                              }}
+                              title="Locate failed node on canvas"
+                              className="rounded p-0.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30"
+                            >
+                              <AlertTriangle size={12} />
+                            </button>
+                          )}
+                        </span>
+                      </td>
                       <td className="py-2">
                         <NodeRunStatusBadge status={nr.status} />
                       </td>

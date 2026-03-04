@@ -48,7 +48,7 @@ Set global defaults in `config/workflow-automation.php`:
 ],
 ```
 
-```env
+```ini
 WORKFLOW_AI_PROVIDER=openai
 WORKFLOW_AI_MODEL=gpt-4o
 WORKFLOW_AI_MAX_TOKENS=4096

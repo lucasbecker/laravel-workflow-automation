@@ -3,11 +3,26 @@
 namespace Aftandilmmd\WorkflowAutomation\Engine;
 
 use Aftandilmmd\WorkflowAutomation\Contracts\NodeInterface;
+use Aftandilmmd\WorkflowAutomation\Contracts\NodeMiddlewareInterface;
 use Aftandilmmd\WorkflowAutomation\DTOs\NodeInput;
 use Aftandilmmd\WorkflowAutomation\DTOs\NodeOutput;
+use Closure;
 
 class NodeRunner
 {
+    /** @var array<int, class-string<NodeMiddlewareInterface>|NodeMiddlewareInterface> */
+    private array $middleware = [];
+
+    /**
+     * Add a middleware to the execution pipeline.
+     *
+     * @param  class-string<NodeMiddlewareInterface>|NodeMiddlewareInterface  $middleware
+     */
+    public function pushMiddleware(string|NodeMiddlewareInterface $middleware): void
+    {
+        $this->middleware[] = $middleware;
+    }
+
     /**
      * Execute a node with optional retry support.
      *
@@ -26,7 +41,7 @@ class NodeRunner
 
         while (true) {
             try {
-                return $node->execute($input, $config);
+                return $this->executeWithMiddleware($node, $input, $config);
             } catch (\Throwable $e) {
                 $attempt++;
 
@@ -46,6 +61,30 @@ class NodeRunner
                 usleep($delay * 1000);
             }
         }
+    }
+
+    private function executeWithMiddleware(
+        NodeInterface $node,
+        NodeInput $input,
+        array $config,
+    ): NodeOutput {
+        if (empty($this->middleware)) {
+            return $node->execute($input, $config);
+        }
+
+        $pipeline = array_reduce(
+            array_reverse($this->middleware),
+            function (Closure $next, string|NodeMiddlewareInterface $middleware): Closure {
+                return function (NodeInterface $node, NodeInput $input, array $config) use ($middleware, $next): NodeOutput {
+                    $instance = is_string($middleware) ? app($middleware) : $middleware;
+
+                    return $instance->handle($node, $input, $config, $next);
+                };
+            },
+            fn (NodeInterface $node, NodeInput $input, array $config): NodeOutput => $node->execute($input, $config),
+        );
+
+        return $pipeline($node, $input, $config);
     }
 
     /**

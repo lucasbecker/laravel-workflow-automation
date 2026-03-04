@@ -6,6 +6,7 @@ interface RunStore {
   runs: WorkflowRun[]
   selectedRun: WorkflowRun | null
   isLoading: boolean
+  isReplaying: boolean
   fetchRuns: (workflowId: number) => Promise<void>
   fetchRunDetail: (runId: number) => Promise<void>
   cancelRun: (runId: number) => Promise<void>
@@ -18,6 +19,7 @@ export const useRunStore = create<RunStore>((set) => ({
   runs: [],
   selectedRun: null,
   isLoading: false,
+  isReplaying: false,
 
   fetchRuns: async (workflowId) => {
     set({ isLoading: true })
@@ -41,7 +43,12 @@ export const useRunStore = create<RunStore>((set) => ({
   },
 
   replayRun: async (runId) => {
-    await runsApi.replay(runId)
+    set({ isReplaying: true })
+    try {
+      await runsApi.replay(runId)
+    } finally {
+      set({ isReplaying: false })
+    }
   },
 
   retryFromFailure: async (runId) => {

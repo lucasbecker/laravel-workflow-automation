@@ -4,7 +4,7 @@ import { useWorkflowEditorStore } from '../../stores/useWorkflowEditorStore'
 import { DynamicForm } from './DynamicForm'
 
 export function NodeConfigPanel() {
-  const { selectedApiNode, selectedRegistryNode, selectNode, updateNodeConfig, updateNodeLabel } =
+  const { selectedApiNode, selectedRegistryNode, selectNode, updateNodeConfig, updateNodeLabel, setNodeLabel } =
     useWorkflowEditorStore()
 
   const [localConfig, setLocalConfig] = useState<Record<string, unknown>>({})
@@ -58,6 +58,9 @@ export function NodeConfigPanel() {
             onChange={(e) => {
               setLocalLabel(e.target.value)
               setIsDirty(true)
+              if (selectedApiNode) {
+                setNodeLabel(selectedApiNode.id, e.target.value)
+              }
             }}
             className="w-full truncate border-none bg-transparent text-sm font-semibold text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-0"
             placeholder="Node Name"

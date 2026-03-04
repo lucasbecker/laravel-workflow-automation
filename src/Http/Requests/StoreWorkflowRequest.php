@@ -19,6 +19,7 @@ class StoreWorkflowRequest extends FormRequest
             'is_active'   => ['boolean'],
             'run_async'   => ['boolean'],
             'settings'    => ['nullable', 'array'],
+            'created_via' => ['nullable', 'string', 'in:editor,import,code,api,duplicate'],
         ];
     }
 }

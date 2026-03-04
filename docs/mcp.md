@@ -18,7 +18,7 @@ composer require laravel/mcp
 
 Enable the MCP server in your `.env`:
 
-```env
+```ini
 WORKFLOW_MCP_ENABLED=true
 ```
 

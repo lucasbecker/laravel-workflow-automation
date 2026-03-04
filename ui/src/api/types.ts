@@ -7,6 +7,7 @@ export interface Workflow {
   is_active: boolean
   run_async: boolean
   settings: Record<string, unknown> | null
+  created_via: CreatedVia | null
   created_at: string
   updated_at: string
   nodes?: WorkflowNode[]
@@ -89,6 +90,7 @@ export interface ConfigSchemaField {
   show_when?: { key: string; value: string | string[] }
 }
 
+export type CreatedVia = 'editor' | 'import' | 'code' | 'api' | 'duplicate'
 export type NodeType = 'trigger' | 'action' | 'condition' | 'transformer' | 'control' | 'utility' | 'code'
 export type RunStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled' | 'waiting'
 export type NodeRunStatus = 'pending' | 'running' | 'completed' | 'failed' | 'skipped'
@@ -99,6 +101,7 @@ export interface CreateWorkflowPayload {
   name: string
   description?: string
   is_active?: boolean
+  created_via?: CreatedVia
 }
 
 export interface UpdateWorkflowPayload {

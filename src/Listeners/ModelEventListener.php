@@ -6,6 +6,7 @@ use Aftandilmmd\WorkflowAutomation\Enums\NodeType;
 use Aftandilmmd\WorkflowAutomation\Jobs\ExecuteWorkflowJob;
 use Aftandilmmd\WorkflowAutomation\Models\WorkflowNode;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
 
 class ModelEventListener
@@ -25,7 +26,13 @@ class ModelEventListener
                 continue;
             }
 
+            $usesSoftDeletes = in_array(SoftDeletes::class, class_uses_recursive($modelClass));
+
             foreach ($events as $eventName) {
+                if (! $usesSoftDeletes && in_array($eventName, ['restored', 'forceDeleted'])) {
+                    continue;
+                }
+
                 $modelClass::{$eventName}(function (Model $model) use ($trigger, $eventName) {
                     static::handleEvent($model, $trigger, $eventName);
                 });
@@ -59,18 +66,22 @@ class ModelEventListener
      */
     private static function getActiveTriggers(): array
     {
-        return Cache::remember('workflow:model_event_triggers', 60, function () {
-            return WorkflowNode::query()
-                ->where('type', NodeType::Trigger)
-                ->where('node_key', 'model_event')
-                ->whereHas('workflow', fn ($q) => $q->where('is_active', true))
-                ->get()
-                ->map(fn (WorkflowNode $node) => [
-                    'workflow_id' => $node->workflow_id,
-                    'node_id'     => $node->id,
-                    'config'      => $node->config ?? [],
-                ])
-                ->toArray();
-        });
+        try {
+            return Cache::remember('workflow:model_event_triggers', 60, function () {
+                return WorkflowNode::query()
+                    ->where('type', NodeType::Trigger)
+                    ->where('node_key', 'model_event')
+                    ->whereHas('workflow', fn ($q) => $q->where('is_active', true))
+                    ->get()
+                    ->map(fn (WorkflowNode $node) => [
+                        'workflow_id' => $node->workflow_id,
+                        'node_id'     => $node->id,
+                        'config'      => $node->config ?? [],
+                    ])
+                    ->toArray();
+            });
+        } catch (\Illuminate\Database\QueryException) {
+            return [];
+        }
     }
 }

@@ -3,7 +3,7 @@ layout: home
 
 hero:
   name: Build Workflows, Not Boilerplate
-  tagline: Stop hardcoding automation in controllers. Design trigger → condition → action flows visually or through code — and let AI agents extend your app without touching a single PHP file.
+  tagline: "Stop hardcoding automation in controllers.\nDesign trigger → condition → action flows visually or through code — and let AI agents extend your app without touching a single PHP file."
   actions:
     - theme: brand
       text: Get Started
@@ -13,25 +13,30 @@ hero:
       link: https://github.com/aftandilmmd/laravel-workflow-automation
 
 features:
-  - icon: 🔗
+  - icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 22V7a1 1 0 0 0-1-1H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5a1 1 0 0 0-1-1H2"/><rect x="14" y="2" width="8" height="8" rx="1"/></svg>'
     title: 26 Ready-to-Use Nodes
     details: Email, HTTP, AI, delays, conditions, loops — connect them like building blocks. No code needed for common scenarios.
-  - icon: ⚡
-    title: Dynamic Expressions
-    details: "Use {{ item.email }} to reference any data in your flow. 38+ built-in functions, fully sandboxed — no eval(), no risk."
-  - icon: 🔄
+  - icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>'
+    title: Visual Editor
+    details: Drag-and-drop workflow builder with live preview. Design complex automations visually — no code needed for common scenarios.
+    link: /ui-editor
+  - icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 18V5"/><path d="M15 13a4.17 4.17 0 0 1-3-4 4.17 4.17 0 0 1-3 4"/><path d="M17.598 6.5A3 3 0 1 0 12 5a3 3 0 1 0-5.598 1.5"/><path d="M17.997 5.125a4 4 0 0 1 2.526 5.77"/><path d="M18 18a4 4 0 0 0 2-7.464"/><path d="M19.967 17.483A4 4 0 1 1 12 18a4 4 0 1 1-7.967-.517"/><path d="M6 18a4 4 0 0 1-2-7.464"/><path d="M6.003 5.125a4 4 0 0 0-2.526 5.77"/></svg>'
+    title: AI Node
+    details: Connect any LLM to your workflows. Classify, summarize, extract, generate — AI becomes just another node in your flow.
+  - icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>'
     title: Reliable Execution
     details: Every node runs in order with automatic retries and backoff. Pause, resume, and pick up right where you left off.
-  - icon: 🛠️
-    title: Extend with One Class
-    details: "Write a single PHP class with #[AsWorkflowNode] — it's instantly available in the editor, API, and registry. Zero config."
-  - icon: 🌐
+  - icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.39 4.39a1 1 0 0 0 1.68-.474 2.5 2.5 0 1 1 3.014 3.015 1 1 0 0 0-.474 1.68l1.683 1.682a2.414 2.414 0 0 1 0 3.414L19.61 15.39a1 1 0 0 1-1.68-.474 2.5 2.5 0 1 0-3.014 3.015 1 1 0 0 1 .474 1.68l-1.683 1.682a2.414 2.414 0 0 1-3.414 0L8.61 19.61a1 1 0 0 0-1.68.474 2.5 2.5 0 1 1-3.014-3.015 1 1 0 0 0 .474-1.68l-1.683-1.682a2.414 2.414 0 0 1 0-3.414L4.39 8.61a1 1 0 0 1 1.68.474 2.5 2.5 0 1 0 3.014-3.015 1 1 0 0 1-.474-1.68l1.683-1.682a2.414 2.414 0 0 1 3.414 0z"/></svg>'
+    title: Plugin System
+    details: Bundle custom nodes, middleware, and event listeners into reusable plugins. Share across projects or publish as packages.
+  - icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>'
     title: Full REST API
     details: Create, edit, run, and monitor workflows from any frontend, dashboard, or AI agent. Complete CRUD + execution endpoints.
-  - icon: ⏱️
-    title: Approval Workflows
-    details: Need manager sign-off? Wait/Resume nodes pause the flow, send a unique token, and continue when approved.
 ---
+
+<div style="margin: 2rem 0;">
+  <img src="./screenshots/workflow-editor.png" alt="Visual Workflow Editor" style="border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.1);" />
+</div>
 
 ## Quick Overview
 

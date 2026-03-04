@@ -3,6 +3,7 @@ interface ConfirmDialogProps {
   title: string
   message: string
   confirmLabel?: string
+  variant?: 'danger' | 'primary'
   onConfirm: () => void
   onCancel: () => void
 }
@@ -12,6 +13,7 @@ export function ConfirmDialog({
   title,
   message,
   confirmLabel = 'Delete',
+  variant = 'danger',
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
@@ -31,7 +33,11 @@ export function ConfirmDialog({
           </button>
           <button
             onClick={onConfirm}
-            className="rounded-md bg-red-600 px-3 py-1.5 text-sm text-white hover:bg-red-700"
+            className={`rounded-md px-3 py-1.5 text-sm text-white ${
+              variant === 'danger'
+                ? 'bg-red-600 hover:bg-red-700'
+                : 'bg-blue-600 hover:bg-blue-700'
+            }`}
           >
             {confirmLabel}
           </button>

@@ -2,6 +2,7 @@
 
 namespace Aftandilmmd\WorkflowAutomation\Models;
 
+use Aftandilmmd\WorkflowAutomation\Enums\CreatedVia;
 use Aftandilmmd\WorkflowAutomation\Enums\NodeType;
 use Aftandilmmd\WorkflowAutomation\Services\WorkflowService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -23,9 +24,10 @@ class Workflow extends Model
     protected function casts(): array
     {
         return [
-            'is_active' => 'boolean',
-            'run_async' => 'boolean',
-            'settings'  => 'array',
+            'is_active'   => 'boolean',
+            'run_async'   => 'boolean',
+            'settings'    => 'array',
+            'created_via' => CreatedVia::class,
         ];
     }
 

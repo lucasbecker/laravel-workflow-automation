@@ -38,7 +38,7 @@ export const useWorkflowListStore = create<WorkflowListStore>((set, get) => ({
   },
 
   createWorkflow: async (name, description) => {
-    const res = await workflowsApi.create({ name, description })
+    const res = await workflowsApi.create({ name, description, created_via: 'editor' })
     await get().fetchWorkflows(get().currentPage)
     return res.data
   },

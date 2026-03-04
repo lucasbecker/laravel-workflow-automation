@@ -160,7 +160,7 @@ If workflows are managed via PHP only and you don't need the REST API:
 
 Or via `.env`:
 
-```env
+```ini
 WORKFLOW_API_ROUTES=false
 ```
 

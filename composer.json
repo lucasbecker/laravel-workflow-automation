@@ -48,7 +48,8 @@
                 "Aftandilmmd\\WorkflowAutomation\\WorkflowAutomationServiceProvider"
             ],
             "aliases": {
-                "Workflow": "Aftandilmmd\\WorkflowAutomation\\Facades\\Workflow"
+                "Workflow": "Aftandilmmd\\WorkflowAutomation\\Facades\\Workflow",
+                "WorkflowAutomation": "Aftandilmmd\\WorkflowAutomation\\Facades\\WorkflowAutomation"
             }
         }
     },

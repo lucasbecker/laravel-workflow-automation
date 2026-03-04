@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Plus,
+  Upload,
   Copy,
   Trash2,
   ToggleLeft,
@@ -12,9 +13,12 @@ import {
   Moon,
 } from 'lucide-react'
 import { useWorkflowListStore } from '../../stores/useWorkflowListStore'
+import { useRegistryStore } from '../../stores/useRegistryStore'
 import { useThemeStore } from '../../stores/useThemeStore'
 import { LoadingSpinner } from '../shared/LoadingSpinner'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
+import { ImportWorkflowModal } from './ImportWorkflowModal'
+import type { Workflow } from '../../api/types'
 
 export function WorkflowListPage() {
   const navigate = useNavigate()
@@ -31,11 +35,14 @@ export function WorkflowListPage() {
     toggleActive,
   } = useWorkflowListStore()
   const { theme, toggle: toggleTheme } = useThemeStore()
+  const { nodes: registryNodes, fetchRegistry } = useRegistryStore()
 
   const [showCreate, setShowCreate] = useState(false)
+  const [showImport, setShowImport] = useState(false)
   const [newName, setNewName] = useState('')
   const [newDesc, setNewDesc] = useState('')
   const [deleteId, setDeleteId] = useState<number | null>(null)
+  const [duplicateId, setDuplicateId] = useState<number | null>(null)
 
   useEffect(() => {
     fetchWorkflows()
@@ -56,6 +63,12 @@ export function WorkflowListPage() {
     setDeleteId(null)
   }
 
+  const handleDuplicate = async () => {
+    if (duplicateId === null) return
+    await duplicateWorkflow(duplicateId)
+    setDuplicateId(null)
+  }
+
   return (
     <div className="mx-auto max-w-6xl px-6 py-8">
       <div className="flex items-center justify-between">
@@ -70,6 +83,16 @@ export function WorkflowListPage() {
             title={theme === 'light' ? 'Dark mode' : 'Light mode'}
           >
             {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+          </button>
+          <button
+            onClick={async () => {
+              await fetchRegistry()
+              setShowImport(true)
+            }}
+            className="flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+          >
+            <Upload size={16} />
+            Import
           </button>
           <button
             onClick={() => setShowCreate(true)}
@@ -122,7 +145,7 @@ export function WorkflowListPage() {
                 </div>
 
                 <div
-                  className="mt-3 flex gap-1 opacity-0 transition group-hover:opacity-100"
+                  className="mt-3 flex gap-1"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <button
@@ -133,7 +156,7 @@ export function WorkflowListPage() {
                     {wf.is_active ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
                   </button>
                   <button
-                    onClick={() => duplicateWorkflow(wf.id)}
+                    onClick={() => setDuplicateId(wf.id)}
                     className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:text-gray-500 dark:hover:bg-gray-700 dark:hover:text-gray-300"
                     title="Duplicate"
                   >
@@ -223,6 +246,29 @@ export function WorkflowListPage() {
           </div>
         </div>
       )}
+
+      {showImport && (
+        <ImportWorkflowModal
+          registryNodes={registryNodes}
+          existingWorkflows={workflows}
+          onImported={(workflow: Workflow) => {
+            setShowImport(false)
+            fetchWorkflows()
+            navigate(`/${workflow.id}`)
+          }}
+          onClose={() => setShowImport(false)}
+        />
+      )}
+
+      <ConfirmDialog
+        open={duplicateId !== null}
+        title="Duplicate Workflow"
+        message={`Create a copy of "${workflows.find((w) => w.id === duplicateId)?.name ?? ''}"? The duplicate will be inactive by default.`}
+        confirmLabel="Duplicate"
+        variant="primary"
+        onConfirm={handleDuplicate}
+        onCancel={() => setDuplicateId(null)}
+      />
 
       <ConfirmDialog
         open={deleteId !== null}

@@ -7,6 +7,8 @@ use Aftandilmmd\WorkflowAutomation\Engine\ExpressionEvaluator;
 use Aftandilmmd\WorkflowAutomation\Engine\GraphExecutor;
 use Aftandilmmd\WorkflowAutomation\Engine\GraphValidator;
 use Aftandilmmd\WorkflowAutomation\Engine\NodeRunner;
+use Aftandilmmd\WorkflowAutomation\Plugin\PluginManager;
+use Aftandilmmd\WorkflowAutomation\Plugin\PluginRegistry;
 use Aftandilmmd\WorkflowAutomation\Registry\NodeRegistry;
 use Aftandilmmd\WorkflowAutomation\Services\WorkflowService;
 use Illuminate\Support\Facades\Route;
@@ -20,6 +22,8 @@ class WorkflowAutomationServiceProvider extends ServiceProvider
 
         $this->app->singleton(NodeRegistry::class);
         $this->app->singleton(NodeRunner::class);
+        $this->app->singleton(PluginRegistry::class);
+        $this->app->singleton(PluginManager::class);
 
         $this->app->singleton(
             ExpressionEvaluatorInterface::class,
@@ -76,6 +80,8 @@ class WorkflowAutomationServiceProvider extends ServiceProvider
         }
 
         $this->registerBuiltInNodes();
+        $this->registerConfigPlugins();
+        $this->bootPlugins();
         $this->registerListeners();
         $this->registerMcpServer();
     }
@@ -102,6 +108,22 @@ class WorkflowAutomationServiceProvider extends ServiceProvider
             config('workflow-automation.mcp.path', '/mcp/workflow'),
             \Aftandilmmd\WorkflowAutomation\Mcp\WorkflowMcpServer::class,
         );
+    }
+
+    private function registerConfigPlugins(): void
+    {
+        $manager = $this->app->make(PluginManager::class);
+
+        foreach (config('workflow-automation.plugins', []) as $pluginClass) {
+            if (is_string($pluginClass) && class_exists($pluginClass)) {
+                $manager->plugin($pluginClass::make());
+            }
+        }
+    }
+
+    private function bootPlugins(): void
+    {
+        $this->app->make(PluginManager::class)->bootPlugins();
     }
 
     private function registerBuiltInNodes(): void

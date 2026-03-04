@@ -4,6 +4,7 @@ const advancedSection = {
   text: 'Advanced',
   collapsed: false,
   items: [
+    { text: 'Plugins', link: '/advanced/plugins' },
     { text: 'Custom Nodes', link: '/advanced/custom-nodes' },
     { text: 'Execution Engine', link: '/advanced/execution-engine' },
     { text: 'Error Handling', link: '/advanced/error-handling' },
@@ -147,16 +148,6 @@ export default defineConfig({
             { text: 'Multi-Step Form', link: '/examples/multi-step-form' },
           ],
         },
-        advancedSection,
-        referenceSection,
-      ],
-      '/api/': [
-        referenceSection,
-        advancedSection,
-      ],
-      '/advanced/': [
-        advancedSection,
-        referenceSection,
       ],
     },
 

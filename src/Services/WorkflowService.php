@@ -4,6 +4,7 @@ namespace Aftandilmmd\WorkflowAutomation\Services;
 
 use Aftandilmmd\WorkflowAutomation\Engine\GraphExecutor;
 use Aftandilmmd\WorkflowAutomation\Engine\GraphValidator;
+use Aftandilmmd\WorkflowAutomation\Enums\CreatedVia;
 use Aftandilmmd\WorkflowAutomation\Enums\NodeType;
 use Aftandilmmd\WorkflowAutomation\Enums\RunStatus;
 use Aftandilmmd\WorkflowAutomation\Exceptions\WorkflowException;
@@ -146,6 +147,7 @@ class WorkflowService
         $new = $workflow->replicate();
         $new->name = $workflow->name.' (Copy)';
         $new->is_active = false;
+        $new->created_via = CreatedVia::Duplicate;
         $new->save();
 
         $nodeIdMap = [];
