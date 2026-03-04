@@ -37,12 +37,12 @@ function PaletteCategory({ type, nodes }: { type: NodeType; nodes: RegistryNode[
     <div>
       <button
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100"
+        className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
       >
         {open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
         <Icon size={12} className={colors.text} />
         {NODE_TYPE_LABELS[type]}
-        <span className="ml-auto text-[10px] text-gray-400">{nodes.length}</span>
+        <span className="ml-auto text-[10px] text-gray-400 dark:text-gray-500">{nodes.length}</span>
       </button>
       {open && (
         <div className="ml-2 space-y-0.5">
@@ -78,13 +78,13 @@ function PaletteItem({ node }: { node: RegistryNode }) {
     <div
       draggable
       onDragStart={onDragStart}
-      className={`flex cursor-grab items-center gap-2 rounded-md border border-transparent px-2 py-1.5 text-xs transition hover:border-gray-200 hover:bg-gray-50 active:cursor-grabbing ${colors.text}`}
+      className={`flex cursor-grab items-center gap-2 rounded-md border border-transparent px-2 py-1.5 text-xs transition hover:border-gray-200 hover:bg-gray-50 dark:hover:border-gray-700 dark:hover:bg-gray-700 active:cursor-grabbing ${colors.text}`}
     >
-      <GripVertical size={10} className="text-gray-300" />
-      <span className="flex-1 text-gray-700">{node.label}</span>
+      <GripVertical size={10} className="text-gray-300 dark:text-gray-600" />
+      <span className="flex-1 text-gray-700 dark:text-gray-300">{node.label}</span>
       <button
         onClick={handleClick}
-        className="rounded p-0.5 text-gray-300 hover:bg-gray-200 hover:text-gray-600"
+        className="rounded p-0.5 text-gray-300 hover:bg-gray-200 hover:text-gray-600 dark:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
         title="Add to canvas"
       >
         <Plus size={12} />

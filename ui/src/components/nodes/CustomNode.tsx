@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { memo, useState } from 'react'
 import { Handle, Position, type NodeProps } from '@xyflow/react'
 import type { CustomNodeData } from '../../lib/mappers'
 import { NODE_TYPE_COLORS } from '../../lib/constants'
@@ -13,9 +13,11 @@ function CustomNodeComponent({ data, selected }: NodeProps) {
   const inputPorts = nodeData.inputPorts ?? []
   const outputPorts = nodeData.outputPorts ?? []
 
+  const [hoveredPort, setHoveredPort] = useState<string | null>(null)
+
   return (
     <div
-      className={`min-w-[160px] rounded-lg border-l-4 bg-white shadow-md ${colors.border} ${
+      className={`min-w-[160px] rounded-lg border-l-4 bg-white dark:bg-gray-800 shadow-md ${colors.border} ${
         selected ? 'ring-2 ring-blue-400' : ''
       }`}
     >
@@ -39,19 +41,28 @@ function CustomNodeComponent({ data, selected }: NodeProps) {
       <div className="px-3 py-2">
         <div className="flex items-center gap-1.5">
           <Icon size={14} className={colors.text} />
-          <span className="truncate text-xs font-semibold text-gray-800">
+          <span className="truncate text-xs font-semibold text-gray-800 dark:text-gray-200">
             {nodeData.label}
           </span>
         </div>
-        <div className="mt-0.5 text-[10px] text-gray-400">{nodeData.nodeKey}</div>
+        <div className="mt-0.5 text-[10px] text-gray-400 dark:text-gray-500">{nodeData.nodeKey}</div>
       </div>
 
-      {/* Port Labels */}
+      {/* Output Port Labels */}
       {outputPorts.length > 1 && (
-        <div className="border-t border-gray-100 px-3 py-1">
+        <div className="border-t border-gray-100 dark:border-gray-700 px-3 py-1">
           <div className="flex flex-wrap gap-1">
             {outputPorts.map((port) => (
-              <span key={port} className="rounded bg-gray-100 px-1 py-0.5 text-[9px] text-gray-500">
+              <span
+                key={port}
+                className={`cursor-default rounded px-1 py-0.5 text-[9px] transition-colors ${
+                  hoveredPort === port
+                    ? 'bg-blue-100 text-blue-700 ring-1 ring-blue-300'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
+                }`}
+                onMouseEnter={() => setHoveredPort(port)}
+                onMouseLeave={() => setHoveredPort(null)}
+              >
                 {port}
               </span>
             ))}
@@ -70,7 +81,13 @@ function CustomNodeComponent({ data, selected }: NodeProps) {
             position={Position.Right}
             id={port}
             style={{ top: `${topPercent}%` }}
-            className="!h-2.5 !w-2.5 !border-2 !border-white !bg-blue-500"
+            className={`!border-2 !border-white transition-all ${
+              hoveredPort === port
+                ? '!h-3.5 !w-3.5 !bg-blue-600'
+                : '!h-2.5 !w-2.5 !bg-blue-500'
+            }`}
+            onMouseEnter={() => setHoveredPort(port)}
+            onMouseLeave={() => setHoveredPort(null)}
           />
         )
       })}

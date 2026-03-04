@@ -8,8 +8,8 @@ use Aftandilmmd\WorkflowAutomation\DTOs\NodeInput;
 use Aftandilmmd\WorkflowAutomation\DTOs\NodeOutput;
 use Aftandilmmd\WorkflowAutomation\Enums\NodeType;
 
-#[AsWorkflowNode(key: 'model_event', type: NodeType::Trigger, label: 'Model Event')]
-class ModelEventTrigger implements TriggerInterface
+#[AsWorkflowNode(key: 'event', type: NodeType::Trigger, label: 'Event')]
+class EventTrigger implements TriggerInterface
 {
     public function inputPorts(): array
     {
@@ -24,23 +24,25 @@ class ModelEventTrigger implements TriggerInterface
     public static function configSchema(): array
     {
         return [
-            ['key' => 'model', 'type' => 'model_select', 'label' => 'Model', 'required' => true],
-            ['key' => 'events', 'type' => 'multiselect', 'label' => 'Events', 'options_from' => 'model_events', 'required' => true],
-            ['key' => 'only_fields', 'type' => 'array', 'label' => 'Only when these fields change (updated only, empty = all)', 'required' => false],
+            ['key' => 'event_class', 'type' => 'string', 'label' => 'Event Class (e.g. App\\Events\\OrderPlaced)', 'required' => true],
         ];
     }
 
     public function register(int $workflowId, int $nodeId, array $config): void
     {
-        // Registration handled by ModelEventListener during boot
+        // Registration handled by EventListener during boot
     }
 
     public function unregister(int $workflowId, int $nodeId, array $config): void {}
 
     public function extractPayload(mixed $event): array
     {
-        if ($event instanceof \Illuminate\Database\Eloquent\Model) {
-            return [$event->toArray()];
+        if (is_object($event)) {
+            if (method_exists($event, 'toArray')) {
+                return [$event->toArray()];
+            }
+
+            return [get_object_vars($event)];
         }
 
         return is_array($event) ? [$event] : [[]];

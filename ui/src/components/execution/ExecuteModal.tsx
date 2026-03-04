@@ -53,31 +53,31 @@ export function ExecuteModal({ workflowId, onClose, onExecuted }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
+      <div className="w-full max-w-lg rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800 dark:shadow-2xl dark:shadow-black/40">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Execute Workflow</h2>
-          <button onClick={onClose} className="rounded p-1 text-gray-400 hover:bg-gray-100">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Execute Workflow</h2>
+          <button onClick={onClose} className="rounded p-1 text-gray-400 hover:bg-gray-100 dark:text-gray-500 dark:hover:bg-gray-700">
             <X size={18} />
           </button>
         </div>
 
         <div className="mt-4">
-          <label className="mb-1 block text-sm font-medium text-gray-700">Input Payload (JSON)</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Input Payload (JSON)</label>
           <textarea
             value={payloadText}
             onChange={(e) => setPayloadText(e.target.value)}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
             rows={10}
             placeholder='[{"name": "Alice", "email": "alice@example.com"}]'
           />
         </div>
 
         {error && (
-          <div className="mt-2 rounded-md bg-red-50 px-3 py-2 text-xs text-red-600">{error}</div>
+          <div className="mt-2 rounded-md bg-red-50 px-3 py-2 text-xs text-red-600 dark:bg-red-900/30 dark:text-red-400">{error}</div>
         )}
 
         {validationErrors.length > 0 && (
-          <div className="mt-2 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-700">
+          <div className="mt-2 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
             <p className="font-medium">Validation Issues:</p>
             <ul className="mt-1 list-inside list-disc">
               {validationErrors.map((err, i) => (
@@ -90,7 +90,7 @@ export function ExecuteModal({ workflowId, onClose, onExecuted }: Props) {
         <div className="mt-4 flex justify-end gap-2">
           <button
             onClick={handleValidate}
-            className="rounded-md px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100"
+            className="rounded-md px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
           >
             Validate
           </button>

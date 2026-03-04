@@ -12,7 +12,7 @@ export function ExpressionInput({ children }: Props) {
   return (
     <div className="relative">
       {children}
-      <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 rounded bg-amber-100 px-1 py-0.5 text-[9px] font-mono text-amber-700">
+      <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 rounded bg-amber-100 px-1 py-0.5 text-[9px] font-mono text-amber-700 dark:bg-amber-900/50 dark:text-amber-400">
         {'{{ }}'}
       </span>
     </div>

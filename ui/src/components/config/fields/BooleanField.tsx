@@ -15,7 +15,7 @@ export function BooleanField({ field, value, onChange }: Props) {
         aria-checked={!!value}
         onClick={() => onChange(!value)}
         className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
-          value ? 'bg-blue-600' : 'bg-gray-300'
+          value ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
         }`}
       >
         <span
@@ -24,7 +24,7 @@ export function BooleanField({ field, value, onChange }: Props) {
           }`}
         />
       </button>
-      <span className="text-sm text-gray-700">{field.label}</span>
+      <span className="text-sm text-gray-700 dark:text-gray-300">{field.label}</span>
     </label>
   )
 }

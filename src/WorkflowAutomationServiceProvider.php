@@ -9,6 +9,7 @@ use Aftandilmmd\WorkflowAutomation\Engine\GraphValidator;
 use Aftandilmmd\WorkflowAutomation\Engine\NodeRunner;
 use Aftandilmmd\WorkflowAutomation\Registry\NodeRegistry;
 use Aftandilmmd\WorkflowAutomation\Services\WorkflowService;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 class WorkflowAutomationServiceProvider extends ServiceProvider
@@ -50,6 +51,10 @@ class WorkflowAutomationServiceProvider extends ServiceProvider
             $this->loadRoutesFrom(__DIR__.'/../routes/api.php');
         }
 
+        if (config('workflow-automation.editor_routes', true)) {
+            $this->loadRoutesFrom(__DIR__.'/../routes/editor.php');
+        }
+
         if ($this->app->runningInConsole()) {
             $this->commands([
                 Console\Commands\ScheduleRunCommand::class,
@@ -71,7 +76,16 @@ class WorkflowAutomationServiceProvider extends ServiceProvider
         }
 
         $this->registerBuiltInNodes();
+        $this->registerListeners();
         $this->registerMcpServer();
+    }
+
+    private function registerListeners(): void
+    {
+        $this->app->booted(function () {
+            Listeners\ModelEventListener::register();
+            Listeners\EventListener::register();
+        });
     }
 
     private function registerMcpServer(): void

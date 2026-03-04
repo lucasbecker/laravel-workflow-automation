@@ -7,6 +7,8 @@ import { IntegerField } from './fields/IntegerField'
 import { JsonField } from './fields/JsonField'
 import { KeyValueField } from './fields/KeyValueField'
 import { ArrayOfObjectsField } from './fields/ArrayOfObjectsField'
+import { MultiSelectField } from './fields/MultiSelectField'
+import { ModelSelectField } from './fields/ModelSelectField'
 
 interface Props {
   schema: ConfigSchemaField[]
@@ -17,20 +19,27 @@ interface Props {
 export function DynamicForm({ schema, values, onChange }: Props) {
   return (
     <div className="space-y-3">
-      {schema.map((field) => {
-        const value = values[field.key]
-        return (
-          <div key={field.key}>
-            {field.type !== 'boolean' && (
-              <label className="mb-1 block text-xs font-medium text-gray-600">
-                {field.label}
-                {field.required && <span className="ml-0.5 text-red-400">*</span>}
-              </label>
-            )}
-            <FieldRenderer field={field} value={value} onChange={(v) => onChange(field.key, v)} />
-          </div>
-        )
-      })}
+      {schema
+        .filter((field) => {
+          if (!field.show_when) return true
+          const current = values[field.show_when.key]
+          const expected = field.show_when.value
+          return Array.isArray(expected) ? expected.includes(current as string) : current === expected
+        })
+        .map((field) => {
+          const value = values[field.key]
+          return (
+            <div key={field.key}>
+              {field.type !== 'boolean' && (
+                <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
+                  {field.label}
+                  {field.required && <span className="ml-0.5 text-red-400">*</span>}
+                </label>
+              )}
+              <FieldRenderer field={field} value={value} onChange={(v) => onChange(field.key, v)} />
+            </div>
+          )
+        })}
     </div>
   )
 }
@@ -73,6 +82,16 @@ function FieldRenderer({
           onChange={onChange as (v: Record<string, unknown>[]) => void}
         />
       )
+    case 'multiselect':
+      return (
+        <MultiSelectField
+          field={field}
+          value={value as string[] | null}
+          onChange={onChange as (v: string[]) => void}
+        />
+      )
+    case 'model_select':
+      return <ModelSelectField field={field} value={value as string} onChange={onChange as (v: string) => void} />
     default:
       return <StringField field={field} value={String(value ?? '')} onChange={onChange} />
   }

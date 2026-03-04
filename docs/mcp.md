@@ -119,7 +119,7 @@ add_node(workflow_id: 1, node_key: "model_event", name: "User Registered",
 → { id: 1 }
 
 add_node(workflow_id: 1, node_key: "send_mail", name: "Send Welcome",
-    config: { to: "{{ item.email }}", subject: "Welcome!", body: "Hi {{ item.name }}!" })
+    config: { send_mode: "inline", to: "{{ item.email }}", subject: "Welcome!", body: "Hi {{ item.name }}!" })
 → { id: 2 }
 
 connect_nodes(source_node_id: 1, target_node_id: 2)

@@ -37,8 +37,8 @@ export function JsonField({ field, value, onChange }: Props) {
         onChange={(e) => handleChange(e.target.value)}
         className={`w-full rounded-md border px-2.5 py-1.5 font-mono text-xs focus:outline-none focus:ring-1 ${
           error
-            ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
-            : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+            ? 'border-red-300 focus:border-red-500 focus:ring-red-500 dark:border-red-600'
+            : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100'
         }`}
         rows={6}
         placeholder={field.label}

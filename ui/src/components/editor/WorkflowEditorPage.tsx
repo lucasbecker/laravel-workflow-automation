@@ -7,12 +7,15 @@ import {
   ToggleRight,
   Clock,
   Layers,
+  Sun,
+  Moon,
 } from 'lucide-react'
 import { ReactFlowProvider } from '@xyflow/react'
 
 import { useWorkflowEditorStore } from '../../stores/useWorkflowEditorStore'
 import { useRegistryStore } from '../../stores/useRegistryStore'
 import { useRunStore } from '../../stores/useRunStore'
+import { useThemeStore } from '../../stores/useThemeStore'
 import { workflowsApi } from '../../api/workflows'
 import { Canvas } from './Canvas'
 import { NodePalette } from '../palette/NodePalette'
@@ -27,19 +30,20 @@ export function WorkflowEditorPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { workflow, isLoading, loadWorkflow, reset, selectedNodeId } = useWorkflowEditorStore()
-  const { fetchRegistry, getByKey } = useRegistryStore()
+  const { fetchRegistry } = useRegistryStore()
   const { fetchRuns } = useRunStore()
+  const { theme, toggle: toggleTheme } = useThemeStore()
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>('palette')
   const [showExecute, setShowExecute] = useState(false)
 
   useEffect(() => {
-    fetchRegistry()
-  }, [fetchRegistry])
-
-  useEffect(() => {
-    if (id) {
-      loadWorkflow(parseInt(id), getByKey)
+    const init = async () => {
+      await fetchRegistry()
+      if (id) {
+        loadWorkflow(parseInt(id), useRegistryStore.getState().getByKey)
+      }
     }
+    init()
     return () => reset()
   }, [id]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -50,7 +54,7 @@ export function WorkflowEditorPage() {
     } else {
       await workflowsApi.activate(workflow.id)
     }
-    loadWorkflow(workflow.id, getByKey)
+    loadWorkflow(workflow.id, useRegistryStore.getState().getByKey)
   }
 
   if (isLoading || !workflow) {
@@ -64,18 +68,18 @@ export function WorkflowEditorPage() {
   return (
     <div className="flex h-screen flex-col">
       {/* Header */}
-      <div className="flex h-12 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4">
+      <div className="flex h-12 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 dark:border-gray-700 dark:bg-gray-800">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/')}
-            className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:text-gray-500 dark:hover:bg-gray-700 dark:hover:text-gray-300"
           >
             <ArrowLeft size={18} />
           </button>
-          <h1 className="text-sm font-semibold text-gray-900">{workflow.name}</h1>
+          <h1 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{workflow.name}</h1>
           <span
             className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
-              workflow.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+              workflow.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
             }`}
           >
             {workflow.is_active ? 'Active' : 'Inactive'}
@@ -83,8 +87,15 @@ export function WorkflowEditorPage() {
         </div>
         <div className="flex items-center gap-2">
           <button
+            onClick={toggleTheme}
+            className="rounded-md p-1.5 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+            title={theme === 'light' ? 'Dark mode' : 'Light mode'}
+          >
+            {theme === 'light' ? <Moon size={14} /> : <Sun size={14} />}
+          </button>
+          <button
             onClick={handleToggleActive}
-            className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs text-gray-600 hover:bg-gray-100"
+            className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
             title={workflow.is_active ? 'Deactivate' : 'Activate'}
           >
             {workflow.is_active ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
@@ -102,15 +113,15 @@ export function WorkflowEditorPage() {
       {/* Body */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left Sidebar */}
-        <div className="flex w-60 shrink-0 flex-col border-r border-gray-200 bg-white">
+        <div className="flex w-60 shrink-0 flex-col border-r border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
           {/* Tabs */}
-          <div className="flex border-b border-gray-200">
+          <div className="flex border-b border-gray-200 dark:border-gray-700">
             <button
               onClick={() => setSidebarTab('palette')}
               className={`flex flex-1 items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-medium ${
                 sidebarTab === 'palette'
                   ? 'border-b-2 border-blue-600 text-blue-600'
-                  : 'text-gray-500 hover:text-gray-700'
+                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
               }`}
             >
               <Layers size={12} /> Nodes
@@ -120,7 +131,7 @@ export function WorkflowEditorPage() {
               className={`flex flex-1 items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-medium ${
                 sidebarTab === 'runs'
                   ? 'border-b-2 border-blue-600 text-blue-600'
-                  : 'text-gray-500 hover:text-gray-700'
+                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
               }`}
             >
               <Clock size={12} /> Runs
@@ -142,7 +153,7 @@ export function WorkflowEditorPage() {
 
         {/* Right Panel (Config) */}
         {selectedNodeId && (
-          <div className="w-80 shrink-0 border-l border-gray-200 bg-white">
+          <div className="w-80 shrink-0 border-l border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
             <NodeConfigPanel />
           </div>
         )}

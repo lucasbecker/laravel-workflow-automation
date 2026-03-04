@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react'
+import { useCallback, useRef, useState, useEffect } from 'react'
 import {
   ReactFlow,
   MiniMap,
@@ -8,9 +8,11 @@ import {
   type OnSelectionChangeFunc,
   type Connection,
   type Node,
+  type Edge,
   useReactFlow,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
+import { Trash2 } from 'lucide-react'
 
 import { useWorkflowEditorStore } from '../../stores/useWorkflowEditorStore'
 import { useRegistryStore } from '../../stores/useRegistryStore'
@@ -18,6 +20,12 @@ import { useAutoSavePosition } from '../../hooks/useAutoSavePosition'
 import { CustomNode } from '../nodes/CustomNode'
 
 const nodeTypes = { custom: CustomNode }
+
+interface EdgeContextMenu {
+  edgeId: string
+  x: number
+  y: number
+}
 
 export function Canvas() {
   const {
@@ -35,6 +43,7 @@ export function Canvas() {
   const savePosition = useAutoSavePosition()
   const reactFlowWrapper = useRef<HTMLDivElement>(null)
   const { screenToFlowPosition } = useReactFlow()
+  const [edgeMenu, setEdgeMenu] = useState<EdgeContextMenu | null>(null)
 
   const onConnect = useCallback(
     (connection: Connection) => {
@@ -103,6 +112,26 @@ export function Canvas() {
     [deleteNode, deleteEdge, rfEdges],
   )
 
+  const onEdgeContextMenu = useCallback(
+    (event: React.MouseEvent, edge: Edge) => {
+      event.preventDefault()
+      setEdgeMenu({ edgeId: edge.id, x: event.clientX, y: event.clientY })
+    },
+    [],
+  )
+
+  const onPaneClick = useCallback(() => {
+    setEdgeMenu(null)
+  }, [])
+
+  useEffect(() => {
+    const handleClickOutside = () => setEdgeMenu(null)
+    if (edgeMenu) {
+      document.addEventListener('click', handleClickOutside)
+      return () => document.removeEventListener('click', handleClickOutside)
+    }
+  }, [edgeMenu])
+
   return (
     <div ref={reactFlowWrapper} className="h-full w-full" onKeyDown={onKeyDown} tabIndex={0}>
       <ReactFlow
@@ -115,19 +144,39 @@ export function Canvas() {
         onSelectionChange={onSelectionChange}
         onDragOver={onDragOver}
         onDrop={onDrop}
+        onEdgeContextMenu={onEdgeContextMenu}
+        onPaneClick={onPaneClick}
         nodeTypes={nodeTypes}
         fitView
         deleteKeyCode={null}
-        className="bg-gray-50"
+        className="bg-gray-50 dark:bg-gray-900"
       >
         <Controls position="bottom-left" />
         <MiniMap
           position="bottom-right"
-          className="!rounded-lg !border !border-gray-200 !shadow-sm"
+          className="!rounded-lg !border !border-gray-200 dark:!border-gray-700 !shadow-sm dark:!bg-gray-800"
           maskColor="rgb(240 240 240 / 0.7)"
         />
         <Background variant={BackgroundVariant.Dots} gap={16} size={1} color="#d1d5db" />
       </ReactFlow>
+
+      {edgeMenu && (
+        <div
+          className="fixed z-50 min-w-[140px] rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-1 shadow-lg"
+          style={{ top: edgeMenu.y, left: edgeMenu.x }}
+        >
+          <button
+            className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"
+            onClick={() => {
+              deleteEdge(parseInt(edgeMenu.edgeId))
+              setEdgeMenu(null)
+            }}
+          >
+            <Trash2 size={14} />
+            Delete connection
+          </button>
+        </div>
+      )}
     </div>
   )
 }

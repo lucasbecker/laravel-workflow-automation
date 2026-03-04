@@ -20,23 +20,10 @@ The `model_event` trigger fires automatically when an Eloquent model event occur
 
 ## Setup
 
-Register the model event listener in your `AppServiceProvider`:
+No manual setup needed — the package automatically registers model event listeners when the application boots. Active trigger configurations are cached for 60 seconds.
 
-```php
-// app/Providers/AppServiceProvider.php
-
-use Aftandilmmd\WorkflowAutomation\Listeners\ModelEventListener;
-
-public function boot(): void
-{
-    ModelEventListener::register();
-}
-```
-
-This scans all active workflows with `model_event` triggers and attaches Eloquent observers. Trigger configurations are cached for 60 seconds.
-
-::: warning Important
-Call `ModelEventListener::register()` in `boot()`, not `register()`. The database must be available when observers are attached.
+::: tip
+If you create a new workflow while the app is running, the trigger will be picked up automatically after the cache expires (60 seconds) or after clearing the cache with `Cache::forget('workflow:model_event_triggers')`.
 :::
 
 ## How It Works

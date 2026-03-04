@@ -1,3 +1,5 @@
+<div v-pre>
+
 # Parse Data
 
 Parses raw data from a field (JSON, CSV, or query string) into structured data.
@@ -28,41 +30,135 @@ Parses raw data from a field (JSON, CSV, or query string) into structured data.
 | `csv` | First row = headers, subsequent rows = associative arrays |
 | `key_value` | `parse_str()` — handles `key1=val1&key2=val2` format |
 
-## Example
+## Examples
+
+### JSON — Parse an API response
+
+An HTTP Request node fetches order data from an external API. The response body comes back as a raw JSON string — Parse Data turns it into a usable array.
 
 ```php
+$fetch = $workflow->addNode('Fetch Order', 'http_request', [
+    'url'    => 'https://api.store.com/orders/{{ item.order_id }}',
+    'method' => 'GET',
+]);
+
+$parse = $workflow->addNode('Parse Response', 'parse_data', [
+    'source_field' => 'response_body',   // raw JSON string from the HTTP node
+    'format'       => 'json',
+    'target_field' => 'order',           // parsed array available as {{ item.order }}
+]);
+
+$notify = $workflow->addNode('Notify Customer', 'send_mail', [
+    'to'      => '{{ item.order.customer.email }}',
+    'subject' => 'Your order #{{ item.order.id }} has shipped!',
+]);
+
+$fetch->connect($parse);
+$parse->connect($notify);
+```
+
+**Before parse** — `response_body` is a string:
+
+```json
+"{\"id\":1024,\"customer\":{\"email\":\"john@example.com\"},\"status\":\"shipped\"}"
+```
+
+**After parse** — `order` is a structured array you can reference with expressions:
+
+```json
+{
+  "order": {
+    "id": 1024,
+    "customer": { "email": "john@example.com" },
+    "status": "shipped"
+  }
+}
+```
+
+### CSV — Import contacts from a file
+
+A webhook receives a CSV file. Parse Data splits it into rows, then a Loop node processes each contact.
+
+```php
+$webhook = $workflow->addNode('CSV Upload', 'webhook', []);
+
 $parse = $workflow->addNode('Parse CSV', 'parse_data', [
     'source_field' => 'csv_body',
     'format'       => 'csv',
-    'target_field' => 'rows',
+    'target_field' => 'contacts',
 ]);
+
+$loop = $workflow->addNode('Each Contact', 'loop', [
+    'source_field' => 'contacts',
+]);
+
+$mail = $workflow->addNode('Send Welcome', 'send_mail', [
+    'to'      => '{{ item.email }}',
+    'subject' => 'Welcome, {{ item.name }}!',
+]);
+
+$webhook->connect($parse);
+$parse->connect($loop);
+$loop->connect($mail);
 ```
 
-## Input / Output Example
+**Before parse** — `csv_body` is a raw string:
 
-**Input (JSON format):**
-
-```php
-[
-    ['api_response' => '{"status":"ok","count":42}'],
-]
+```
+name,email,role
+Alice,alice@example.com,admin
+Bob,bob@example.com,editor
 ```
 
-**Config:** `source_field: "api_response"`, `format: "json"`, `target_field: "parsed"`
+**After parse** — `contacts` is an array of rows:
 
-**Output:**
+```json
+{
+  "contacts": [
+    { "name": "Alice", "email": "alice@example.com", "role": "admin" },
+    { "name": "Bob", "email": "bob@example.com", "role": "editor" }
+  ]
+}
+```
+
+### Query String — Parse form data
+
+A webhook receives URL-encoded form data. Parse Data converts it into key-value pairs.
 
 ```php
-[
-    [
-        'api_response' => '{"status":"ok","count":42}',
-        'parsed'       => ['status' => 'ok', 'count' => 42],
-    ],
-]
+$webhook = $workflow->addNode('Form Submit', 'webhook', []);
+
+$parse = $workflow->addNode('Parse Form', 'parse_data', [
+    'source_field' => 'body',
+    'format'       => 'key_value',
+    'target_field' => 'form',
+]);
+
+$webhook->connect($parse);
+```
+
+**Before parse** — `body` is a query string:
+
+```
+name=Alice&email=alice%40example.com&plan=pro
+```
+
+**After parse** — `form` is a structured array:
+
+```json
+{
+  "form": {
+    "name": "Alice",
+    "email": "alice@example.com",
+    "plan": "pro"
+  }
+}
 ```
 
 ## Tips
 
 - Combine with a [Loop](/nodes/loop) node to iterate over parsed CSV rows or JSON arrays
-- The `source_field` supports expressions for dynamic field resolution
-- Malformed data routes to `error` with the exception message
+- The `source_field` supports expressions — use `{{ nodes.HTTP Request.response_body }}` to reference a previous node's output
+- Malformed data routes to the `error` port with the exception message, so you can handle failures gracefully
+
+</div>

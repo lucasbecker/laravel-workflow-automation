@@ -69,20 +69,7 @@ class SetupWelcomeWorkflow extends Command
 }
 ```
 
-**Step 2 — Register the model listener** (one line, once):
-
-```php
-// app/Providers/AppServiceProvider.php
-
-use Aftandilmmd\WorkflowAutomation\Listeners\ModelEventListener;
-
-public function boot(): void
-{
-    ModelEventListener::register();
-}
-```
-
-**That's it.** Every `User::create()` call now triggers the workflow automatically. No manual `Workflow::run()` needed.
+**That's it.** Every `User::create()` call now triggers the workflow automatically — the package registers model event listeners on boot. No manual `Workflow::run()` needed.
 
 ## Adding Logic
 
@@ -123,7 +110,7 @@ $run = $workflow->start([['id' => 42, 'amount' => 250, 'email' => 'customer@test
 
 ## Triggers
 
-There are 4 ways to start a workflow:
+There are 5 ways to start a workflow:
 
 **Manual** — Call `$workflow->start()` from your code or the API.
 
@@ -140,7 +127,15 @@ $workflow->addNode('Order Created', 'model_event', [
     'events' => ['created'],
 ]);
 // Trigger: automatic — Order::create([...]) fires the workflow
-// Requires: ModelEventListener::register() in AppServiceProvider
+```
+
+**Event** — Fires when any Laravel event is dispatched.
+
+```php
+$workflow->addNode('Order Placed', 'event', [
+    'event_class' => 'App\\Events\\OrderPlaced',
+]);
+// Trigger: automatic — event(new OrderPlaced(...)) fires the workflow
 ```
 
 **Webhook** — Generates a unique URL that accepts POST requests.
@@ -172,6 +167,7 @@ $workflow->addNode('Morning Report', 'schedule', [
 |-----|-------------|
 | `manual` | Triggered via code or API |
 | `model_event` | Eloquent model events (created, updated, deleted) |
+| `event` | Any Laravel event (domain events, custom events) |
 | `schedule` | Cron-based scheduling |
 | `webhook` | HTTP endpoint with auth support |
 

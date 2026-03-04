@@ -19,8 +19,8 @@ class WorkflowEdgeController extends Controller
     public function store(StoreEdgeRequest $request, Workflow $workflow): WorkflowEdgeResource
     {
         $edge = $this->service->connect(
-            sourceNodeId: $request->validated('source_node_id'),
-            targetNodeId: $request->validated('target_node_id'),
+            source: $request->validated('source_node_id'),
+            target: $request->validated('target_node_id'),
             sourcePort: $request->validated('source_port', 'main'),
             targetPort: $request->validated('target_port', 'main'),
         );

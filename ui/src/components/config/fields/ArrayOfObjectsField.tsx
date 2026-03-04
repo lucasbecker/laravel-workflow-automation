@@ -33,10 +33,10 @@ export function ArrayOfObjectsField({ field, value, onChange }: Props) {
   return (
     <div className="space-y-3">
       {items.map((item, index) => (
-        <div key={index} className="relative rounded-md border border-gray-200 bg-gray-50 p-3">
+        <div key={index} className="relative rounded-md border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-900">
           <button
             onClick={() => removeItem(index)}
-            className="absolute right-2 top-2 rounded p-0.5 text-gray-400 hover:bg-red-50 hover:text-red-500"
+            className="absolute right-2 top-2 rounded p-0.5 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:text-gray-500 dark:hover:bg-red-900/30 dark:hover:text-red-400"
           >
             <X size={12} />
           </button>

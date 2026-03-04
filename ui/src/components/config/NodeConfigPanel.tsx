@@ -41,7 +41,7 @@ export function NodeConfigPanel() {
 
   if (!selectedApiNode || !selectedRegistryNode) {
     return (
-      <div className="flex h-full items-center justify-center p-4 text-center text-sm text-gray-400">
+      <div className="flex h-full items-center justify-center p-4 text-center text-sm text-gray-400 dark:text-gray-500">
         Select a node to configure it
       </div>
     )
@@ -50,7 +50,7 @@ export function NodeConfigPanel() {
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
+      <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-4 py-3">
         <div className="min-w-0">
           <input
             type="text"
@@ -59,14 +59,14 @@ export function NodeConfigPanel() {
               setLocalLabel(e.target.value)
               setIsDirty(true)
             }}
-            className="w-full truncate border-none bg-transparent text-sm font-semibold text-gray-900 focus:outline-none focus:ring-0"
+            className="w-full truncate border-none bg-transparent text-sm font-semibold text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-0"
             placeholder="Node Name"
           />
-          <div className="text-[10px] text-gray-400">{selectedApiNode.node_key}</div>
+          <div className="text-[10px] text-gray-400 dark:text-gray-500">{selectedApiNode.node_key}</div>
         </div>
         <button
           onClick={() => selectNode(null)}
-          className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+          className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:text-gray-500 dark:hover:bg-gray-700 dark:hover:text-gray-300"
         >
           <X size={16} />
         </button>
@@ -83,7 +83,7 @@ export function NodeConfigPanel() {
 
       {/* Save Button */}
       {isDirty && (
-        <div className="border-t border-gray-200 px-4 py-3">
+        <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-3">
           <button
             onClick={handleSave}
             disabled={isSaving}

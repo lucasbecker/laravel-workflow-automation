@@ -14,7 +14,7 @@ hero:
 
 features:
   - icon: 🔗
-    title: 25 Ready-to-Use Nodes
+    title: 26 Ready-to-Use Nodes
     details: Email, HTTP, AI, delays, conditions, loops — connect them like building blocks. No code needed for common scenarios.
   - icon: ⚡
     title: Dynamic Expressions

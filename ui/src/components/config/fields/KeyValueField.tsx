@@ -41,19 +41,19 @@ export function KeyValueField({ value, onChange }: Props) {
             type="text"
             value={k}
             onChange={(e) => updateKey(k, e.target.value)}
-            className="w-1/3 rounded-md border border-gray-300 px-2 py-1 text-xs focus:border-blue-500 focus:outline-none"
+            className="w-1/3 rounded-md border border-gray-300 px-2 py-1 text-xs focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
             placeholder="Key"
           />
           <input
             type="text"
             value={v}
             onChange={(e) => updateValue(k, e.target.value)}
-            className="flex-1 rounded-md border border-gray-300 px-2 py-1 text-xs focus:border-blue-500 focus:outline-none"
+            className="flex-1 rounded-md border border-gray-300 px-2 py-1 text-xs focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
             placeholder="Value"
           />
           <button
             onClick={() => removePair(k)}
-            className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-500"
+            className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:text-gray-500 dark:hover:bg-red-900/30 dark:hover:text-red-400"
           >
             <X size={14} />
           </button>

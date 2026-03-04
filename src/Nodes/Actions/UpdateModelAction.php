@@ -14,7 +14,7 @@ class UpdateModelAction extends BaseNode
     public static function configSchema(): array
     {
         return [
-            ['key' => 'model', 'type' => 'string', 'label' => 'Model Class (e.g. App\\Models\\User)', 'required' => true],
+            ['key' => 'model', 'type' => 'model_select', 'label' => 'Model', 'required' => true],
             ['key' => 'find_by', 'type' => 'string', 'label' => 'Find by field (e.g. id)', 'required' => true],
             ['key' => 'find_value', 'type' => 'string', 'label' => 'Find value', 'required' => true, 'supports_expression' => true],
             ['key' => 'fields', 'type' => 'keyvalue', 'label' => 'Fields to update', 'required' => true, 'supports_expression' => true],

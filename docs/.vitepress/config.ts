@@ -59,6 +59,7 @@ export default defineConfig({
           items: [
             { text: 'Manual', link: '/triggers/manual' },
             { text: 'Model Event', link: '/triggers/model-event' },
+            { text: 'Event', link: '/triggers/event' },
             { text: 'Webhook', link: '/triggers/webhook' },
             { text: 'Schedule', link: '/triggers/schedule' },
           ],

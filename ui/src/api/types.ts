@@ -78,13 +78,15 @@ export interface RegistryNode {
 
 export interface ConfigSchemaField {
   key: string
-  type: 'string' | 'textarea' | 'select' | 'boolean' | 'integer' | 'json' | 'keyvalue' | 'array_of_objects'
+  type: 'string' | 'textarea' | 'select' | 'boolean' | 'integer' | 'json' | 'keyvalue' | 'array_of_objects' | 'multiselect' | 'model_select'
   label: string
   required?: boolean
   options?: string[]
+  options_from?: string
   supports_expression?: boolean
   readonly?: boolean
   schema?: ConfigSchemaField[]
+  show_when?: { key: string; value: string | string[] }
 }
 
 export type NodeType = 'trigger' | 'action' | 'condition' | 'transformer' | 'control' | 'utility' | 'code'

@@ -19,13 +19,13 @@ export function ConfirmDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-xl">
-        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-        <p className="mt-2 text-sm text-gray-600">{message}</p>
+      <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800 dark:shadow-2xl dark:shadow-black/40">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{message}</p>
         <div className="mt-4 flex justify-end gap-2">
           <button
             onClick={onCancel}
-            className="rounded-md px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100"
+            className="rounded-md px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
           >
             Cancel
           </button>

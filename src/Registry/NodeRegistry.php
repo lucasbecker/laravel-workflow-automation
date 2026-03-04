@@ -139,7 +139,9 @@ class NodeRegistry
     private function findPhpFiles(string $directory): iterable
     {
         if (class_exists(Finder::class)) {
-            return Finder::create()->files()->name('*.php')->in($directory);
+            yield from Finder::create()->files()->name('*.php')->in($directory);
+
+            return;
         }
 
         // Fallback without symfony/finder
