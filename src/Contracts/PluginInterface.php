@@ -29,6 +29,14 @@ interface PluginInterface
     public function boot(PluginContext $context): void;
 
     /**
+     * Return an array of JS asset URLs to be loaded by the workflow editor.
+     * These scripts should register Web Components for custom config fields.
+     *
+     * @return string[]
+     */
+    public function editorScripts(): array;
+
+    /**
      * Static factory for fluent API.
      */
     public static function make(): static;

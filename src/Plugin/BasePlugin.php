@@ -11,6 +11,11 @@ abstract class BasePlugin implements PluginInterface
         //
     }
 
+    public function editorScripts(): array
+    {
+        return [];
+    }
+
     public static function make(): static
     {
         return new static;

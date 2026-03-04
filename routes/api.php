@@ -47,6 +47,7 @@ if (config('workflow-automation.api_routes', true)) {
             // ── Node Registry ────────────────────────────────────────
             Route::get('registry/nodes', [NodeRegistryController::class, 'index']);
             Route::get('registry/nodes/{key}', [NodeRegistryController::class, 'show']);
+            Route::get('registry/editor-scripts', [NodeRegistryController::class, 'editorScripts']);
 
             // ── Metadata (models, events) ──────────────────────────
             Route::get('metadata/models', [MetadataController::class, 'models']);

@@ -79,7 +79,11 @@ export interface RegistryNode {
 
 export interface ConfigSchemaField {
   key: string
-  type: 'string' | 'textarea' | 'select' | 'boolean' | 'integer' | 'json' | 'keyvalue' | 'array_of_objects' | 'multiselect' | 'model_select'
+  type:
+    | 'string' | 'textarea' | 'select' | 'boolean' | 'integer' | 'json'
+    | 'keyvalue' | 'array_of_objects' | 'multiselect' | 'model_select'
+    | 'number' | 'color' | 'url' | 'password' | 'slider' | 'code'
+    | 'info' | 'section' | 'custom'
   label: string
   required?: boolean
   options?: string[]
@@ -90,6 +94,15 @@ export interface ConfigSchemaField {
   readonly?: boolean
   schema?: ConfigSchemaField[]
   show_when?: { key: string; value: string | string[] }
+  description?: string
+  placeholder?: string
+  min?: number
+  max?: number
+  step?: number
+  language?: string
+  collapsible?: boolean
+  collapsed?: boolean
+  custom_component?: string
 }
 
 export type CreatedVia = 'editor' | 'import' | 'code' | 'api' | 'duplicate'

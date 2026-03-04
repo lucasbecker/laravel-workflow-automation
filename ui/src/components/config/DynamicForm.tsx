@@ -1,3 +1,4 @@
+import { Fragment } from 'react'
 import type { ConfigSchemaField } from '../../api/types'
 import { StringField } from './fields/StringField'
 import { TextareaField } from './fields/TextareaField'
@@ -9,6 +10,15 @@ import { KeyValueField } from './fields/KeyValueField'
 import { ArrayOfObjectsField } from './fields/ArrayOfObjectsField'
 import { MultiSelectField } from './fields/MultiSelectField'
 import { ModelSelectField } from './fields/ModelSelectField'
+import { NumberField } from './fields/NumberField'
+import { ColorField } from './fields/ColorField'
+import { UrlField } from './fields/UrlField'
+import { PasswordField } from './fields/PasswordField'
+import { SliderField } from './fields/SliderField'
+import { CodeField } from './fields/CodeField'
+import { InfoField } from './fields/InfoField'
+import { SectionField } from './fields/SectionField'
+import { CustomWebComponentField } from './fields/CustomWebComponentField'
 
 interface Props {
   schema: ConfigSchemaField[]
@@ -17,32 +27,67 @@ interface Props {
 }
 
 export function DynamicForm({ schema, values, onChange }: Props) {
+  const visible = schema.filter((field) => {
+    if (!field.show_when) return true
+    const current = values[field.show_when.key]
+    const expected = field.show_when.value
+    return Array.isArray(expected) ? expected.includes(current as string) : current === expected
+  })
+
+  // Group fields into sections
+  const groups: { section: ConfigSchemaField | null; fields: ConfigSchemaField[] }[] = []
+  let current: { section: ConfigSchemaField | null; fields: ConfigSchemaField[] } = { section: null, fields: [] }
+
+  for (const field of visible) {
+    if (field.type === 'section') {
+      if (current.section || current.fields.length > 0) {
+        groups.push(current)
+      }
+      current = { section: field, fields: [] }
+    } else {
+      current.fields.push(field)
+    }
+  }
+  if (current.section || current.fields.length > 0) {
+    groups.push(current)
+  }
+
   return (
     <div className="space-y-3">
-      {schema
-        .filter((field) => {
-          if (!field.show_when) return true
-          const current = values[field.show_when.key]
-          const expected = field.show_when.value
-          return Array.isArray(expected) ? expected.includes(current as string) : current === expected
-        })
-        .map((field) => {
+      {groups.map((group, gi) => {
+        const fields = group.fields.map((field) => {
           const resolvedField = field.depends_on && field.options_map
             ? { ...field, options: field.options_map[values[field.depends_on] as string] ?? [] }
             : field
           const value = values[field.key]
+          const hideLabel = field.type === 'boolean' || field.type === 'info'
+
           return (
             <div key={field.key}>
-              {field.type !== 'boolean' && (
+              {!hideLabel && (
                 <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
                   {field.label}
                   {field.required && <span className="ml-0.5 text-red-400">*</span>}
                 </label>
               )}
               <FieldRenderer field={resolvedField} value={value} onChange={(v) => onChange(field.key, v)} />
+              {field.description && (
+                <p className="mt-1 text-[10px] leading-tight text-gray-400 dark:text-gray-500">{field.description}</p>
+              )}
             </div>
           )
-        })}
+        })
+
+        if (group.section) {
+          return (
+            <SectionField key={group.section.key} field={group.section}>
+              {fields}
+            </SectionField>
+          )
+        }
+
+        return <Fragment key={`group-${gi}`}>{fields}</Fragment>
+      })}
     </div>
   )
 }
@@ -95,6 +140,22 @@ function FieldRenderer({
       )
     case 'model_select':
       return <ModelSelectField field={field} value={value as string} onChange={onChange as (v: string) => void} />
+    case 'number':
+      return <NumberField field={field} value={value as number} onChange={onChange as (v: number) => void} />
+    case 'color':
+      return <ColorField field={field} value={value as string} onChange={onChange} />
+    case 'url':
+      return <UrlField field={field} value={value as string} onChange={onChange} />
+    case 'password':
+      return <PasswordField field={field} value={value as string} onChange={onChange} />
+    case 'slider':
+      return <SliderField field={field} value={value as number} onChange={onChange as (v: number) => void} />
+    case 'code':
+      return <CodeField field={field} value={value as string} onChange={onChange} />
+    case 'info':
+      return <InfoField field={field} />
+    case 'custom':
+      return <CustomWebComponentField field={field} value={value} onChange={onChange} />
     default:
       return <StringField field={field} value={String(value ?? '')} onChange={onChange} />
   }

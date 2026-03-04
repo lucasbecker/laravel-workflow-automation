@@ -18,8 +18,20 @@ export const useRegistryStore = create<RegistryStore>((set, get) => ({
     if (get().nodes.length > 0) return
     set({ isLoading: true })
     try {
-      const res = await registryApi.list()
-      set({ nodes: res.data })
+      const [registryRes, scriptsRes] = await Promise.all([
+        registryApi.list(),
+        registryApi.editorScripts().catch(() => ({ data: { scripts: [] } })),
+      ])
+      set({ nodes: registryRes.data })
+
+      for (const src of scriptsRes.data.scripts) {
+        if (!document.querySelector(`script[src="${src}"]`)) {
+          const script = document.createElement('script')
+          script.src = src
+          script.type = 'module'
+          document.head.appendChild(script)
+        }
+      }
     } finally {
       set({ isLoading: false })
     }
