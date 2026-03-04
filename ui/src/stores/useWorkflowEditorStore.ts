@@ -13,6 +13,7 @@ import { workflowsApi } from '../api/workflows'
 import { nodesApi } from '../api/nodes'
 import { edgesApi } from '../api/edges'
 import { apiNodeToRFNode, apiEdgeToRFEdge, type CustomNodeData } from '../lib/mappers'
+import { getAutoLayoutPositions, allNodesAtOrigin } from '../lib/autoLayout'
 
 interface WorkflowEditorStore {
   workflow: Workflow | null
@@ -39,6 +40,8 @@ interface WorkflowEditorStore {
   deleteNode: (nodeId: number) => Promise<void>
   updateNodePosition: (nodeId: number, x: number, y: number) => Promise<void>
 
+  autoLayout: () => Promise<void>
+
   addEdge: (connection: Connection) => Promise<void>
   deleteEdge: (edgeId: number) => Promise<void>
 
@@ -63,8 +66,11 @@ export const useWorkflowEditorStore = create<WorkflowEditorStore>((set, get) => 
     try {
       const res = await workflowsApi.show(id)
       const wf = res.data
-      const rfNodes = (wf.nodes ?? []).map((n) => apiNodeToRFNode(n, registryLookup(n.node_key)))
+      let rfNodes = (wf.nodes ?? []).map((n) => apiNodeToRFNode(n, registryLookup(n.node_key)))
       const rfEdges = (wf.edges ?? []).map(apiEdgeToRFEdge)
+      if (allNodesAtOrigin(rfNodes)) {
+        rfNodes = getAutoLayoutPositions(rfNodes, rfEdges)
+      }
       set({ workflow: wf, rfNodes, rfEdges, selectedNodeId: null, selectedApiNode: null })
     } finally {
       set({ isLoading: false })
@@ -159,6 +165,21 @@ export const useWorkflowEditorStore = create<WorkflowEditorStore>((set, get) => 
       position_x: Math.round(x),
       position_y: Math.round(y),
     })
+  },
+
+  autoLayout: async () => {
+    const wf = get().workflow
+    if (!wf) return
+    const layoutedNodes = getAutoLayoutPositions(get().rfNodes, get().rfEdges)
+    set({ rfNodes: layoutedNodes })
+    await Promise.all(
+      layoutedNodes.map((n) =>
+        nodesApi.updatePosition(wf.id, parseInt(n.id), {
+          position_x: Math.round(n.position.x),
+          position_y: Math.round(n.position.y),
+        }),
+      ),
+    )
   },
 
   addEdge: async (connection) => {

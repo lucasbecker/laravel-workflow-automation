@@ -18,6 +18,7 @@ import { useRunStore } from '../../stores/useRunStore'
 import { useThemeStore } from '../../stores/useThemeStore'
 import { workflowsApi } from '../../api/workflows'
 import { Canvas } from './Canvas'
+import { ExportDropdown } from './ExportDropdown'
 import { NodePalette } from '../palette/NodePalette'
 import { NodeConfigPanel } from '../config/NodeConfigPanel'
 import { RunHistoryPanel } from '../runs/RunHistoryPanel'
@@ -66,6 +67,7 @@ export function WorkflowEditorPage() {
   }
 
   return (
+    <ReactFlowProvider>
     <div className="flex h-screen flex-col">
       {/* Header */}
       <div className="flex h-12 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 dark:border-gray-700 dark:bg-gray-800">
@@ -93,6 +95,7 @@ export function WorkflowEditorPage() {
           >
             {theme === 'light' ? <Moon size={14} /> : <Sun size={14} />}
           </button>
+          <ExportDropdown workflow={workflow} />
           <button
             onClick={handleToggleActive}
             className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
@@ -146,9 +149,7 @@ export function WorkflowEditorPage() {
 
         {/* Canvas */}
         <div className="flex-1">
-          <ReactFlowProvider>
-            <Canvas />
-          </ReactFlowProvider>
+          <Canvas />
         </div>
 
         {/* Right Panel (Config) */}
@@ -171,5 +172,6 @@ export function WorkflowEditorPage() {
         />
       )}
     </div>
+    </ReactFlowProvider>
   )
 }
