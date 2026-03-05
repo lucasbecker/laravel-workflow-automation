@@ -6,6 +6,7 @@ import { useRunStore } from '../../stores/useRunStore'
 import { useWorkflowEditorStore } from '../../stores/useWorkflowEditorStore'
 import { useReactFlow } from '@xyflow/react'
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 
 interface Props {
   run: WorkflowRun
@@ -32,9 +33,9 @@ export function RunDetailModal({ run, onClose }: Props) {
 
   const canCancel = run.status === 'running' || run.status === 'waiting'
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="flex max-h-[80vh] w-full max-w-3xl flex-col rounded-lg bg-white shadow-xl dark:bg-gray-800 dark:shadow-2xl dark:shadow-black/40">
+      <div className="flex max-h-[80vh] w-full max-w-3xl flex-col rounded-lg bg-white shadow-xl dark:bg-gray-800 dark:shadow-2xl dark:shadow-black/40 mx-4">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4 dark:border-gray-700">
           <div>
@@ -164,6 +165,7 @@ export function RunDetailModal({ run, onClose }: Props) {
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
