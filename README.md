@@ -9,7 +9,7 @@ Define multi-step business logic as visual, configurable graphs — then let Lar
 
 **[Full Documentation](https://laravel-workflow.pilyus.com)**
 
-https://github.com/aftandilmmd/laravel-workflow-automation/raw/main/screenshots/workflow.mp4
+<video src="screenshots/workflow.mp4" autoplay loop muted playsinline></video>
 
 ## Installation
 
