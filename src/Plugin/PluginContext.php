@@ -3,6 +3,8 @@
 namespace Aftandilmmd\WorkflowAutomation\Plugin;
 
 use Aftandilmmd\WorkflowAutomation\Contracts\NodeMiddlewareInterface;
+use Aftandilmmd\WorkflowAutomation\Credentials\CredentialTypeInterface;
+use Aftandilmmd\WorkflowAutomation\Credentials\CredentialTypeRegistry;
 use Aftandilmmd\WorkflowAutomation\Engine\ExpressionEvaluator;
 use Aftandilmmd\WorkflowAutomation\Engine\NodeRunner;
 use Aftandilmmd\WorkflowAutomation\Registry\NodeRegistry;
@@ -13,6 +15,7 @@ class PluginContext
         private readonly NodeRegistry $nodeRegistry,
         private readonly NodeRunner $nodeRunner,
         private readonly ExpressionEvaluator $expressionEvaluator,
+        private readonly CredentialTypeRegistry $credentialTypeRegistry,
     ) {}
 
     /**
@@ -50,5 +53,15 @@ class PluginContext
     public function registerMiddleware(string|NodeMiddlewareInterface $middleware): void
     {
         $this->nodeRunner->pushMiddleware($middleware);
+    }
+
+    /**
+     * Register a custom credential type.
+     *
+     * @param  class-string<CredentialTypeInterface>  $class
+     */
+    public function registerCredentialType(string $class): void
+    {
+        $this->credentialTypeRegistry->register($class);
     }
 }

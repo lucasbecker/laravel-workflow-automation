@@ -1,6 +1,6 @@
 # Database Schema
 
-The package creates 5 tables. All table names are configurable in `config/workflow-automation.php`.
+The package creates 6 tables. All table names are configurable in `config/workflow-automation.php`.
 
 ## workflows
 
@@ -95,17 +95,41 @@ Per-node execution logs within a run.
 
 **Indexes:** `(workflow_run_id, node_id)`
 
+## workflow_credentials
+
+Encrypted credential storage for sensitive values (API keys, tokens, passwords).
+
+| Column | Type | Default | Description |
+|--------|------|---------|-------------|
+| `id` | bigint (PK) | auto | Primary key |
+| `name` | varchar | — | Display name (e.g. "Stripe API Key") |
+| `type` | varchar | — | Credential type key (e.g. `bearer_token`, `basic_auth`) |
+| `data` | text | — | Encrypted JSON (AES-256-CBC via Laravel's `Crypt`) |
+| `meta` | json | null | Non-secret metadata |
+| `created_at` | timestamp | — | — |
+| `updated_at` | timestamp | — | — |
+| `deleted_at` | timestamp | null | Soft delete |
+
+**Indexes:** `type`
+
+::: warning
+The `data` column is encrypted at rest using your `APP_KEY`. Never expose this column directly — use the `WorkflowCredential` model which handles encryption/decryption automatically.
+:::
+
 ## Relationships
 
 ```
 workflows ─┬─ workflow_nodes
             ├─ workflow_edges
             └─ workflow_runs ── workflow_node_runs
+
+workflow_credentials (standalone, referenced by node config via credential_id)
 ```
 
 - Deleting a workflow cascades to nodes, edges, and (via runs) node runs
 - Deleting a node cascades to its edges
 - Deleting a run cascades to its node runs
+- Credentials are standalone — deleting a credential does not affect nodes that reference it
 
 ## Custom Table Names
 
@@ -114,10 +138,11 @@ Change before running migrations:
 ```php
 // config/workflow-automation.php
 'tables' => [
-    'workflows'  => 'custom_workflows',
-    'nodes'      => 'custom_workflow_nodes',
-    'edges'      => 'custom_workflow_edges',
-    'runs'       => 'custom_workflow_runs',
-    'node_runs'  => 'custom_workflow_node_runs',
+    'workflows'    => 'custom_workflows',
+    'nodes'        => 'custom_workflow_nodes',
+    'edges'        => 'custom_workflow_edges',
+    'runs'         => 'custom_workflow_runs',
+    'node_runs'    => 'custom_workflow_node_runs',
+    'credentials'  => 'custom_workflow_credentials',
 ],
 ```

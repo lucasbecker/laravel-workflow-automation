@@ -14,20 +14,22 @@ php artisan vendor:publish --tag=workflow-automation-config
 return [
     // Database table names
     'tables' => [
-        'workflows'  => 'workflows',
-        'nodes'      => 'workflow_nodes',
-        'edges'      => 'workflow_edges',
-        'runs'       => 'workflow_runs',
-        'node_runs'  => 'workflow_node_runs',
+        'workflows'    => 'workflows',
+        'nodes'        => 'workflow_nodes',
+        'edges'        => 'workflow_edges',
+        'runs'         => 'workflow_runs',
+        'node_runs'    => 'workflow_node_runs',
+        'credentials'  => 'workflow_credentials',
     ],
 
     // Override default model classes with your own
     'models' => [
-        'workflow'  => Aftandilmmd\WorkflowAutomation\Models\Workflow::class,
-        'node'      => Aftandilmmd\WorkflowAutomation\Models\WorkflowNode::class,
-        'edge'      => Aftandilmmd\WorkflowAutomation\Models\WorkflowEdge::class,
-        'run'       => Aftandilmmd\WorkflowAutomation\Models\WorkflowRun::class,
-        'node_run'  => Aftandilmmd\WorkflowAutomation\Models\WorkflowNodeRun::class,
+        'workflow'    => Aftandilmmd\WorkflowAutomation\Models\Workflow::class,
+        'node'        => Aftandilmmd\WorkflowAutomation\Models\WorkflowNode::class,
+        'edge'        => Aftandilmmd\WorkflowAutomation\Models\WorkflowEdge::class,
+        'run'         => Aftandilmmd\WorkflowAutomation\Models\WorkflowRun::class,
+        'node_run'    => Aftandilmmd\WorkflowAutomation\Models\WorkflowNodeRun::class,
+        'credential'  => Aftandilmmd\WorkflowAutomation\Models\WorkflowCredential::class,
     ],
 
     // Queue configuration
@@ -82,8 +84,8 @@ return [
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| `tables.*` | string | See above | Customize database table names |
-| `models.*` | class-string | Package models | Override with your own Eloquent models |
+| `tables.*` | string | See above | Customize database table names (includes `credentials`) |
+| `models.*` | class-string | Package models | Override with your own Eloquent models (includes `credential`) |
 | `async` | bool | `true` | Whether workflows run on the queue by default |
 | `queue` | string | `'default'` | Queue name for async workflows |
 | `routes` | bool | `true` | Master switch — set `false` to disable all package routes |

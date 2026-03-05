@@ -232,6 +232,7 @@ The `PluginContext` is the API surface plugins interact with:
 | `discoverNodes(string $directory)` | Auto-discover all nodes in a directory |
 | `registerExpressionFunction(string $name, callable $fn)` | Add a custom expression function |
 | `registerMiddleware(string\|NodeMiddlewareInterface $middleware)` | Add node execution middleware |
+| `registerCredentialType(string $class)` | Register a custom credential type (must implement `CredentialTypeInterface`) |
 
 ## Node Middleware
 

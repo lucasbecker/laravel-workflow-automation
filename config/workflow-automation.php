@@ -16,7 +16,8 @@ return [
         'nodes'      => 'workflow_nodes',
         'edges'      => 'workflow_edges',
         'runs'       => 'workflow_runs',
-        'node_runs'  => 'workflow_node_runs',
+        'node_runs'    => 'workflow_node_runs',
+        'credentials'  => 'workflow_credentials',
     ],
 
     /*
@@ -33,7 +34,8 @@ return [
         'node'      => Aftandilmmd\WorkflowAutomation\Models\WorkflowNode::class,
         'edge'      => Aftandilmmd\WorkflowAutomation\Models\WorkflowEdge::class,
         'run'       => Aftandilmmd\WorkflowAutomation\Models\WorkflowRun::class,
-        'node_run'  => Aftandilmmd\WorkflowAutomation\Models\WorkflowNodeRun::class,
+        'node_run'    => Aftandilmmd\WorkflowAutomation\Models\WorkflowNodeRun::class,
+        'credential'  => Aftandilmmd\WorkflowAutomation\Models\WorkflowCredential::class,
     ],
 
     /*

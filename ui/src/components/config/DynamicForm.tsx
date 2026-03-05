@@ -19,6 +19,7 @@ import { CodeField } from './fields/CodeField'
 import { InfoField } from './fields/InfoField'
 import { SectionField } from './fields/SectionField'
 import { CustomWebComponentField } from './fields/CustomWebComponentField'
+import { CredentialField } from './fields/CredentialField'
 
 interface Props {
   schema: ConfigSchemaField[]
@@ -157,6 +158,8 @@ function FieldRenderer({
       return <CodeField field={field} value={value as string} onChange={onChange} variables={variables} />
     case 'info':
       return <InfoField field={field} />
+    case 'credential':
+      return <CredentialField field={field} value={value as number | null} onChange={onChange as (v: number | null) => void} />
     case 'custom':
       return <CustomWebComponentField field={field} value={value} onChange={onChange} />
     default:

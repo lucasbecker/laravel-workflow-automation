@@ -3,6 +3,12 @@
 namespace Aftandilmmd\WorkflowAutomation;
 
 use Aftandilmmd\WorkflowAutomation\Contracts\ExpressionEvaluatorInterface;
+use Aftandilmmd\WorkflowAutomation\Credentials\CredentialResolutionMiddleware;
+use Aftandilmmd\WorkflowAutomation\Credentials\CredentialTypeRegistry;
+use Aftandilmmd\WorkflowAutomation\Credentials\Types\ApiKeyCredential;
+use Aftandilmmd\WorkflowAutomation\Credentials\Types\BasicAuthCredential;
+use Aftandilmmd\WorkflowAutomation\Credentials\Types\BearerTokenCredential;
+use Aftandilmmd\WorkflowAutomation\Credentials\Types\HeaderAuthCredential;
 use Aftandilmmd\WorkflowAutomation\Engine\ExpressionEvaluator;
 use Aftandilmmd\WorkflowAutomation\Engine\GraphExecutor;
 use Aftandilmmd\WorkflowAutomation\Engine\GraphValidator;
@@ -24,6 +30,7 @@ class WorkflowAutomationServiceProvider extends ServiceProvider
         $this->app->singleton(NodeRunner::class);
         $this->app->singleton(PluginRegistry::class);
         $this->app->singleton(PluginManager::class);
+        $this->app->singleton(CredentialTypeRegistry::class);
 
         $this->app->singleton(
             ExpressionEvaluatorInterface::class,
@@ -80,6 +87,7 @@ class WorkflowAutomationServiceProvider extends ServiceProvider
         }
 
         $this->registerBuiltInNodes();
+        $this->registerBuiltInCredentialTypes();
         $this->registerConfigPlugins();
         $this->bootPlugins();
         $this->registerListeners();
@@ -136,5 +144,17 @@ class WorkflowAutomationServiceProvider extends ServiceProvider
                 $registry->discoverNodes($path);
             }
         }
+    }
+
+    private function registerBuiltInCredentialTypes(): void
+    {
+        $registry = $this->app->make(CredentialTypeRegistry::class);
+
+        $registry->register(BearerTokenCredential::class);
+        $registry->register(BasicAuthCredential::class);
+        $registry->register(HeaderAuthCredential::class);
+        $registry->register(ApiKeyCredential::class);
+
+        $this->app->make(NodeRunner::class)->pushMiddleware(CredentialResolutionMiddleware::class);
     }
 }

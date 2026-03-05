@@ -254,9 +254,28 @@ Workflow items flow through every node in the graph. Be mindful of what data ent
 
 Node configs (including expressions) are stored in the database as JSON. If configs contain secrets:
 
+- **Use the Credential Vault** — store secrets in the `workflow_credentials` table where they are encrypted at rest using AES-256-CBC. Nodes reference credentials by ID, not by value. See [Credential Vault](/advanced/credentials).
 - Use environment variable references: `{{ env.STRIPE_KEY }}` instead of hardcoded values
-- Encrypt the `config` column if your threat model requires it
 - Restrict database access to the workflow tables
+
+### Credential Vault
+
+The package includes a built-in credential vault for encrypted secret management:
+
+- Secrets are encrypted at rest using Laravel's `Crypt` (AES-256-CBC with `APP_KEY`)
+- The REST API **never** returns decrypted credential data
+- Credentials are resolved at runtime via middleware — decrypted values only exist in-memory during node execution
+- Run logs never contain credential data (the `_credential` key is injected after logging)
+
+```php
+// Instead of storing secrets in node config:
+// ❌ 'headers' => ['Authorization' => 'Bearer sk-xxx']
+
+// Use credentials:
+// ✅ 'credential_id' => 1
+```
+
+See the full [Credential Vault guide](/advanced/credentials) for details.
 
 ## Production Checklist
 
@@ -267,10 +286,11 @@ Node configs (including expressions) are stored in the database as JSON. If conf
 | Set expression mode | `'expression_mode' => 'strict'` for high-security |
 | Configure command allowlist | `'run_command.allowed_commands' => [...]` |
 | Disable shell if not needed | `'run_command.shell_enabled' => false` |
-| Authenticate webhooks | Set `auth_type` + `auth_value` on every webhook node |
+| Use credential vault | Store API keys and tokens as encrypted credentials, not in node config |
+| Authenticate webhooks | Set `auth_type` + `credential_id` on every webhook node |
 | Restrict dangerous nodes | Block `run_command`, `code`, `dispatch_job` for non-admins |
 | Set log retention | `'log_retention_days' => 7` |
 | Validate before activation | Call `WorkflowEngine::validate()` before activating |
-| Don't pass secrets in items | Use `config()` / `env()` references instead |
+| Don't pass secrets in items | Use credentials or `config()` / `env()` references instead |
 
 </div>

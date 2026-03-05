@@ -6,12 +6,16 @@ use Aftandilmmd\WorkflowAutomation\Mcp\Prompts\WorkflowBuilderPrompt;
 use Aftandilmmd\WorkflowAutomation\Mcp\Tools\ActivateWorkflowTool;
 use Aftandilmmd\WorkflowAutomation\Mcp\Tools\AddNodeTool;
 use Aftandilmmd\WorkflowAutomation\Mcp\Tools\ConnectNodesTool;
+use Aftandilmmd\WorkflowAutomation\Mcp\Tools\CreateCredentialTool;
 use Aftandilmmd\WorkflowAutomation\Mcp\Tools\CreateWorkflowTool;
 use Aftandilmmd\WorkflowAutomation\Mcp\Tools\DeactivateWorkflowTool;
+use Aftandilmmd\WorkflowAutomation\Mcp\Tools\DeleteCredentialTool;
 use Aftandilmmd\WorkflowAutomation\Mcp\Tools\DeleteWorkflowTool;
 use Aftandilmmd\WorkflowAutomation\Mcp\Tools\DuplicateWorkflowTool;
 use Aftandilmmd\WorkflowAutomation\Mcp\Tools\GetAvailableVariablesTool;
 use Aftandilmmd\WorkflowAutomation\Mcp\Tools\GetRunTool;
+use Aftandilmmd\WorkflowAutomation\Mcp\Tools\ListCredentialsTool;
+use Aftandilmmd\WorkflowAutomation\Mcp\Tools\ListCredentialTypesTool;
 use Aftandilmmd\WorkflowAutomation\Mcp\Tools\ListNodeTypesTool;
 use Aftandilmmd\WorkflowAutomation\Mcp\Tools\ListRunsTool;
 use Aftandilmmd\WorkflowAutomation\Mcp\Tools\ListWorkflowsTool;
@@ -61,6 +65,12 @@ class WorkflowMcpServer extends Server
         ListNodeTypesTool::class,
         ShowNodeTypeTool::class,
         GetAvailableVariablesTool::class,
+
+        // Credentials
+        ListCredentialsTool::class,
+        CreateCredentialTool::class,
+        DeleteCredentialTool::class,
+        ListCredentialTypesTool::class,
     ];
 
     protected array $prompts = [

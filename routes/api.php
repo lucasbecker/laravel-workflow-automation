@@ -1,5 +1,6 @@
 <?php
 
+use Aftandilmmd\WorkflowAutomation\Http\Controllers\CredentialController;
 use Aftandilmmd\WorkflowAutomation\Http\Controllers\MetadataController;
 use Aftandilmmd\WorkflowAutomation\Http\Controllers\NodeRegistryController;
 use Aftandilmmd\WorkflowAutomation\Http\Controllers\WebhookController;
@@ -54,6 +55,10 @@ if (config('workflow-automation.api_routes', true)) {
             // ── Metadata (models, events) ──────────────────────────
             Route::get('metadata/models', [MetadataController::class, 'models']);
             Route::get('metadata/model-events', [MetadataController::class, 'modelEvents']);
+
+            // ── Credentials ───────────────────────────────────────────
+            Route::apiResource('credentials', CredentialController::class);
+            Route::get('credentials-types', [CredentialController::class, 'types']);
         });
 }
 

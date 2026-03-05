@@ -116,7 +116,7 @@ export interface ConfigSchemaField {
     | 'string' | 'textarea' | 'select' | 'boolean' | 'integer' | 'json'
     | 'keyvalue' | 'array_of_objects' | 'multiselect' | 'model_select'
     | 'number' | 'color' | 'url' | 'password' | 'slider' | 'code'
-    | 'info' | 'section' | 'custom'
+    | 'info' | 'section' | 'custom' | 'credential'
   label: string
   required?: boolean
   options?: string[]
@@ -136,12 +136,42 @@ export interface ConfigSchemaField {
   collapsible?: boolean
   collapsed?: boolean
   custom_component?: string
+  credential_types?: string[]
 }
 
 export type CreatedVia = 'editor' | 'import' | 'code' | 'api' | 'duplicate'
 export type NodeType = 'trigger' | 'action' | 'condition' | 'transformer' | 'control' | 'utility' | 'code'
 export type RunStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled' | 'waiting'
 export type NodeRunStatus = 'pending' | 'running' | 'completed' | 'failed' | 'skipped'
+
+export interface Credential {
+  id: number
+  name: string
+  type: string
+  meta: Record<string, unknown> | null
+  created_at: string
+  updated_at: string
+}
+
+export interface CredentialType {
+  key: string
+  label: string
+  schema: ConfigSchemaField[]
+}
+
+export interface CreateCredentialPayload {
+  name: string
+  type: string
+  data: Record<string, string>
+  meta?: Record<string, unknown>
+}
+
+export interface UpdateCredentialPayload {
+  name?: string
+  type?: string
+  data?: Record<string, string>
+  meta?: Record<string, unknown>
+}
 
 // ── Request Payloads ──
 

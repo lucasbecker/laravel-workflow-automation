@@ -27,7 +27,8 @@ class WebhookTrigger implements TriggerInterface
             ['key' => 'path', 'type' => 'string', 'label' => 'Webhook Path (auto-generated UUID)', 'required' => false, 'readonly' => true],
             ['key' => 'method', 'type' => 'select', 'label' => 'HTTP Method', 'options' => ['GET', 'POST', 'PUT', 'PATCH'], 'required' => true],
             ['key' => 'auth_type', 'type' => 'select', 'label' => 'Authentication', 'options' => ['none', 'basic', 'bearer', 'header_key'], 'required' => true],
-            ['key' => 'auth_value', 'type' => 'string', 'label' => 'Auth Value', 'required' => false],
+            ['key' => 'credential_id', 'type' => 'credential', 'label' => 'Credential', 'required' => false, 'credential_types' => ['bearer_token', 'basic_auth', 'header_auth'], 'show_when' => ['key' => 'auth_type', 'value' => ['basic', 'bearer', 'header_key']]],
+            ['key' => 'auth_value', 'type' => 'string', 'label' => 'Auth Value (legacy)', 'required' => false, 'description' => 'Use Credential field above instead for encrypted storage.', 'show_when' => ['key' => 'auth_type', 'value' => ['basic', 'bearer', 'header_key']]],
         ];
     }
 

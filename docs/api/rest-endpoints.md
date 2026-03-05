@@ -349,6 +349,112 @@ GET /workflow-engine/registry/nodes/{key}
 
 Returns metadata for a specific node type.
 
+## Credentials
+
+### List Credentials
+
+```http
+GET /workflow-engine/credentials
+```
+
+Returns all credentials. The `data` field (encrypted secrets) is **never** included in the response.
+
+**Response:**
+
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Stripe API Key",
+      "type": "bearer_token",
+      "meta": null,
+      "created_at": "2024-01-15T08:00:00.000000Z",
+      "updated_at": "2024-01-15T08:00:00.000000Z"
+    }
+  ]
+}
+```
+
+### Create Credential
+
+```http
+POST /workflow-engine/credentials
+Content-Type: application/json
+
+{
+  "name": "Stripe API Key",
+  "type": "bearer_token",
+  "data": {
+    "token": "sk_live_xxx"
+  }
+}
+```
+
+The `data` object is encrypted at rest using Laravel's `Crypt`. The fields in `data` depend on the credential type — see [Credential Types](#credential-types).
+
+### Get Credential
+
+```http
+GET /workflow-engine/credentials/{id}
+```
+
+Returns the credential without the `data` field.
+
+### Update Credential
+
+```http
+PUT /workflow-engine/credentials/{id}
+Content-Type: application/json
+
+{
+  "name": "Updated Name",
+  "data": {
+    "token": "sk_live_new_xxx"
+  }
+}
+```
+
+### Delete Credential
+
+```http
+DELETE /workflow-engine/credentials/{id}
+```
+
+Soft-deletes the credential.
+
+### List Credential Types
+
+```http
+GET /workflow-engine/credentials-types
+```
+
+Returns all registered credential type schemas.
+
+**Response:**
+
+```json
+{
+  "data": {
+    "bearer_token": {
+      "key": "bearer_token",
+      "label": "Bearer Token",
+      "schema": [
+        {"key": "token", "type": "password", "label": "Token", "required": true}
+      ]
+    },
+    "basic_auth": {
+      "key": "basic_auth",
+      "label": "Basic Auth",
+      "schema": [
+        {"key": "username", "type": "string", "label": "Username", "required": true},
+        {"key": "password", "type": "password", "label": "Password", "required": true}
+      ]
+    }
+  }
+}
+```
+
 ## Webhook
 
 Webhook endpoints are separate from the main API prefix:

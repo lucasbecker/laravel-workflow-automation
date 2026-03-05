@@ -3,6 +3,7 @@
 namespace Aftandilmmd\WorkflowAutomation\Plugin;
 
 use Aftandilmmd\WorkflowAutomation\Contracts\PluginInterface;
+use Aftandilmmd\WorkflowAutomation\Credentials\CredentialTypeRegistry;
 use Aftandilmmd\WorkflowAutomation\Engine\ExpressionEvaluator;
 use Aftandilmmd\WorkflowAutomation\Engine\NodeRunner;
 use Aftandilmmd\WorkflowAutomation\Registry\NodeRegistry;
@@ -16,11 +17,13 @@ class PluginManager
         private readonly NodeRegistry $nodeRegistry,
         private readonly NodeRunner $nodeRunner,
         private readonly ExpressionEvaluator $expressionEvaluator,
+        private readonly CredentialTypeRegistry $credentialTypeRegistry,
     ) {
         $this->context = new PluginContext(
             $this->nodeRegistry,
             $this->nodeRunner,
             $this->expressionEvaluator,
+            $this->credentialTypeRegistry,
         );
     }
 

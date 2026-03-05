@@ -4,7 +4,7 @@
 
 Let AI clients (Claude, GPT, Cursor, etc.) create, edit, and execute workflows through the **Model Context Protocol**.
 
-The package ships with a built-in MCP server that exposes **20 tools** and **1 prompt** — everything an LLM needs to build complete workflows without writing a single line of PHP.
+The package ships with a built-in MCP server that exposes **24 tools** and **1 prompt** — everything an LLM needs to build complete workflows without writing a single line of PHP.
 
 ## Requirements
 
@@ -72,6 +72,15 @@ The server registers at `/mcp/workflow` by default. Customize the path in `confi
 | `list_node_types` | List all available node types with ports and config schema | Yes |
 | `show_node_type` | Get full details for a specific node type | Yes |
 | `get_available_variables` | Get available variables for a node's expressions (globals, upstream outputs, functions) | Yes |
+
+### Credentials
+
+| Tool | Description | Read-Only |
+|------|-------------|-----------|
+| `list_credentials` | List all stored credentials (never returns decrypted data) | Yes |
+| `create_credential` | Create an encrypted credential | No |
+| `delete_credential` | Soft-delete a credential by ID | No |
+| `list_credential_types` | List available credential types with their schemas | Yes |
 
 ## Prompt
 

@@ -11,7 +11,8 @@ The `webhook` trigger starts a workflow when an external service sends an HTTP r
 | `path` | string | Auto | No | Auto-generated UUID path (read-only) |
 | `method` | select | Yes | No | HTTP method: `GET`, `POST`, `PUT`, `PATCH` |
 | `auth_type` | select | Yes | No | Authentication: `none`, `basic`, `bearer`, `header_key` |
-| `auth_value` | string | No | No | Auth credentials (password, token, or header value) |
+| `credential_id` | credential | No | No | Encrypted credential (see [Credential Vault](/advanced/credentials)) |
+| `auth_value` | string | No | No | Auth credentials — legacy, use `credential_id` instead |
 
 ## Ports
 
@@ -67,13 +68,18 @@ External Service (Stripe, GitHub, etc.)
 
 ## Example: Stripe Payment Webhook
 
+Using a credential (recommended):
+
 ```php
 $workflow = Workflow::create(['name' => 'Stripe Payment Handler']);
 
+// First, create a credential via API or code:
+// WorkflowCredential::create(['name' => 'Stripe Webhook', 'type' => 'bearer_token', 'data' => ['token' => 'whsec_xxx']]);
+
 $trigger = $workflow->addNode('Stripe Hook', 'webhook', [
-    'method'     => 'POST',
-    'auth_type'  => 'bearer',
-    'auth_value' => 'whsec_your_stripe_secret',
+    'method'        => 'POST',
+    'auth_type'     => 'bearer',
+    'credential_id' => 1, // references the stored credential
 ]);
 
 $router = $workflow->addNode('Route Event', 'switch', [
@@ -115,6 +121,6 @@ $workflow->activate();
 
 - Webhook routes bypass the package's configurable middleware — they only use the `api` middleware
 - The request body is parsed as JSON and passed as `[$request->all()]`
-- Use `auth_type: bearer` with a secret token for production webhooks
+- Use `credential_id` with `auth_type: bearer` for production webhooks — secrets are encrypted at rest
 - The auto-generated UUID in the `path` config is set when the node is created and remains constant
 - Multiple workflows can each have their own webhook URL — each gets a unique UUID

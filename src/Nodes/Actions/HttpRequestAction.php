@@ -15,6 +15,7 @@ class HttpRequestAction extends BaseNode
     public static function configSchema(): array
     {
         return [
+            ['key' => 'credential_id', 'type' => 'credential', 'label' => 'Authentication', 'required' => false, 'credential_types' => ['bearer_token', 'basic_auth', 'header_auth', 'api_key']],
             ['key' => 'url', 'type' => 'string', 'label' => 'URL', 'required' => true, 'supports_expression' => true],
             ['key' => 'method', 'type' => 'select', 'label' => 'Method', 'required' => true, 'options' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']],
             ['key' => 'headers', 'type' => 'keyvalue', 'label' => 'Headers', 'required' => false, 'supports_expression' => true],
@@ -43,8 +44,14 @@ class HttpRequestAction extends BaseNode
             try {
                 $http = Http::timeout($config['timeout'] ?? 30);
 
-                if (! empty($config['headers'])) {
-                    $http = $http->withHeaders($config['headers']);
+                $headers = $config['headers'] ?? [];
+
+                if (! empty($config['_credential'])) {
+                    $headers = array_merge($headers, $this->resolveCredentialHeaders($config['_credential']));
+                }
+
+                if (! empty($headers)) {
+                    $http = $http->withHeaders($headers);
                 }
 
                 $response = match (strtoupper($config['method'])) {
@@ -76,5 +83,26 @@ class HttpRequestAction extends BaseNode
         }
 
         return NodeOutput::main($results);
+    }
+
+    private function resolveCredentialHeaders(array $credential): array
+    {
+        if (isset($credential['token'])) {
+            return ['Authorization' => 'Bearer '.$credential['token']];
+        }
+
+        if (isset($credential['username'], $credential['password'])) {
+            return ['Authorization' => 'Basic '.base64_encode($credential['username'].':'.$credential['password'])];
+        }
+
+        if (isset($credential['header_name'], $credential['header_value'])) {
+            return [$credential['header_name'] => $credential['header_value']];
+        }
+
+        if (isset($credential['api_key'])) {
+            return ['Authorization' => 'Bearer '.$credential['api_key']];
+        }
+
+        return [];
     }
 }
