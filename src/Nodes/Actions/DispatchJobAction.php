@@ -21,6 +21,15 @@ class DispatchJobAction extends BaseNode
         ];
     }
 
+    public static function outputSchema(): array
+    {
+        return [
+            'main' => [
+                ['key' => 'job_dispatched', 'type' => 'string', 'label' => 'Dispatched Job Class'],
+            ],
+        ];
+    }
+
     public function execute(NodeInput $input, array $config): NodeOutput
     {
         $results = [];

@@ -90,6 +90,11 @@ class DummyRegistryNode implements NodeInterface
         return ['main'];
     }
 
+    public static function outputSchema(): array
+    {
+        return [];
+    }
+
     public function execute(NodeInput $input, array $config): NodeOutput
     {
         return NodeOutput::main($input->items);

@@ -28,6 +28,11 @@ class MergeControl implements NodeInterface
         ];
     }
 
+    public static function outputSchema(): array
+    {
+        return [];
+    }
+
     public function execute(NodeInput $input, array $config): NodeOutput
     {
         // Items from all input ports are already merged by GraphExecutor

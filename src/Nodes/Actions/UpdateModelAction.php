@@ -21,6 +21,15 @@ class UpdateModelAction extends BaseNode
         ];
     }
 
+    public static function outputSchema(): array
+    {
+        return [
+            'main' => [
+                ['key' => 'updated_model', 'type' => 'object', 'label' => 'Updated Model'],
+            ],
+        ];
+    }
+
     public function execute(NodeInput $input, array $config): NodeOutput
     {
         $results = [];

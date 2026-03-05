@@ -28,6 +28,11 @@ class ManualTrigger implements TriggerInterface
         ];
     }
 
+    public static function outputSchema(): array
+    {
+        return [];
+    }
+
     public function register(int $workflowId, int $nodeId, array $config): void {}
 
     public function unregister(int $workflowId, int $nodeId, array $config): void {}

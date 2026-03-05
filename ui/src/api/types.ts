@@ -75,6 +75,39 @@ export interface RegistryNode {
   input_ports: string[]
   output_ports: string[]
   config_schema: ConfigSchemaField[]
+  output_schema: Record<string, OutputSchemaField[]>
+}
+
+export interface OutputSchemaField {
+  key: string
+  type: string
+  label: string
+}
+
+export interface AvailableVariable {
+  path: string
+  type: string
+  label: string
+  children?: AvailableVariable[]
+}
+
+export interface UpstreamNode {
+  node_id: number
+  node_name: string
+  node_key: string
+  variables: AvailableVariable[]
+}
+
+export interface AvailableFunction {
+  name: string
+  args: string
+  label: string
+}
+
+export interface AvailableVariablesResponse {
+  globals: AvailableVariable[]
+  nodes: UpstreamNode[]
+  functions: AvailableFunction[]
 }
 
 export interface ConfigSchemaField {

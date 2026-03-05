@@ -1,75 +1,42 @@
 <?php
 
-namespace Aftandilmmd\WorkflowAutomation\Http\Controllers;
+namespace Aftandilmmd\WorkflowAutomation\Mcp\Tools;
 
-use Aftandilmmd\WorkflowAutomation\Http\Requests\StoreNodeRequest;
-use Aftandilmmd\WorkflowAutomation\Http\Requests\UpdateNodeRequest;
-use Aftandilmmd\WorkflowAutomation\Http\Resources\WorkflowNodeResource;
 use Aftandilmmd\WorkflowAutomation\Models\Workflow;
 use Aftandilmmd\WorkflowAutomation\Models\WorkflowNode;
 use Aftandilmmd\WorkflowAutomation\Registry\NodeRegistry;
-use Aftandilmmd\WorkflowAutomation\Services\WorkflowService;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
+use Laravel\Mcp\Server\Attributes\Description;
+use Laravel\Mcp\Server\Attributes\Name;
+use Laravel\Mcp\Server\Attributes\Title;
+use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 
-class WorkflowNodeController extends Controller
+#[Name('get_available_variables')]
+#[Title('Get Available Variables')]
+#[Description('Get all variables available for a node\'s expressions — globals, upstream node outputs, and built-in functions. Use this to discover what variables can be used in {{ }} expressions when configuring a node.')]
+#[IsReadOnly]
+class GetAvailableVariablesTool extends Tool
 {
     public function __construct(
-        private readonly WorkflowService $service,
-        private readonly NodeRegistry $registry,
+        protected NodeRegistry $registry,
     ) {}
 
-    public function store(StoreNodeRequest $request, Workflow $workflow): WorkflowNodeResource
+    public function schema(JsonSchema $schema): array
     {
-        $node = $this->service->addNode(
-            workflow: $workflow,
-            nodeKey: $request->validated('node_key'),
-            config: $request->validated('config', []),
-            name: $request->validated('name'),
-        );
-
-        if ($request->has('position_x')) {
-            $node->update([
-                'position_x' => $request->integer('position_x'),
-                'position_y' => $request->integer('position_y'),
-            ]);
-        }
-
-        return new WorkflowNodeResource($node);
+        return [
+            'workflow_id' => $schema->integer()->required()->description('The workflow ID'),
+            'node_id' => $schema->integer()->required()->description('The node ID to get available variables for'),
+        ];
     }
 
-    public function update(UpdateNodeRequest $request, Workflow $workflow, WorkflowNode $node): WorkflowNodeResource
+    public function handle(Request $request): Response
     {
-        $node->update($request->validated());
+        $workflow = Workflow::findOrFail($request->get('workflow_id'));
+        $node = WorkflowNode::findOrFail($request->get('node_id'));
 
-        return new WorkflowNodeResource($node->fresh());
-    }
-
-    public function destroy(Workflow $workflow, WorkflowNode $node): JsonResponse
-    {
-        $this->service->removeNode($node->id);
-
-        return response()->json(['message' => 'Node deleted.'], 200);
-    }
-
-    public function position(Request $request, Workflow $workflow, WorkflowNode $node): WorkflowNodeResource
-    {
-        $request->validate([
-            'position_x' => ['required', 'integer'],
-            'position_y' => ['required', 'integer'],
-        ]);
-
-        $node->update([
-            'position_x' => $request->integer('position_x'),
-            'position_y' => $request->integer('position_y'),
-        ]);
-
-        return new WorkflowNodeResource($node->fresh());
-    }
-
-    public function availableVariables(Workflow $workflow, WorkflowNode $node): JsonResponse
-    {
         $nodes = $workflow->nodes()->get()->keyBy('id');
         $edges = $workflow->edges()->get();
 
@@ -109,26 +76,24 @@ class WorkflowNodeController extends Controller
                         continue;
                     }
                     $variables[] = [
-                        'path'  => "nodes.{$nodeName}.{$port}.0.{$field['key']}",
-                        'type'  => $field['type'],
+                        'path' => "nodes.{$nodeName}.{$port}.0.{$field['key']}",
+                        'type' => $field['type'],
                         'label' => $field['label'],
                     ];
                 }
             }
 
             $upstreamNodes[] = [
-                'node_id'   => $nodeId,
+                'node_id' => $nodeId,
                 'node_name' => $nodeName,
-                'node_key'  => $upNode->node_key,
+                'node_key' => $upNode->node_key,
                 'variables' => $variables,
             ];
         }
 
-        return response()->json([
+        return Response::structured([
             'globals' => [
-                ['path' => 'item', 'type' => 'object', 'label' => 'Current Item', 'children' => [
-                    ['path' => 'item.*', 'type' => 'mixed', 'label' => 'Any field from current item'],
-                ]],
+                ['path' => 'item', 'type' => 'object', 'label' => 'Current Item'],
                 ['path' => 'payload', 'type' => 'object', 'label' => 'Initial Payload'],
                 ['path' => 'trigger', 'type' => 'array', 'label' => 'Trigger Output'],
             ],

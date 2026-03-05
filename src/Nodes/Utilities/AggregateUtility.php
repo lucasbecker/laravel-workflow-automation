@@ -34,6 +34,11 @@ class AggregateUtility implements NodeInterface
         ];
     }
 
+    public static function outputSchema(): array
+    {
+        return [];
+    }
+
     public function execute(NodeInput $input, array $config): NodeOutput
     {
         $groupBy = $config['group_by'] ?? null;

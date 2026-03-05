@@ -28,6 +28,15 @@ class EventTrigger implements TriggerInterface
         ];
     }
 
+    public static function outputSchema(): array
+    {
+        return [
+            'main' => [
+                ['key' => 'event', 'type' => 'object', 'label' => 'Event Data'],
+            ],
+        ];
+    }
+
     public function register(int $workflowId, int $nodeId, array $config): void
     {
         // Registration handled by EventListener during boot

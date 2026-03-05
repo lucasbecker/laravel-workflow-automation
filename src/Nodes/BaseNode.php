@@ -20,4 +20,9 @@ abstract class BaseNode implements NodeInterface
     {
         return [];
     }
+
+    public static function outputSchema(): array
+    {
+        return [];
+    }
 }

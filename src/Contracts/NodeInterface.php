@@ -35,4 +35,13 @@ interface NodeInterface
      * @return array<int, array<string, mixed>>
      */
     public static function configSchema(): array;
+
+    /**
+     * Output field definitions per port for variable discovery.
+     *
+     * Each entry: ['key' => string, 'type' => string, 'label' => string]
+     *
+     * @return array<string, array<int, array<string, mixed>>>
+     */
+    public static function outputSchema(): array;
 }

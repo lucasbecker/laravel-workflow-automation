@@ -25,6 +25,17 @@ class RunCommandAction extends BaseNode
         ];
     }
 
+    public static function outputSchema(): array
+    {
+        return [
+            'main' => [
+                ['key' => 'command_result.exit_code', 'type' => 'integer', 'label' => 'Exit Code'],
+                ['key' => 'command_result.success', 'type' => 'boolean', 'label' => 'Success'],
+                ['key' => 'command_result.output', 'type' => 'string', 'label' => 'Command Output'],
+            ],
+        ];
+    }
+
     public function execute(NodeInput $input, array $config): NodeOutput
     {
         $this->validateAllowed($config);

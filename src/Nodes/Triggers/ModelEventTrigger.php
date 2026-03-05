@@ -30,6 +30,15 @@ class ModelEventTrigger implements TriggerInterface
         ];
     }
 
+    public static function outputSchema(): array
+    {
+        return [
+            'main' => [
+                ['key' => 'model', 'type' => 'object', 'label' => 'Model Data'],
+            ],
+        ];
+    }
+
     public function register(int $workflowId, int $nodeId, array $config): void
     {
         // Registration handled by ModelEventListener during boot

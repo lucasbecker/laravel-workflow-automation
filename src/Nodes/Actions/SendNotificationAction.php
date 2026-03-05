@@ -20,6 +20,15 @@ class SendNotificationAction extends BaseNode
         ];
     }
 
+    public static function outputSchema(): array
+    {
+        return [
+            'main' => [
+                ['key' => 'notification_sent', 'type' => 'boolean', 'label' => 'Notification Sent'],
+            ],
+        ];
+    }
+
     public function execute(NodeInput $input, array $config): NodeOutput
     {
         $results = [];

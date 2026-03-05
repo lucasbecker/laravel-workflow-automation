@@ -34,6 +34,15 @@ class SendMailAction extends BaseNode
         ];
     }
 
+    public static function outputSchema(): array
+    {
+        return [
+            'main' => [
+                ['key' => 'mail_sent', 'type' => 'boolean', 'label' => 'Mail Sent'],
+            ],
+        ];
+    }
+
     public function execute(NodeInput $input, array $config): NodeOutput
     {
         $results = [];
