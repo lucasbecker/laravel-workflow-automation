@@ -70,13 +70,13 @@ export function WorkflowListPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
+    <div className="mx-auto max-w-6xl px-4 py-6 md:px-6 md:py-8">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Workflows</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{total} workflow{total !== 1 ? 's' : ''}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={toggleTheme}
             className="rounded-md p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
@@ -92,14 +92,14 @@ export function WorkflowListPage() {
             className="flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
           >
             <Upload size={16} />
-            Import
+            <span className="hidden sm:inline">Import</span>
           </button>
           <button
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
           >
             <Plus size={16} />
-            New Workflow
+            <span className="hidden sm:inline">New Workflow</span>
           </button>
         </div>
       </div>
