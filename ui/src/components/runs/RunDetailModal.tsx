@@ -69,11 +69,30 @@ export function RunDetailModal({ run, onClose }: Props) {
         </div>
 
         {/* Error */}
-        {run.error_message && (
-          <div className="mx-5 mt-3 rounded-md bg-red-50 px-3 py-2 text-xs text-red-700 dark:bg-red-900/30 dark:text-red-400">
-            {run.error_message}
-          </div>
-        )}
+        {run.error_message && (() => {
+          try {
+            const parsed = JSON.parse(run.error_message)
+            if (parsed.errors) {
+              return (
+                <div className="mx-5 mt-3 rounded-md bg-red-50 px-3 py-2 dark:bg-red-900/30">
+                  <p className="mb-1.5 text-xs font-medium text-red-700 dark:text-red-400">{parsed.message}</p>
+                  <ul className="list-disc space-y-0.5 pl-4 text-xs text-red-600 dark:text-red-400/80">
+                    {parsed.errors.map((err: string, i: number) => (
+                      <li key={i}>{err}</li>
+                    ))}
+                  </ul>
+                </div>
+              )
+            }
+          } catch {
+            // not JSON, fall through
+          }
+          return (
+            <div className="mx-5 mt-3 rounded-md bg-red-50 px-3 py-2 text-xs text-red-700 dark:bg-red-900/30 dark:text-red-400">
+              {run.error_message}
+            </div>
+          )
+        })()}
 
         {/* Node Runs */}
         <div className="flex-1 overflow-y-auto px-5 py-4">

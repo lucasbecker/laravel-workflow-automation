@@ -122,17 +122,25 @@ export function WorkflowEditorPage() {
           </button>
           <button
             onClick={handleToggleActive}
-            className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+            className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium ${
+              workflow.is_active
+                ? 'text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/30'
+                : 'text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30'
+            }`}
             title={workflow.is_active ? 'Deactivate' : 'Activate'}
           >
             {workflow.is_active ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
-            {workflow.is_active ? 'Deactivate' : 'Activate'}
+            {workflow.is_active ? 'Active' : 'Inactive'}
           </button>
           <button
             onClick={() => setShowExecute(true)}
-            className="flex items-center gap-1.5 rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700"
+            className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium ${
+              workflow.is_active
+                ? 'bg-green-600 text-white hover:bg-green-700'
+                : 'bg-gray-300 text-gray-500 dark:bg-gray-600 dark:text-gray-400'
+            }`}
           >
-            <Play size={12} /> Run
+            <Play size={12} /> {workflow.is_active ? 'Run' : 'Run (Inactive)'}
           </button>
         </div>
       </div>

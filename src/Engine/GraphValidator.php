@@ -70,7 +70,8 @@ class GraphValidator
     {
         foreach ($nodes as $node) {
             if (! $this->registry->has($node->node_key)) {
-                $errors[] = "Node '{$node->name}' (id:{$node->id}) uses unregistered key: {$node->node_key}";
+                $nodeName = $node->name ?: $node->node_key;
+                $errors[] = "Node '{$nodeName}' (id:{$node->id}) uses unregistered key: {$node->node_key}";
             }
         }
     }
@@ -187,7 +188,8 @@ class GraphValidator
 
         foreach ($nodes as $node) {
             if ($node->id !== $trigger->id && ! isset($visited[$node->id])) {
-                $errors[] = "Node '{$node->name}' (id:{$node->id}) is unreachable from the trigger.";
+                $nodeName = $node->name ?: $node->node_key;
+                $errors[] = "Node '{$nodeName}' (id:{$node->id}) is unreachable from the trigger.";
             }
         }
     }
@@ -220,8 +222,20 @@ class GraphValidator
             $config = $node->config ?? [];
 
             foreach ($schema as $field) {
-                if (($field['required'] ?? false) && ! isset($config[$field['key']])) {
-                    $errors[] = "Node '{$node->name}' (id:{$node->id}) is missing required config field: {$field['key']}";
+                if (! ($field['required'] ?? false)) {
+                    continue;
+                }
+
+                // Skip fields hidden by show_when conditions
+                if (isset($field['show_when']) && isset($config[$field['show_when']['key']])) {
+                    if ($config[$field['show_when']['key']] !== $field['show_when']['value']) {
+                        continue;
+                    }
+                }
+
+                if (! isset($config[$field['key']])) {
+                    $nodeName = $node->name ?: $node->node_key;
+                    $errors[] = "Node '{$nodeName}' (id:{$node->id}) is missing required config field: {$field['key']}";
                 }
             }
         }

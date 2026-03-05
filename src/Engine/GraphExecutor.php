@@ -15,6 +15,7 @@ use Aftandilmmd\WorkflowAutomation\Events\WorkflowCompleted;
 use Aftandilmmd\WorkflowAutomation\Events\WorkflowFailed;
 use Aftandilmmd\WorkflowAutomation\Events\WorkflowStarted;
 use Aftandilmmd\WorkflowAutomation\Exceptions\WorkflowException;
+use Aftandilmmd\WorkflowAutomation\Exceptions\WorkflowValidationException;
 use Aftandilmmd\WorkflowAutomation\Models\Workflow;
 use Aftandilmmd\WorkflowAutomation\Models\WorkflowNode;
 use Aftandilmmd\WorkflowAutomation\Models\WorkflowNodeRun;
@@ -47,9 +48,13 @@ class GraphExecutor
             $this->graphValidator->validate($workflow);
             $this->doExecute($workflow, $run, $initialPayload);
         } catch (\Throwable $e) {
+            $errorMessage = $e instanceof WorkflowValidationException
+                ? json_encode(['message' => $e->getMessage(), 'errors' => $e->errors])
+                : $e->getMessage();
+
             $run->update([
                 'status'        => RunStatus::Failed,
-                'error_message' => $e->getMessage(),
+                'error_message' => $errorMessage,
                 'finished_at'   => now(),
             ]);
 
@@ -239,9 +244,13 @@ class GraphExecutor
             $this->graphValidator->validate($workflow);
             $this->doExecute($workflow, $run, $initialPayload, $targetNodeId);
         } catch (\Throwable $e) {
+            $errorMessage = $e instanceof WorkflowValidationException
+                ? json_encode(['message' => $e->getMessage(), 'errors' => $e->errors])
+                : $e->getMessage();
+
             $run->update([
                 'status'        => RunStatus::Failed,
-                'error_message' => $e->getMessage(),
+                'error_message' => $errorMessage,
                 'finished_at'   => now(),
             ]);
 
