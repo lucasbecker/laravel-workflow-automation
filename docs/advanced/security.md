@@ -167,17 +167,89 @@ WORKFLOW_SHELL_ENABLED=false
 
 ### Restrict Node Types
 
-If end users can create workflows, consider limiting which node types they can use. The `run_command` and `code` nodes are the most powerful — you may want to restrict them to admin users only:
+If end users can create workflows, consider limiting which node types they can use. The `run_command` and `code` nodes are the most powerful — you may want to restrict them to admin users only.
+
+#### Option 1: Middleware (Recommended)
+
+Create a middleware that checks the `node_key` on node creation requests:
 
 ```php
-$dangerousNodes = ['run_command', 'code', 'dispatch_job'];
+// app/Http/Middleware/RestrictDangerousNodes.php
+namespace App\Http\Middleware;
 
-if (in_array($request->input('node_key'), $dangerousNodes)) {
-    if (! $request->user()->isAdmin()) {
-        abort(403, 'You are not authorized to use this node type.');
+use Closure;
+use Illuminate\Http\Request;
+
+class RestrictDangerousNodes
+{
+    private array $dangerousNodes = ['run_command', 'code', 'dispatch_job'];
+
+    public function handle(Request $request, Closure $next)
+    {
+        if ($request->isMethod('post') && $request->has('node_key')) {
+            if (in_array($request->input('node_key'), $this->dangerousNodes)) {
+                if (! $request->user()?->isAdmin()) {
+                    abort(403, 'You are not authorized to use this node type.');
+                }
+            }
+        }
+
+        return $next($request);
     }
 }
 ```
+
+Register it in your workflow middleware config:
+
+```php
+// config/workflow-automation.php
+'middleware' => ['api', 'auth:sanctum', \App\Http\Middleware\RestrictDangerousNodes::class],
+```
+
+#### Option 2: FormRequest Macro
+
+Override the `StoreNodeRequest` authorization to check node types:
+
+```php
+// app/Providers/AppServiceProvider.php
+use Aftandilmmd\WorkflowAutomation\Http\Requests\StoreNodeRequest;
+
+public function boot(): void
+{
+    StoreNodeRequest::macro('authorize', function () {
+        $dangerousNodes = ['run_command', 'code', 'dispatch_job'];
+
+        if (in_array($this->input('node_key'), $dangerousNodes)) {
+            return $this->user()->isAdmin();
+        }
+
+        return true;
+    });
+}
+```
+
+#### Option 3: Inline Check in Controller
+
+If you override the package's routes and use your own controller, add the check directly in the `store` method:
+
+```php
+public function store(StoreNodeRequest $request, Workflow $workflow)
+{
+    $dangerousNodes = ['run_command', 'code', 'dispatch_job'];
+
+    if (in_array($request->input('node_key'), $dangerousNodes)) {
+        if (! $request->user()->isAdmin()) {
+            abort(403, 'You are not authorized to use this node type.');
+        }
+    }
+
+    // ... continue with node creation
+}
+```
+
+::: tip
+The middleware approach is recommended because it works without modifying or overriding any package code, and it applies to both REST API and MCP tool calls.
+:::
 
 ## Webhook Security
 
