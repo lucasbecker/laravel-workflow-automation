@@ -9,7 +9,7 @@
 
 **[Detaylı Dokümantasyon](https://laravel-workflow.pilyus.com)**
 
-https://github.com/user-attachments/assets/screenshots/workflow.mp4
+![Workflow Editor](screenshots/ai-workflow.png)
 
 ## Kurulum
 
