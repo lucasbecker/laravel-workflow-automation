@@ -2,7 +2,10 @@ import { useState, useEffect, useCallback } from 'react'
 import { X, Save, Play, Loader2, Settings, Database } from 'lucide-react'
 import { useWorkflowEditorStore } from '../../stores/useWorkflowEditorStore'
 import { useRunStore } from '../../stores/useRunStore'
+import { nodesApi } from '../../api/nodes'
+import type { AvailableVariablesResponse } from '../../api/types'
 import { DynamicForm } from './DynamicForm'
+import { VariablePanel } from './VariablePanel'
 import { JsonViewer } from '../shared/JsonViewer'
 import { NodeRunStatusBadge } from '../shared/StatusBadge'
 import { TestNodeInputModal } from '../execution/TestNodeInputModal'
@@ -20,6 +23,7 @@ export function NodeConfigPanel() {
   const [isSaving, setIsSaving] = useState(false)
   const [tab, setTab] = useState<Tab>('config')
   const [showTestModal, setShowTestModal] = useState(false)
+  const [variables, setVariables] = useState<AvailableVariablesResponse | null>(null)
 
   useEffect(() => {
     if (selectedApiNode) {
@@ -29,6 +33,16 @@ export function NodeConfigPanel() {
       setTab('config')
     }
   }, [selectedApiNode?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!workflow || !selectedApiNode) {
+      setVariables(null)
+      return
+    }
+    nodesApi.availableVariables(workflow.id, selectedApiNode.id)
+      .then(setVariables)
+      .catch(() => setVariables(null))
+  }, [workflow?.id, selectedApiNode?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleConfigChange = useCallback((key: string, value: unknown) => {
     setLocalConfig((prev) => ({ ...prev, [key]: value }))
@@ -128,11 +142,22 @@ export function NodeConfigPanel() {
       {/* Tab Content */}
       <div className="flex-1 overflow-y-auto px-4 py-3">
         {tab === 'config' ? (
-          <DynamicForm
-            schema={selectedRegistryNode.config_schema}
-            values={localConfig}
-            onChange={handleConfigChange}
-          />
+          <div className="space-y-4">
+            <DynamicForm
+              schema={selectedRegistryNode.config_schema}
+              values={localConfig}
+              onChange={handleConfigChange}
+              variables={variables}
+            />
+            {variables && (
+              <div className="border-t border-gray-200 pt-3 dark:border-gray-700">
+                <VariablePanel
+                  data={variables}
+                  onInsert={(expr) => navigator.clipboard.writeText(expr)}
+                />
+              </div>
+            )}
+          </div>
         ) : (
           <NodeOutputView nodeResult={nodeResult} />
         )}

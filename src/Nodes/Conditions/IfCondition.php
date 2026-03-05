@@ -31,6 +31,14 @@ class IfCondition implements NodeInterface
         ];
     }
 
+    public static function outputSchema(): array
+    {
+        return [
+            'true'  => [['key' => '*', 'type' => 'passthrough', 'label' => 'Items matching condition']],
+            'false' => [['key' => '*', 'type' => 'passthrough', 'label' => 'Items not matching condition']],
+        ];
+    }
+
     public function execute(NodeInput $input, array $config): NodeOutput
     {
         $trueItems = [];

@@ -24,6 +24,17 @@ class HttpRequestAction extends BaseNode
         ];
     }
 
+    public static function outputSchema(): array
+    {
+        return [
+            'main' => [
+                ['key' => 'http_response.status', 'type' => 'integer', 'label' => 'HTTP Status Code'],
+                ['key' => 'http_response.body', 'type' => 'mixed', 'label' => 'Response Body'],
+                ['key' => 'http_response.headers', 'type' => 'object', 'label' => 'Response Headers'],
+            ],
+        ];
+    }
+
     public function execute(NodeInput $input, array $config): NodeOutput
     {
         $results = [];

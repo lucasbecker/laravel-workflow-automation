@@ -1,13 +1,14 @@
-import type { ConfigSchemaField } from '../../../api/types'
+import type { AvailableVariablesResponse, ConfigSchemaField } from '../../../api/types'
 import { ExpressionInput } from './ExpressionInput'
 
 interface Props {
   field: ConfigSchemaField
   value: string
   onChange: (value: string) => void
+  variables?: AvailableVariablesResponse | null
 }
 
-export function StringField({ field, value, onChange }: Props) {
+export function StringField({ field, value, onChange, variables }: Props) {
   const input = (
     <input
       type="text"
@@ -21,7 +22,7 @@ export function StringField({ field, value, onChange }: Props) {
   )
 
   if (field.supports_expression) {
-    return <ExpressionInput value={value ?? ''} onChange={onChange} field={field}>{input}</ExpressionInput>
+    return <ExpressionInput value={value ?? ''} onChange={onChange} field={field} variables={variables}>{input}</ExpressionInput>
   }
 
   return input

@@ -30,6 +30,11 @@ class ScheduleTrigger implements TriggerInterface
         ];
     }
 
+    public static function outputSchema(): array
+    {
+        return [];
+    }
+
     public function register(int $workflowId, int $nodeId, array $config): void
     {
         // Handled by ScheduleRunCommand

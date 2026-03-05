@@ -28,6 +28,17 @@ class LoopControl implements NodeInterface
         ];
     }
 
+    public static function outputSchema(): array
+    {
+        return [
+            'loop_item' => [
+                ['key' => '_loop_index', 'type' => 'integer', 'label' => 'Loop Index'],
+                ['key' => '_loop_parent', 'type' => 'object', 'label' => 'Parent Item'],
+                ['key' => '_loop_item', 'type' => 'object', 'label' => 'Current Loop Item'],
+            ],
+        ];
+    }
+
     public function execute(NodeInput $input, array $config): NodeOutput
     {
         $loopItems = [];

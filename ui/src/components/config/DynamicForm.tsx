@@ -1,5 +1,5 @@
 import { Fragment } from 'react'
-import type { ConfigSchemaField } from '../../api/types'
+import type { AvailableVariablesResponse, ConfigSchemaField } from '../../api/types'
 import { StringField } from './fields/StringField'
 import { TextareaField } from './fields/TextareaField'
 import { SelectField } from './fields/SelectField'
@@ -24,9 +24,10 @@ interface Props {
   schema: ConfigSchemaField[]
   values: Record<string, unknown>
   onChange: (key: string, value: unknown) => void
+  variables?: AvailableVariablesResponse | null
 }
 
-export function DynamicForm({ schema, values, onChange }: Props) {
+export function DynamicForm({ schema, values, onChange, variables }: Props) {
   const visible = schema.filter((field) => {
     if (!field.show_when) return true
     const current = values[field.show_when.key]
@@ -70,7 +71,7 @@ export function DynamicForm({ schema, values, onChange }: Props) {
                   {field.required && <span className="ml-0.5 text-red-400">*</span>}
                 </label>
               )}
-              <FieldRenderer field={resolvedField} value={value} onChange={(v) => onChange(field.key, v)} />
+              <FieldRenderer field={resolvedField} value={value} onChange={(v) => onChange(field.key, v)} variables={variables} />
               {field.description && (
                 <p className="mt-1 text-[10px] leading-tight text-gray-400 dark:text-gray-500">{field.description}</p>
               )}
@@ -96,16 +97,18 @@ function FieldRenderer({
   field,
   value,
   onChange,
+  variables,
 }: {
   field: ConfigSchemaField
   value: unknown
   onChange: (value: unknown) => void
+  variables?: AvailableVariablesResponse | null
 }) {
   switch (field.type) {
     case 'string':
-      return <StringField field={field} value={value as string} onChange={onChange} />
+      return <StringField field={field} value={value as string} onChange={onChange} variables={variables} />
     case 'textarea':
-      return <TextareaField field={field} value={value as string} onChange={onChange} />
+      return <TextareaField field={field} value={value as string} onChange={onChange} variables={variables} />
     case 'select':
       return <SelectField field={field} value={value as string} onChange={onChange} />
     case 'boolean':
@@ -145,13 +148,13 @@ function FieldRenderer({
     case 'color':
       return <ColorField field={field} value={value as string} onChange={onChange} />
     case 'url':
-      return <UrlField field={field} value={value as string} onChange={onChange} />
+      return <UrlField field={field} value={value as string} onChange={onChange} variables={variables} />
     case 'password':
       return <PasswordField field={field} value={value as string} onChange={onChange} />
     case 'slider':
       return <SliderField field={field} value={value as number} onChange={onChange as (v: number) => void} />
     case 'code':
-      return <CodeField field={field} value={value as string} onChange={onChange} />
+      return <CodeField field={field} value={value as string} onChange={onChange} variables={variables} />
     case 'info':
       return <InfoField field={field} />
     case 'custom':

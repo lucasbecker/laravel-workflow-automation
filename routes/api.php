@@ -31,6 +31,7 @@ if (config('workflow-automation.api_routes', true)) {
             Route::put('workflows/{workflow}/nodes/{node}', [WorkflowNodeController::class, 'update']);
             Route::delete('workflows/{workflow}/nodes/{node}', [WorkflowNodeController::class, 'destroy']);
             Route::patch('workflows/{workflow}/nodes/{node}/position', [WorkflowNodeController::class, 'position']);
+            Route::get('workflows/{workflow}/nodes/{node}/variables', [WorkflowNodeController::class, 'availableVariables']);
 
             // ── Edges ────────────────────────────────────────────────
             Route::post('workflows/{workflow}/edges', [WorkflowEdgeController::class, 'store']);

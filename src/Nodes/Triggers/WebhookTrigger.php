@@ -31,6 +31,17 @@ class WebhookTrigger implements TriggerInterface
         ];
     }
 
+    public static function outputSchema(): array
+    {
+        return [
+            'main' => [
+                ['key' => 'body', 'type' => 'object', 'label' => 'Request Body'],
+                ['key' => 'headers', 'type' => 'object', 'label' => 'Request Headers'],
+                ['key' => 'query', 'type' => 'object', 'label' => 'Query Parameters'],
+            ],
+        ];
+    }
+
     public function register(int $workflowId, int $nodeId, array $config): void
     {
         // Webhook route handled by WebhookController

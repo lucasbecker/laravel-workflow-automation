@@ -34,6 +34,11 @@ class FilterUtility implements NodeInterface
         ];
     }
 
+    public static function outputSchema(): array
+    {
+        return [];
+    }
+
     public function execute(NodeInput $input, array $config): NodeOutput
     {
         $conditions = $config['conditions'] ?? [];

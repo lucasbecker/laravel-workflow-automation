@@ -36,6 +36,17 @@ class AiAction extends BaseNode
         ];
     }
 
+    public static function outputSchema(): array
+    {
+        return [
+            'main' => [
+                ['key' => 'ai_response', 'type' => 'string', 'label' => 'AI Response Text'],
+                ['key' => 'ai_usage.input_tokens', 'type' => 'integer', 'label' => 'Input Tokens'],
+                ['key' => 'ai_usage.output_tokens', 'type' => 'integer', 'label' => 'Output Tokens'],
+            ],
+        ];
+    }
+
     public function execute(NodeInput $input, array $config): NodeOutput
     {
         $this->ensureLaravelAiInstalled();

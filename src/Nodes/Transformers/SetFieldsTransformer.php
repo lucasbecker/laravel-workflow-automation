@@ -19,6 +19,13 @@ class SetFieldsTransformer extends BaseNode
         ];
     }
 
+    public static function outputSchema(): array
+    {
+        return [
+            'main' => [['key' => '*', 'type' => 'dynamic', 'label' => 'Fields defined in config']],
+        ];
+    }
+
     public function execute(NodeInput $input, array $config): NodeOutput
     {
         $results = [];
