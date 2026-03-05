@@ -132,7 +132,7 @@ export function WorkflowListPage() {
                   <span
                     className={`ml-2 inline-flex shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
                       wf.is_active
-                        ? 'bg-green-100 text-green-700'
+                        ? 'bg-green-600 text-white'
                         : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
                     }`}
                   >
