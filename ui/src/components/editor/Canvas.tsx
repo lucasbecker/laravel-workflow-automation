@@ -45,7 +45,7 @@ export function Canvas() {
   const reactFlowWrapper = useRef<HTMLDivElement>(null)
   const { screenToFlowPosition, fitView } = useReactFlow()
   const [edgeMenu, setEdgeMenu] = useState<EdgeContextMenu | null>(null)
-  const [showMiniMap, setShowMiniMap] = useState(() => window.innerWidth >= 768)
+  const [showMiniMap, setShowMiniMap] = useState(false)
 
   const onConnect = useCallback(
     (connection: Connection) => {
