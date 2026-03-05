@@ -156,6 +156,7 @@ export function Canvas() {
         nodeTypes={nodeTypes}
         fitView
         deleteKeyCode={null}
+        proOptions={{ hideAttribution: true }}
         className="bg-gray-50 dark:bg-gray-900"
       >
         <Controls position="bottom-left" />
