@@ -9,7 +9,7 @@
 
 **[Detaylı Dokümantasyon](https://laravel-workflow.pilyus.com)**
 
-<video src="screenshots/workflow.mp4" autoplay loop muted playsinline></video>
+![Workflow Editor](screenshots/workflow.png)
 
 ## Kurulum
 
