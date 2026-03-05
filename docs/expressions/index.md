@@ -37,6 +37,34 @@ Expressions are wrapped in double curly braces:
 | `nodes` | All node outputs | `{{ nodes }}` |
 | `payload` | Initial workflow payload | `{{ payload }}` |
 
+## Variable Discovery
+
+When editing a node's config in the visual editor, the system helps you discover which variables are available:
+
+### Autocomplete
+
+Type `{{` in any expression-enabled field to open an autocomplete dropdown. It shows:
+
+- **Global variables** — `item`, `payload`, `trigger`
+- **Upstream node outputs** — variables from nodes connected before the current one
+- **Built-in functions** — all 38 functions listed below
+
+Use arrow keys to navigate, Enter/Tab to select. The expression is auto-completed with closing `}}`.
+
+### Variable Panel
+
+Below the config form, an **Available Variables** panel lists all variables grouped by:
+
+- **Globals** — always available (`item`, `payload`, `trigger`)
+- **Upstream Nodes** — each upstream node's output fields (e.g. `nodes.HTTP Request.main.0.http_response.status`)
+- **Functions** — all expression functions with their signatures
+
+Click any variable to copy `{{ path }}` to your clipboard.
+
+### Output Schema
+
+Each node declares what variables it produces via `outputSchema()`. This powers both autocomplete and the variable panel. See [Custom Nodes](/advanced/custom-nodes) for how to define output schemas in your own nodes.
+
 ## Operators
 
 ### Arithmetic

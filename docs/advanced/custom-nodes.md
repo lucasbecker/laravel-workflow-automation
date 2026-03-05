@@ -29,6 +29,15 @@ class SlackMessageNode extends BaseNode
         ];
     }
 
+    public static function outputSchema(): array
+    {
+        return [
+            'main' => [
+                ['key' => 'slack_sent', 'type' => 'boolean', 'label' => 'Slack Sent'],
+            ],
+        ];
+    }
+
     public function execute(NodeInput $input, array $config): NodeOutput
     {
         $results = [];
@@ -80,11 +89,12 @@ interface NodeInterface
     public function inputPorts(): array;    // e.g. ['main']
     public function outputPorts(): array;   // e.g. ['main', 'error']
     public static function configSchema(): array;
+    public static function outputSchema(): array;
     public function execute(NodeInput $input, array $config): NodeOutput;
 }
 ```
 
-The `BaseNode` class provides sensible defaults: input `['main']`, output `['main', 'error']`, and an empty config schema.
+The `BaseNode` class provides sensible defaults: input `['main']`, output `['main', 'error']`, an empty config schema, and an empty output schema.
 
 ## NodeInput
 
@@ -113,6 +123,46 @@ NodeOutput::ports([
     'error' => $errorItems,
 ]);
 ```
+
+## Output Schema
+
+The output schema declares what variables a node produces. This powers the visual editor's autocomplete and variable panel, helping users discover available variables when writing expressions.
+
+Each key in the returned array is a port name, and the value is an array of field definitions:
+
+```php
+public static function outputSchema(): array
+{
+    return [
+        'main' => [
+            ['key' => 'slack_sent', 'type' => 'boolean', 'label' => 'Slack Sent'],
+            ['key' => 'channel', 'type' => 'string', 'label' => 'Channel Name'],
+        ],
+    ];
+}
+```
+
+Downstream nodes will see these as `{{ nodes.Slack Message.main.0.slack_sent }}` in the autocomplete.
+
+**Field definition:**
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `key` | string | Dot-notation path of the output field |
+| `type` | string | Data type: `string`, `integer`, `boolean`, `object`, `array`, `mixed` |
+| `label` | string | Human-readable label shown in the editor |
+
+For nodes with dynamic output (e.g. Set Fields), you can return a wildcard marker:
+
+```php
+return [
+    'main' => [
+        ['key' => '*', 'type' => 'mixed', 'label' => 'Dynamic fields from config'],
+    ],
+];
+```
+
+`BaseNode` returns an empty output schema by default. Override it in your node to enable variable discovery.
 
 ## Config Schema
 
@@ -266,6 +316,8 @@ class MyTrigger implements TriggerInterface
     public function outputPorts(): array { return ['main']; }
 
     public static function configSchema(): array { return []; }
+
+    public static function outputSchema(): array { return []; }
 
     public function register(int $workflowId, int $nodeId, array $config): void
     {

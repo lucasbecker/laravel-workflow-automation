@@ -10,6 +10,7 @@ use Aftandilmmd\WorkflowAutomation\Mcp\Tools\CreateWorkflowTool;
 use Aftandilmmd\WorkflowAutomation\Mcp\Tools\DeactivateWorkflowTool;
 use Aftandilmmd\WorkflowAutomation\Mcp\Tools\DeleteWorkflowTool;
 use Aftandilmmd\WorkflowAutomation\Mcp\Tools\DuplicateWorkflowTool;
+use Aftandilmmd\WorkflowAutomation\Mcp\Tools\GetAvailableVariablesTool;
 use Aftandilmmd\WorkflowAutomation\Mcp\Tools\GetRunTool;
 use Aftandilmmd\WorkflowAutomation\Mcp\Tools\ListNodeTypesTool;
 use Aftandilmmd\WorkflowAutomation\Mcp\Tools\ListRunsTool;
@@ -56,9 +57,10 @@ class WorkflowMcpServer extends Server
         GetRunTool::class,
         ListRunsTool::class,
 
-        // Registry
+        // Registry & Discovery
         ListNodeTypesTool::class,
         ShowNodeTypeTool::class,
+        GetAvailableVariablesTool::class,
     ];
 
     protected array $prompts = [

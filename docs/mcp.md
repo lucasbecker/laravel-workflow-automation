@@ -4,7 +4,7 @@
 
 Let AI clients (Claude, GPT, Cursor, etc.) create, edit, and execute workflows through the **Model Context Protocol**.
 
-The package ships with a built-in MCP server that exposes **19 tools** and **1 prompt** — everything an LLM needs to build complete workflows without writing a single line of PHP.
+The package ships with a built-in MCP server that exposes **20 tools** and **1 prompt** — everything an LLM needs to build complete workflows without writing a single line of PHP.
 
 ## Requirements
 
@@ -71,6 +71,7 @@ The server registers at `/mcp/workflow` by default. Customize the path in `confi
 |------|-------------|-----------|
 | `list_node_types` | List all available node types with ports and config schema | Yes |
 | `show_node_type` | Get full details for a specific node type | Yes |
+| `get_available_variables` | Get available variables for a node's expressions (globals, upstream outputs, functions) | Yes |
 
 ## Prompt
 
@@ -93,13 +94,14 @@ workflow_builder(goal: "Send welcome email when user registers")
 An AI client connected to the MCP server will typically follow this sequence:
 
 ```
-1. list_node_types          → Discover available nodes
-2. create_workflow           → Create the workflow
-3. add_node (trigger)        → Add a trigger node
-4. add_node (actions...)     → Add action/condition nodes
-5. connect_nodes (repeat)    → Wire the graph
-6. validate_workflow         → Check for errors
-7. activate_workflow         → Go live
+1. list_node_types              → Discover available nodes
+2. create_workflow               → Create the workflow
+3. add_node (trigger)            → Add a trigger node
+4. add_node (actions...)         → Add action/condition nodes
+5. connect_nodes (repeat)        → Wire the graph
+6. get_available_variables       → Discover variables for expressions
+7. validate_workflow             → Check for errors
+8. activate_workflow             → Go live
 ```
 
 ## Example Session

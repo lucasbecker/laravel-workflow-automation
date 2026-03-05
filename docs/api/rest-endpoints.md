@@ -185,6 +185,41 @@ Content-Type: application/json
 }
 ```
 
+### Get Available Variables
+
+```http
+GET /workflow-engine/workflows/{workflowId}/nodes/{nodeId}/variables
+```
+
+Returns all variables available to a node's expressions — globals, upstream node outputs, and built-in functions.
+
+**Response:**
+
+```json
+{
+  "globals": [
+    { "path": "item", "type": "object", "label": "Current Item" },
+    { "path": "payload", "type": "object", "label": "Initial Payload" },
+    { "path": "trigger", "type": "array", "label": "Trigger Output" }
+  ],
+  "nodes": [
+    {
+      "node_id": 5,
+      "node_name": "HTTP Request",
+      "node_key": "http_request",
+      "variables": [
+        { "path": "nodes.HTTP Request.main.0.http_response.status", "type": "integer", "label": "HTTP Status Code" },
+        { "path": "nodes.HTTP Request.main.0.http_response.body", "type": "mixed", "label": "Response Body" }
+      ]
+    }
+  ],
+  "functions": [
+    { "name": "upper", "args": "value", "label": "Uppercase" },
+    { "name": "lower", "args": "value", "label": "Lowercase" }
+  ]
+}
+```
+
 ## Edges
 
 ### Create Edge
