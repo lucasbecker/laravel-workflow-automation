@@ -31,7 +31,15 @@ class ExecuteWorkflowJob implements ShouldQueue
     {
         $workflow = Workflow::find($this->workflowId);
 
-        if (! $workflow || ! $workflow->is_active) {
+        if (! $workflow) {
+            Log::warning("WorkflowJob skipped: workflow_id={$this->workflowId} not found.");
+
+            return;
+        }
+
+        if (! $workflow->is_active) {
+            Log::info("WorkflowJob skipped: workflow_id={$this->workflowId} is inactive.");
+
             return;
         }
 

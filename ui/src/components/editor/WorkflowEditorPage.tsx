@@ -128,6 +128,11 @@ export function WorkflowEditorPage() {
             {workflow.is_active ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
             {workflow.is_active ? 'Deactivate' : 'Activate'}
           </button>
+          {!workflow.is_active && (
+            <span className="rounded-md bg-red-100 px-2 py-1 text-xs font-medium text-red-600 dark:bg-red-900/30 dark:text-red-400">
+              Inactive
+            </span>
+          )}
           <button
             onClick={() => setShowExecute(true)}
             className="flex items-center gap-1.5 rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700"
