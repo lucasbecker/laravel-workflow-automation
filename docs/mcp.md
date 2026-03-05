@@ -188,4 +188,8 @@ For production, consider adding authentication middleware:
 'middleware' => ['api', 'auth:sanctum'],
 ```
 
+::: tip AI Builder
+Want to build workflows with AI directly inside the Visual Editor? See [AI Builder](/ai-builder) — it uses the same MCP tools but with an in-app chat interface and streaming.
+:::
+
 </div>

@@ -128,6 +128,7 @@ export default defineConfig({
           items: [
             { text: 'Visual Editor', link: '/ui-editor' },
             { text: 'MCP Server', link: '/mcp' },
+            { text: 'AI Builder', link: '/ai-builder' },
           ],
         },
         advancedSection,
