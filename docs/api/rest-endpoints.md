@@ -220,6 +220,46 @@ Returns all variables available to a node's expressions — globals, upstream no
 }
 ```
 
+### Pin Node Test Data
+
+```http
+POST /workflow-engine/workflows/{workflowId}/nodes/{nodeId}/pin
+Content-Type: application/json
+```
+
+**From a previous run:**
+
+```json
+{
+  "source": "run",
+  "node_run_id": 42
+}
+```
+
+**Manual data:**
+
+```json
+{
+  "source": "manual",
+  "input": [{"name": "Alice", "email": "alice@example.com"}],
+  "output": {"main": [{"name": "Alice", "status": "processed"}]}
+}
+```
+
+When a node has pinned output, it is **skipped entirely** during test runs (`executeUpTo` / node testing) — the pinned output is returned directly. When a node has pinned input, it **executes normally** but receives the pinned input instead of computed input.
+
+::: tip
+Pinned data only affects test mode. Normal workflow runs (triggers, manual `start()`) ignore pinned data completely.
+:::
+
+### Unpin Node Test Data
+
+```http
+DELETE /workflow-engine/workflows/{workflowId}/nodes/{nodeId}/pin
+```
+
+Removes pinned data from the node. The node resumes normal execution during test runs.
+
 ## Edges
 
 ### Create Edge

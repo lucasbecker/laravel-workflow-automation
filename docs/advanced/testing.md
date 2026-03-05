@@ -181,6 +181,57 @@ public function test_approval_workflow(): void
 }
 ```
 
+## Pinned Test Data
+
+Pin fixed data to nodes for repeatable, isolated testing. Pinned output skips the node entirely; pinned input replaces computed input.
+
+```php
+use Aftandilmmd\WorkflowAutomation\Models\WorkflowNode;
+
+// Pin output — node will be skipped in test mode
+$node->update(['pinned_data' => [
+    'output' => ['main' => [['name' => 'Alice', 'status' => 'processed']]],
+]]);
+
+// Pin input — node executes with this input
+$node->update(['pinned_data' => [
+    'input' => [['name' => 'Alice', 'email' => 'alice@test.com']],
+]]);
+
+// Pin from a previous node run
+$nodeRun = $run->nodeRuns()->where('node_id', $node->id)->first();
+$node->update(['pinned_data' => [
+    'input'  => $nodeRun->input,
+    'output' => $nodeRun->output,
+    'source_run_id' => $nodeRun->workflow_run_id,
+]]);
+
+// Unpin
+$node->update(['pinned_data' => null]);
+```
+
+Pinned data only takes effect in test mode (`executeUpTo`). Normal runs ignore it:
+
+```php
+// Test mode — pinned output is used, node is skipped
+$service->executeUpTo($workflow, $node->id, $payload);
+
+// Normal run — pinned data is ignored
+$workflow->start($payload);
+```
+
+Use factories for testing pinned behavior:
+
+```php
+$node = WorkflowNode::factory()
+    ->withPinnedOutput(['main' => [['result' => 'ok']]])
+    ->create();
+
+$node = WorkflowNode::factory()
+    ->withPinnedInput([['name' => 'Test']])
+    ->create();
+```
+
 ## Validating Workflows
 
 Test graph validation:

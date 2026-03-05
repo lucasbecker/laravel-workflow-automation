@@ -43,6 +43,7 @@ class ShowWorkflowTool extends Tool
                 'node_key' => $node->node_key,
                 'type' => $node->type->value,
                 'config' => $node->config,
+                'pinned_data' => $node->pinned_data,
             ])->all(),
             'edges' => $workflow->edges->map(fn ($edge) => [
                 'id' => $edge->id,

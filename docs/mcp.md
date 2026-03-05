@@ -4,7 +4,7 @@
 
 Let AI clients (Claude, GPT, Cursor, etc.) create, edit, and execute workflows through the **Model Context Protocol**.
 
-The package ships with a built-in MCP server that exposes **24 tools** and **1 prompt** — everything an LLM needs to build complete workflows without writing a single line of PHP.
+The package ships with a built-in MCP server that exposes **26 tools** and **1 prompt** — everything an LLM needs to build complete workflows without writing a single line of PHP.
 
 ## Requirements
 
@@ -56,6 +56,8 @@ The server registers at `/mcp/workflow` by default. Customize the path in `confi
 | `remove_node` | Remove a node and its edges | No |
 | `connect_nodes` | Create an edge between nodes | No |
 | `remove_edge` | Remove an edge | No |
+| `pin_node` | Pin fixed test data (input/output) to a node | No |
+| `unpin_node` | Remove pinned test data from a node | No |
 
 ### Execution
 

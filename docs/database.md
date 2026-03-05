@@ -30,6 +30,7 @@ Individual steps within a workflow.
 | `node_key` | varchar(100) | — | Node implementation key (e.g. `send_mail`) |
 | `name` | varchar | null | Display name |
 | `config` | json | `{}` | Node-specific configuration |
+| `pinned_data` | json | null | Pinned test data (`input`, `output`, `source_run_id`) |
 | `position_x` | integer | `0` | X position for UI rendering |
 | `position_y` | integer | `0` | Y position for UI rendering |
 | `created_at` | timestamp | — | — |

@@ -85,6 +85,26 @@ Click a node on the canvas to open its config panel on the right. The form is ge
 
 Fields that support expressions show a `{{ }}` indicator — you can use the expression engine syntax like `{{ item.email }}` directly in the field. Fields can also have `description` help text and `placeholder` values. Use `show_when` to conditionally show/hide fields based on other field values.
 
+### Pinned Test Data
+
+Pin fixed test data to any node for repeatable debugging. This is similar to n8n's pin feature.
+
+- **Pin output** — The node is skipped during test runs and returns the pinned output directly. Useful for expensive or external nodes (HTTP requests, AI calls) where you don't want to re-execute every time.
+- **Pin input** — The node still executes but receives pinned input instead of computed input. Useful for testing a node with specific data regardless of upstream changes.
+
+**How to pin:**
+
+1. Open a node's config panel and switch to the **Output** tab
+2. Click **Test** to run the workflow up to that node
+3. Once you see the output, click **Pin** to save it as fixed test data
+4. A pin icon appears on the node in the canvas and an orange banner shows in the config panel
+
+**How to unpin:** Click the **Unpin** button in the orange banner or in the Output tab.
+
+::: tip
+Pinned data only affects test runs (the **Test** button). Normal workflow execution ignores pinned data entirely.
+:::
+
 ### Executing Workflows
 
 1. Click the **Run** button in the header

@@ -19,11 +19,13 @@ use Aftandilmmd\WorkflowAutomation\Mcp\Tools\ListCredentialTypesTool;
 use Aftandilmmd\WorkflowAutomation\Mcp\Tools\ListNodeTypesTool;
 use Aftandilmmd\WorkflowAutomation\Mcp\Tools\ListRunsTool;
 use Aftandilmmd\WorkflowAutomation\Mcp\Tools\ListWorkflowsTool;
+use Aftandilmmd\WorkflowAutomation\Mcp\Tools\PinNodeTool;
 use Aftandilmmd\WorkflowAutomation\Mcp\Tools\RemoveEdgeTool;
 use Aftandilmmd\WorkflowAutomation\Mcp\Tools\RemoveNodeTool;
 use Aftandilmmd\WorkflowAutomation\Mcp\Tools\RunWorkflowTool;
 use Aftandilmmd\WorkflowAutomation\Mcp\Tools\ShowNodeTypeTool;
 use Aftandilmmd\WorkflowAutomation\Mcp\Tools\ShowWorkflowTool;
+use Aftandilmmd\WorkflowAutomation\Mcp\Tools\UnpinNodeTool;
 use Aftandilmmd\WorkflowAutomation\Mcp\Tools\UpdateNodeTool;
 use Aftandilmmd\WorkflowAutomation\Mcp\Tools\UpdateWorkflowTool;
 use Aftandilmmd\WorkflowAutomation\Mcp\Tools\ValidateWorkflowTool;
@@ -55,6 +57,8 @@ class WorkflowMcpServer extends Server
         RemoveNodeTool::class,
         ConnectNodesTool::class,
         RemoveEdgeTool::class,
+        PinNodeTool::class,
+        UnpinNodeTool::class,
 
         // Execution
         RunWorkflowTool::class,
