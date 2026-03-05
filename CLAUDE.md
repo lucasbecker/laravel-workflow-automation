@@ -25,9 +25,9 @@ Graph-based workflow automation engine for Laravel. N8N-inspired logic with trig
 - **Tables/Models:** Config-driven via `getTable()` and model class config
 - **Code node:** Expression-only, no closures or arbitrary PHP
 
-### 23 Node Types
+### 25 Node Types
 - **Triggers (5):** manual, model_event, event, schedule, webhook
-- **Actions (5):** send_mail, http_request, update_model, dispatch_job, send_notification
+- **Actions (7):** send_mail, http_request, update_model, dispatch_job, send_notification, run_command, ai
 - **Conditions (2):** if_condition, switch
 - **Transformers (2):** set_fields, parse_data
 - **Controls (6):** loop, merge, delay, sub_workflow, error_handler, wait_resume
@@ -63,7 +63,7 @@ src/
 ├── Jobs/                # ExecuteWorkflowJob, ResumeWorkflowJob
 ├── Listeners/           # ModelEventListener
 ├── Models/              # Workflow, WorkflowNode, WorkflowEdge, WorkflowRun, WorkflowNodeRun
-├── Nodes/               # All 22 node implementations organized by type
+├── Nodes/               # All 25 node implementations organized by type
 ├── Registry/            # NodeRegistry
 ├── Services/            # WorkflowService
 config/                  # workflow-automation.php

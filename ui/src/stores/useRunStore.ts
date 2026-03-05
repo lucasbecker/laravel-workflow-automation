@@ -20,7 +20,7 @@ interface RunStore {
   clearNodeTestResults: () => void
 }
 
-export const useRunStore = create<RunStore>((set) => ({
+export const useRunStore = create<RunStore>((set, get) => ({
   runs: [],
   selectedRun: null,
   isLoading: false,
@@ -52,7 +52,14 @@ export const useRunStore = create<RunStore>((set) => ({
   replayRun: async (runId) => {
     set({ isReplaying: true })
     try {
-      await runsApi.replay(runId)
+      const res = await runsApi.replay(runId)
+      const newRun = res.data
+      set({ selectedRun: newRun })
+      // Refresh the full runs list
+      const workflowId = newRun.workflow_id
+      if (workflowId) {
+        await get().fetchRuns(workflowId)
+      }
     } finally {
       set({ isReplaying: false })
     }
