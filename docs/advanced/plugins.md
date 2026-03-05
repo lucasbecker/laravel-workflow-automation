@@ -208,6 +208,7 @@ interface PluginInterface
     public function getName(): string;
     public function register(PluginContext $context): void;
     public function boot(PluginContext $context): void;
+    public function editorScripts(): array;
     public static function make(): static;
 }
 ```
@@ -218,6 +219,7 @@ interface PluginInterface
 | `getName()` | Always | Human-readable name |
 | `register()` | During ServiceProvider `register()` | Register nodes, expression functions |
 | `boot()` | During ServiceProvider `boot()` | Register routes, listeners, middleware |
+| `editorScripts()` | When editor loads | Return JS asset URLs for custom config fields |
 | `make()` | By consumer | Static factory for fluent API |
 
 ## PluginContext API

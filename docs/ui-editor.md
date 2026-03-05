@@ -65,14 +65,25 @@ Click a node on the canvas to open its config panel on the right. The form is ge
 |------------|-------------|
 | `string` | Text input |
 | `textarea` | Multi-line text |
-| `select` | Dropdown with options |
+| `select` | Dropdown with options (supports `depends_on` + `options_map`) |
+| `multiselect` | Multi-selection dropdown |
 | `boolean` | Toggle switch |
-| `integer` | Number input |
+| `integer` | Integer number input |
+| `number` | Float number input with `min`, `max`, `step` |
 | `json` | JSON editor with validation |
 | `keyvalue` | Dynamic key-value pairs |
 | `array_of_objects` | Repeatable nested groups |
+| `model_select` | Eloquent model picker |
+| `url` | URL input with validation |
+| `password` | Masked input with show/hide toggle |
+| `color` | Color picker with hex input |
+| `slider` | Range slider with `min`, `max`, `step` |
+| `code` | Monospace code editor with `language` hint |
+| `info` | Read-only information text (not a form field) |
+| `section` | Collapsible section heading for grouping fields |
+| `custom` | Web Component rendered via `custom_component` tag name (see [Plugin System](/advanced/plugins)) |
 
-Fields that support expressions show a `{{ }}` indicator — you can use the expression engine syntax like `{{ item.email }}` directly in the field.
+Fields that support expressions show a `{{ }}` indicator — you can use the expression engine syntax like `{{ item.email }}` directly in the field. Fields can also have `description` help text and `placeholder` values. Use `show_when` to conditionally show/hide fields based on other field values.
 
 ### Executing Workflows
 

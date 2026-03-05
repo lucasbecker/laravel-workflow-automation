@@ -80,4 +80,20 @@ class WorkflowRunController extends Controller
 
         return new WorkflowRunResource($newRun->load('nodeRuns'));
     }
+
+    public function testNode(Request $request, Workflow $workflow): WorkflowRunResource
+    {
+        $request->validate([
+            'node_id' => ['required', 'integer'],
+            'payload' => ['nullable', 'array'],
+        ]);
+
+        $run = $this->service->testNode(
+            $workflow,
+            $request->integer('node_id'),
+            $request->input('payload', []),
+        );
+
+        return new WorkflowRunResource($run->load('nodeRuns'));
+    }
 }
