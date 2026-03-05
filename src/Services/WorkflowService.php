@@ -106,6 +106,16 @@ class WorkflowService
     }
 
     /**
+     * Execute a workflow up to (and including) a specific node, then stop.
+     */
+    public function testNode(int|Workflow $workflow, int $nodeId, array $payload = []): WorkflowRun
+    {
+        $workflow = $this->resolveWorkflow($workflow);
+
+        return $this->executor->executeUpTo($workflow, $nodeId, $payload);
+    }
+
+    /**
      * Retry a single failed node within a run.
      */
     public function retryNode(int|WorkflowRun $run, int $nodeId): WorkflowRun

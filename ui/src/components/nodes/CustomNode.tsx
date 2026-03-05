@@ -4,6 +4,8 @@ import type { CustomNodeData } from '../../lib/mappers'
 import { NODE_TYPE_COLORS } from '../../lib/constants'
 import { NODE_TYPE_ICON } from './nodeStyles'
 import type { NodeType } from '../../api/types'
+import { useRunStore } from '../../stores/useRunStore'
+import { CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 
 function CustomNodeComponent({ data, selected }: NodeProps) {
   const nodeData = data as unknown as CustomNodeData
@@ -15,12 +17,32 @@ function CustomNodeComponent({ data, selected }: NodeProps) {
 
   const [hoveredPort, setHoveredPort] = useState<string | null>(null)
 
+  const nodeTestResults = useRunStore((s) => s.nodeTestResults)
+  const isTestingNode = useRunStore((s) => s.isTestingNode)
+  const apiNodeId = nodeData.apiNode?.id
+  const testResult = apiNodeId && nodeTestResults ? nodeTestResults[apiNodeId] : undefined
+
   return (
     <div
-      className={`min-w-[160px] rounded-lg border-l-4 bg-white dark:bg-gray-800 shadow-md ${colors.border} ${
+      className={`relative min-w-[160px] rounded-lg border-l-4 bg-white dark:bg-gray-800 shadow-md ${colors.border} ${
         selected ? 'ring-2 ring-blue-400' : ''
       }`}
     >
+      {/* Test Status Badge */}
+      {(testResult || (isTestingNode && nodeTestResults === null)) && (
+        <div className="absolute -right-1.5 -top-1.5 z-10">
+          {testResult?.status === 'completed' && (
+            <CheckCircle2 size={16} className="rounded-full bg-white text-green-500 dark:bg-gray-800" />
+          )}
+          {testResult?.status === 'failed' && (
+            <XCircle size={16} className="rounded-full bg-white text-red-500 dark:bg-gray-800" />
+          )}
+          {testResult?.status === 'running' && (
+            <Loader2 size={16} className="animate-spin rounded-full bg-white text-blue-500 dark:bg-gray-800" />
+          )}
+        </div>
+      )}
+
       {/* Input Handles */}
       {inputPorts.map((port, i) => {
         const topPercent =

@@ -5,6 +5,7 @@ import type {
   PaginatedResponse,
   UpdateWorkflowPayload,
   Workflow,
+  WorkflowRun,
 } from './types'
 
 export const workflowsApi = {
@@ -37,4 +38,7 @@ export const workflowsApi = {
 
   validate: (id: number) =>
     api.post<{ valid: boolean; errors: string[] }>(`/workflows/${id}/validate`),
+
+  testNode: (id: number, nodeId: number, payload?: Record<string, unknown>) =>
+    api.post<ApiResponse<WorkflowRun>>(`/workflows/${id}/test-node`, { node_id: nodeId, payload }),
 }

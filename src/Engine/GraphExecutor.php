@@ -224,7 +224,34 @@ class GraphExecutor
         return $newRun->fresh();
     }
 
-    private function doExecute(Workflow $workflow, WorkflowRun $run, array $initialPayload): void
+    /**
+     * Execute a workflow up to (and including) a specific node, then stop.
+     */
+    public function executeUpTo(Workflow $workflow, int $targetNodeId, array $initialPayload = []): WorkflowRun
+    {
+        $run = WorkflowRun::create([
+            'workflow_id'     => $workflow->id,
+            'status'          => RunStatus::Pending,
+            'initial_payload' => $initialPayload,
+        ]);
+
+        try {
+            $this->graphValidator->validate($workflow);
+            $this->doExecute($workflow, $run, $initialPayload, $targetNodeId);
+        } catch (\Throwable $e) {
+            $run->update([
+                'status'        => RunStatus::Failed,
+                'error_message' => $e->getMessage(),
+                'finished_at'   => now(),
+            ]);
+
+            event(new WorkflowFailed($run, $e));
+        }
+
+        return $run->fresh();
+    }
+
+    private function doExecute(Workflow $workflow, WorkflowRun $run, array $initialPayload, ?int $stopAfterNodeId = null): void
     {
         $run->update(['status' => RunStatus::Running, 'started_at' => now()]);
         event(new WorkflowStarted($run));
@@ -243,6 +270,31 @@ class GraphExecutor
 
         if (! $triggerNode) {
             throw new WorkflowException("Workflow {$workflow->id} has no trigger node.");
+        }
+
+        // If the target node IS the trigger, execute it and stop
+        if ($stopAfterNodeId === $triggerNode->id) {
+            $triggerOutput = $this->executeNode(
+                $triggerNode,
+                new NodeInput(items: $initialPayload ?: [[]], context: $context),
+                $run,
+                $context,
+                $nodes,
+            );
+
+            foreach ($triggerOutput->portItems as $port => $items) {
+                $context->setNodeOutput($triggerNode->id, $port, $items);
+            }
+
+            $run->update([
+                'status'      => RunStatus::Completed,
+                'context'     => $context->getAllOutputs(),
+                'finished_at' => now(),
+            ]);
+
+            event(new WorkflowCompleted($run));
+
+            return;
         }
 
         $triggerOutput = $this->executeNode(
@@ -272,7 +324,7 @@ class GraphExecutor
             }
         }
 
-        $this->processQueue($queue, $nodes, $edges, $edgeMap, $context, $run);
+        $this->processQueue($queue, $nodes, $edges, $edgeMap, $context, $run, $stopAfterNodeId);
 
         // Check if a wait/delay node paused execution
         if ($run->fresh()->status === RunStatus::Waiting) {
@@ -300,6 +352,7 @@ class GraphExecutor
         array $edgeMap,
         ExecutionContext $context,
         WorkflowRun $run,
+        ?int $stopAfterNodeId = null,
     ): void {
         $pendingInputs = [];
 
@@ -358,6 +411,11 @@ class GraphExecutor
             // Store output in context
             foreach ($nodeOutput->portItems as $port => $items) {
                 $context->setNodeOutput($node->id, $port, $items);
+            }
+
+            // Stop processing if we reached the target node
+            if ($stopAfterNodeId !== null && $node->id === $stopAfterNodeId) {
+                return;
             }
 
             // Enqueue downstream nodes

@@ -24,6 +24,7 @@ if (config('workflow-automation.api_routes', true)) {
             Route::post('workflows/{workflow}/run', [WorkflowController::class, 'run']);
             Route::post('workflows/{workflow}/duplicate', [WorkflowController::class, 'duplicate']);
             Route::post('workflows/{workflow}/validate', [WorkflowController::class, 'validateWorkflow']);
+            Route::post('workflows/{workflow}/test-node', [WorkflowRunController::class, 'testNode']);
 
             // ── Nodes ────────────────────────────────────────────────
             Route::post('workflows/{workflow}/nodes', [WorkflowNodeController::class, 'store']);
