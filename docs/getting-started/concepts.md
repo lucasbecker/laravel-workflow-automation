@@ -73,7 +73,7 @@ A record of one node's execution within a run. Stores input, output, status, dur
 
 | Category | Count | Purpose | Nodes |
 |----------|-------|---------|-------|
-| **Trigger** | 4 | Start the workflow | Manual, Model Event, Webhook, Schedule |
+| **Trigger** | 5 | Start the workflow | Manual, Model Event, Event, Webhook, Schedule |
 | **Action** | 7 | Perform side effects | Send Mail, HTTP Request, Update Model, Dispatch Job, Send Notification, AI, Run Command |
 | **Condition** | 2 | Branch the flow | IF Condition, Switch |
 | **Transformer** | 2 | Reshape data | Set Fields, Parse Data |
