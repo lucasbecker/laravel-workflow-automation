@@ -6,7 +6,7 @@ import { NODE_TYPE_LABELS, NODE_TYPE_COLORS } from '../../lib/constants'
 import { NODE_TYPE_ICON } from '../nodes/nodeStyles'
 import type { NodeType, RegistryNode } from '../../api/types'
 
-const TYPE_ORDER: NodeType[] = ['trigger', 'action', 'condition', 'transformer', 'control', 'utility', 'code']
+const TYPE_ORDER: NodeType[] = ['trigger', 'action', 'condition', 'transformer', 'control', 'utility', 'code', 'annotation']
 
 export function NodePalette() {
   const nodes = useRegistryStore((s) => s.nodes)

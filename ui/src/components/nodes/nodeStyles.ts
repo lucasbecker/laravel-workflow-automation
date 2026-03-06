@@ -7,6 +7,7 @@ import {
   Settings,
   Wrench,
   Code,
+  StickyNote,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -18,4 +19,5 @@ export const NODE_TYPE_ICON: Record<NodeType, LucideIcon> = {
   control:     Settings,
   utility:     Wrench,
   code:        Code,
+  annotation:  StickyNote,
 }

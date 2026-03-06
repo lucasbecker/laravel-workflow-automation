@@ -18,9 +18,10 @@ import { useWorkflowEditorStore } from '../../stores/useWorkflowEditorStore'
 import { useRegistryStore } from '../../stores/useRegistryStore'
 import { useAutoSavePosition } from '../../hooks/useAutoSavePosition'
 import { CustomNode } from '../nodes/CustomNode'
+import { StickyNoteNode } from '../nodes/StickyNoteNode'
 import { ConfirmDialog } from '../shared/ConfirmDialog'
 
-const nodeTypes = { custom: CustomNode }
+const nodeTypes = { custom: CustomNode, sticky_note: StickyNoteNode }
 
 interface EdgeContextMenu {
   edgeId: string

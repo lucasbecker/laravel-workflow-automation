@@ -11,4 +11,5 @@ enum NodeType: string
     case Control     = 'control';
     case Utility     = 'utility';
     case Code        = 'code';
+    case Annotation  = 'annotation';
 }

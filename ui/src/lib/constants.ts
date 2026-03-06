@@ -8,6 +8,7 @@ export const NODE_TYPE_COLORS: Record<NodeType, { bg: string; border: string; te
   control:     { bg: 'bg-gray-50',    border: 'border-gray-500',   text: 'text-gray-700' },
   utility:     { bg: 'bg-teal-50',    border: 'border-teal-500',   text: 'text-teal-700' },
   code:        { bg: 'bg-slate-50',   border: 'border-slate-500',  text: 'text-slate-700' },
+  annotation:  { bg: 'bg-yellow-50',  border: 'border-yellow-400', text: 'text-yellow-700' },
 }
 
 export const NODE_TYPE_LABELS: Record<NodeType, string> = {
@@ -18,6 +19,7 @@ export const NODE_TYPE_LABELS: Record<NodeType, string> = {
   control:     'Control',
   utility:     'Utility',
   code:        'Code',
+  annotation:  'Annotations',
 }
 
 export const RUN_STATUS_COLORS: Record<RunStatus, string> = {

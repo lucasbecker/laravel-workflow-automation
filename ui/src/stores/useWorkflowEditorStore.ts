@@ -36,6 +36,7 @@ interface WorkflowEditorStore {
   ) => Promise<void>
   updateNodeConfig: (nodeId: number, config: Record<string, unknown>) => Promise<void>
   setNodeLabel: (nodeId: number, label: string) => void
+  setNodeConfig: (nodeId: number, config: Record<string, unknown>) => void
   updateNodeLabel: (nodeId: number, label: string) => Promise<void>
   deleteNode: (nodeId: number) => Promise<void>
   updateNodePosition: (nodeId: number, x: number, y: number) => Promise<void>
@@ -123,6 +124,17 @@ export const useWorkflowEditorStore = create<WorkflowEditorStore>((set, get) => 
       rfNodes: get().rfNodes.map((n) => {
         if (n.id === String(nodeId)) {
           return { ...n, data: { ...n.data, label } }
+        }
+        return n
+      }),
+    })
+  },
+
+  setNodeConfig: (nodeId, config) => {
+    set({
+      rfNodes: get().rfNodes.map((n) => {
+        if (n.id === String(nodeId)) {
+          return { ...n, data: { ...n.data, apiNode: { ...n.data.apiNode, config } } }
         }
         return n
       }),

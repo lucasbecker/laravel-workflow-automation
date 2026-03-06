@@ -147,7 +147,7 @@ export interface ConfigSchemaField {
 }
 
 export type CreatedVia = 'editor' | 'import' | 'code' | 'api' | 'duplicate'
-export type NodeType = 'trigger' | 'action' | 'condition' | 'transformer' | 'control' | 'utility' | 'code'
+export type NodeType = 'trigger' | 'action' | 'condition' | 'transformer' | 'control' | 'utility' | 'code' | 'annotation'
 export type RunStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled' | 'waiting'
 export type NodeRunStatus = 'pending' | 'running' | 'completed' | 'failed' | 'skipped'
 

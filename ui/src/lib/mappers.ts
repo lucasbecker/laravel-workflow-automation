@@ -15,9 +15,11 @@ export function apiNodeToRFNode(
   apiNode: WorkflowNode,
   registryNode?: RegistryNode,
 ): Node<CustomNodeData> {
+  const isStickyNote = apiNode.node_key === 'sticky_note'
+
   return {
     id: String(apiNode.id),
-    type: 'custom',
+    type: isStickyNote ? 'sticky_note' : 'custom',
     position: {
       x: apiNode.position_x ?? 0,
       y: apiNode.position_y ?? 0,
@@ -28,8 +30,8 @@ export function apiNodeToRFNode(
       label: apiNode.name || registryNode?.label || apiNode.node_key,
       nodeKey: apiNode.node_key,
       nodeType: apiNode.type,
-      inputPorts: registryNode?.input_ports ?? ['main'],
-      outputPorts: registryNode?.output_ports ?? ['main'],
+      inputPorts: isStickyNote ? [] : (registryNode?.input_ports ?? ['main']),
+      outputPorts: isStickyNote ? [] : (registryNode?.output_ports ?? ['main']),
     },
   }
 }

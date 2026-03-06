@@ -378,6 +378,11 @@ class GraphExecutor
                 continue;
             }
 
+            // Skip annotation nodes (sticky notes) — they are visual-only
+            if ($node->type === NodeType::Annotation) {
+                continue;
+            }
+
             $nodeInstance = $this->registry->resolve($node->node_key);
             $inputPorts = $nodeInstance->inputPorts();
 

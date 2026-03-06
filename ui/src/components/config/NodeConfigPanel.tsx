@@ -13,7 +13,7 @@ import { TestNodeInputModal } from '../execution/TestNodeInputModal'
 type Tab = 'config' | 'output'
 
 export function NodeConfigPanel() {
-  const { workflow, selectedApiNode, selectedRegistryNode, selectNode, updateNodeConfig, updateNodeLabel, setNodeLabel, pinNode, unpinNode } =
+  const { workflow, selectedApiNode, selectedRegistryNode, selectNode, updateNodeConfig, updateNodeLabel, setNodeLabel, setNodeConfig, pinNode, unpinNode } =
     useWorkflowEditorStore()
   const { nodeTestResults, isTestingNode, testNode } = useRunStore()
 
@@ -45,9 +45,15 @@ export function NodeConfigPanel() {
   }, [workflow?.id, selectedApiNode?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleConfigChange = useCallback((key: string, value: unknown) => {
-    setLocalConfig((prev) => ({ ...prev, [key]: value }))
+    setLocalConfig((prev) => {
+      const updated = { ...prev, [key]: value }
+      if (selectedApiNode?.type === 'annotation') {
+        setNodeConfig(selectedApiNode.id, updated)
+      }
+      return updated
+    })
     setIsDirty(true)
-  }, [])
+  }, [selectedApiNode, setNodeConfig])
 
   const handleSave = async () => {
     if (!selectedApiNode) return
@@ -104,6 +110,7 @@ export function NodeConfigPanel() {
     )
   }
 
+  const isAnnotation = selectedApiNode.type === 'annotation'
   const nodeResult = nodeTestResults?.[selectedApiNode.id]
   const pinnedData = selectedApiNode.pinned_data
 
@@ -136,38 +143,40 @@ export function NodeConfigPanel() {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 dark:border-gray-700">
-        <button
-          onClick={() => setTab('config')}
-          className={`flex flex-1 items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium ${
-            tab === 'config'
-              ? 'border-b-2 border-blue-600 text-blue-600'
-              : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-          }`}
-        >
-          <Settings size={12} /> Config
-        </button>
-        <button
-          onClick={() => setTab('output')}
-          className={`flex flex-1 items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium ${
-            tab === 'output'
-              ? 'border-b-2 border-blue-600 text-blue-600'
-              : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-          }`}
-        >
-          <Database size={12} /> Output
-          {nodeResult && (
-            <span
-              className={`ml-1 inline-block h-1.5 w-1.5 rounded-full ${
-                nodeResult.status === 'completed' ? 'bg-green-500' : nodeResult.status === 'failed' ? 'bg-red-500' : 'bg-gray-400'
-              }`}
-            />
-          )}
-        </button>
-      </div>
+      {!isAnnotation && (
+        <div className="flex border-b border-gray-200 dark:border-gray-700">
+          <button
+            onClick={() => setTab('config')}
+            className={`flex flex-1 items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium ${
+              tab === 'config'
+                ? 'border-b-2 border-blue-600 text-blue-600'
+                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+            }`}
+          >
+            <Settings size={12} /> Config
+          </button>
+          <button
+            onClick={() => setTab('output')}
+            className={`flex flex-1 items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium ${
+              tab === 'output'
+                ? 'border-b-2 border-blue-600 text-blue-600'
+                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+            }`}
+          >
+            <Database size={12} /> Output
+            {nodeResult && (
+              <span
+                className={`ml-1 inline-block h-1.5 w-1.5 rounded-full ${
+                  nodeResult.status === 'completed' ? 'bg-green-500' : nodeResult.status === 'failed' ? 'bg-red-500' : 'bg-gray-400'
+                }`}
+              />
+            )}
+          </button>
+        </div>
+      )}
 
       {/* Pinned Data Banner */}
-      {pinnedData && (pinnedData.input || pinnedData.output) && (
+      {!isAnnotation && pinnedData && (pinnedData.input || pinnedData.output) && (
         <div className="flex items-center justify-between border-b border-orange-200 bg-orange-50 px-4 py-2 dark:border-orange-800 dark:bg-orange-900/20">
           <div className="flex items-center gap-1.5 text-xs text-orange-700 dark:text-orange-400">
             <Pin size={12} />
@@ -229,20 +238,22 @@ export function NodeConfigPanel() {
               {isSaving ? 'Saving...' : 'Save'}
             </button>
           )}
-          <button
-            onClick={() => setShowTestModal(true)}
-            disabled={isTestingNode}
-            className={`flex items-center justify-center gap-2 rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50 ${
-              isDirty && tab === 'config' ? '' : 'flex-1'
-            }`}
-          >
-            {isTestingNode ? (
-              <Loader2 size={14} className="animate-spin" />
-            ) : (
-              <Play size={14} />
-            )}
-            {isTestingNode ? 'Testing...' : 'Test'}
-          </button>
+          {!isAnnotation && (
+            <button
+              onClick={() => setShowTestModal(true)}
+              disabled={isTestingNode}
+              className={`flex items-center justify-center gap-2 rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50 ${
+                isDirty && tab === 'config' ? '' : 'flex-1'
+              }`}
+            >
+              {isTestingNode ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Play size={14} />
+              )}
+              {isTestingNode ? 'Testing...' : 'Test'}
+            </button>
+          )}
         </div>
       </div>
 
