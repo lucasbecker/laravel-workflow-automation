@@ -11,6 +11,8 @@ use Aftandilmmd\WorkflowAutomation\Enums\NodeType;
 #[AsWorkflowNode(key: 'error_handler', type: NodeType::Control, label: 'Error Handler')]
 class ErrorHandlerControl implements NodeInterface
 {
+    use \Aftandilmmd\WorkflowAutomation\Nodes\HasDocumentation;
+
     public function inputPorts(): array
     {
         return ['main'];

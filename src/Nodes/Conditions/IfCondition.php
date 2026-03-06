@@ -12,6 +12,8 @@ use Aftandilmmd\WorkflowAutomation\Enums\Operator;
 #[AsWorkflowNode(key: 'if_condition', type: NodeType::Condition, label: 'IF Condition')]
 class IfCondition implements NodeInterface
 {
+    use \Aftandilmmd\WorkflowAutomation\Nodes\HasDocumentation;
+
     public function inputPorts(): array
     {
         return ['main'];

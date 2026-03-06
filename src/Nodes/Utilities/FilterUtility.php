@@ -12,6 +12,8 @@ use Aftandilmmd\WorkflowAutomation\Enums\Operator;
 #[AsWorkflowNode(key: 'filter', type: NodeType::Utility, label: 'Filter')]
 class FilterUtility implements NodeInterface
 {
+    use \Aftandilmmd\WorkflowAutomation\Nodes\HasDocumentation;
+
     public function inputPorts(): array
     {
         return ['main'];

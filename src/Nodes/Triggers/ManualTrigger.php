@@ -11,6 +11,8 @@ use Aftandilmmd\WorkflowAutomation\Enums\NodeType;
 #[AsWorkflowNode(key: 'manual', type: NodeType::Trigger, label: 'Manual Trigger')]
 class ManualTrigger implements TriggerInterface
 {
+    use \Aftandilmmd\WorkflowAutomation\Nodes\HasDocumentation;
+
     public function inputPorts(): array
     {
         return [];

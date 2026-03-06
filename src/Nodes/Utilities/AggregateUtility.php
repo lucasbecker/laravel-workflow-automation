@@ -12,6 +12,8 @@ use Aftandilmmd\WorkflowAutomation\Enums\NodeType;
 #[AsWorkflowNode(key: 'aggregate', type: NodeType::Utility, label: 'Aggregate')]
 class AggregateUtility implements NodeInterface
 {
+    use \Aftandilmmd\WorkflowAutomation\Nodes\HasDocumentation;
+
     public function inputPorts(): array
     {
         return ['main'];

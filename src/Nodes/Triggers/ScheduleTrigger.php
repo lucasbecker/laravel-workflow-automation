@@ -11,6 +11,8 @@ use Aftandilmmd\WorkflowAutomation\Enums\NodeType;
 #[AsWorkflowNode(key: 'schedule', type: NodeType::Trigger, label: 'Schedule')]
 class ScheduleTrigger implements TriggerInterface
 {
+    use \Aftandilmmd\WorkflowAutomation\Nodes\HasDocumentation;
+
     public function inputPorts(): array
     {
         return [];

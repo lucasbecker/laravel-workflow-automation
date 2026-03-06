@@ -11,6 +11,8 @@ use Aftandilmmd\WorkflowAutomation\Enums\NodeType;
 #[AsWorkflowNode(key: 'event', type: NodeType::Trigger, label: 'Event')]
 class EventTrigger implements TriggerInterface
 {
+    use \Aftandilmmd\WorkflowAutomation\Nodes\HasDocumentation;
+
     public function inputPorts(): array
     {
         return [];

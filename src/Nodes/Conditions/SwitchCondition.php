@@ -12,6 +12,8 @@ use Aftandilmmd\WorkflowAutomation\Enums\Operator;
 #[AsWorkflowNode(key: 'switch', type: NodeType::Condition, label: 'Switch')]
 class SwitchCondition implements NodeInterface
 {
+    use \Aftandilmmd\WorkflowAutomation\Nodes\HasDocumentation;
+
     public function inputPorts(): array
     {
         return ['main'];

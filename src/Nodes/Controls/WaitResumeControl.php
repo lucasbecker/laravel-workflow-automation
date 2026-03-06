@@ -15,6 +15,8 @@ use Illuminate\Support\Str;
 #[AsWorkflowNode(key: 'wait_resume', type: NodeType::Control, label: 'Wait / Resume')]
 class WaitResumeControl implements NodeInterface
 {
+    use \Aftandilmmd\WorkflowAutomation\Nodes\HasDocumentation;
+
     public function inputPorts(): array
     {
         return ['main'];
