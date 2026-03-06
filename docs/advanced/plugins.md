@@ -182,11 +182,33 @@ Your `composer.json` should use Laravel's auto-discovery:
 }
 ```
 
+### 5. Node Documentation
+
+Add documentation that appears in the editor's **Docs** tab. Override `documentation()` on your node classes:
+
+```php
+#[AsWorkflowNode(key: 'slack_send_message', type: NodeType::Action, label: 'Send Slack Message')]
+class SendSlackMessageAction extends BaseNode
+{
+    public static function documentation(): ?string
+    {
+        return file_get_contents(__DIR__.'/../../docs/slack-send-message.md');
+    }
+
+    // ... configSchema(), execute(), etc.
+}
+```
+
+You can also return inline markdown directly. If `documentation()` returns `null` (the default), the Docs tab is hidden for that node.
+
 ### Package Structure
 
 ```
 acme/workflow-slack/
 ├── composer.json
+├── docs/
+│   ├── slack-send-message.md
+│   └── slack-webhook-trigger.md
 ├── src/
 │   ├── SlackPlugin.php
 │   ├── SlackServiceProvider.php

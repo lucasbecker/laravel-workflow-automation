@@ -360,6 +360,49 @@ $trigger->connect($slack);
 $workflow->activate();
 ```
 
+## Node Documentation
+
+Add documentation that appears in the visual editor's **Docs** tab when users select your node. Override the `documentation()` method on your node class:
+
+```php
+#[AsWorkflowNode(key: 'slack_message', type: NodeType::Action, label: 'Slack Message')]
+class SlackMessageNode extends BaseNode
+{
+    public static function documentation(): ?string
+    {
+        return file_get_contents(__DIR__.'/../docs/slack-message.md');
+    }
+}
+```
+
+You can also return inline markdown:
+
+```php
+public static function documentation(): ?string
+{
+    return <<<'MD'
+    # Slack Message
+
+    Sends a message to a Slack channel via webhook.
+
+    ## Config
+
+    | Key | Type | Required | Description |
+    |-----|------|----------|-------------|
+    | channel | string | Yes | Target channel name |
+    | message | textarea | Yes | Message body (supports expressions) |
+    | webhook_url | string | Yes | Slack incoming webhook URL |
+
+    ## Tips
+
+    - Use `{{ }}` expressions in the message field to include dynamic data
+    - The node outputs `slack_sent: true` on success
+    MD;
+}
+```
+
+`BaseNode` provides a default implementation that automatically loads the matching markdown file from the package's `docs/` directory (e.g. `docs/nodes/slack-message.md` for key `slack_message`). If no file exists, it returns `null` and the Docs tab is hidden.
+
 ## Dependency Injection
 
 Custom nodes support constructor injection from the Laravel container:
