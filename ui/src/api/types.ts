@@ -83,6 +83,7 @@ export interface RegistryNode {
   output_ports: string[]
   config_schema: ConfigSchemaField[]
   output_schema: Record<string, OutputSchemaField[]>
+  documentation: string | null
 }
 
 export interface OutputSchemaField {

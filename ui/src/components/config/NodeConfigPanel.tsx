@@ -9,7 +9,6 @@ import { VariablePanel } from './VariablePanel'
 import { JsonViewer } from '../shared/JsonViewer'
 import { NodeRunStatusBadge } from '../shared/StatusBadge'
 import { TestNodeInputModal } from '../execution/TestNodeInputModal'
-import { getNodeDoc } from '../../lib/nodeDocs'
 import { MarkdownRenderer } from '../shared/MarkdownRenderer'
 
 type Tab = 'config' | 'output' | 'docs'
@@ -123,7 +122,7 @@ export function NodeConfigPanel({ onTabChange }: NodeConfigPanelProps) {
   const isAnnotation = selectedApiNode.type === 'annotation'
   const nodeResult = nodeTestResults?.[selectedApiNode.id]
   const pinnedData = selectedApiNode.pinned_data
-  const docContent = isAnnotation ? null : getNodeDoc(selectedApiNode.node_key, selectedRegistryNode.type)
+  const docContent = isAnnotation ? null : selectedRegistryNode.documentation
 
   return (
     <div className="flex h-full flex-col">

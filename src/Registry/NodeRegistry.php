@@ -121,8 +121,9 @@ class NodeRegistry
                 'type'          => $meta['type']->value,
                 'input_ports'   => $instance->inputPorts(),
                 'output_ports'  => $instance->outputPorts(),
-                'config_schema' => $meta['class']::configSchema(),
-                'output_schema' => $meta['class']::outputSchema(),
+                'config_schema'  => $meta['class']::configSchema(),
+                'output_schema'  => $meta['class']::outputSchema(),
+                'documentation'  => method_exists($meta['class'], 'documentation') ? $meta['class']::documentation() : null,
             ];
         }
 
