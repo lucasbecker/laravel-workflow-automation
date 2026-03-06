@@ -8,9 +8,21 @@ import type {
   WorkflowRun,
 } from './types'
 
+export interface WorkflowListParams {
+  page?: number
+  search?: string
+  sort?: 'name' | 'created_at' | 'updated_at'
+  direction?: 'asc' | 'desc'
+}
+
 export const workflowsApi = {
-  list: (page = 1) =>
-    api.get<PaginatedResponse<Workflow>>(`/workflows?page=${page}`),
+  list: ({ page = 1, search, sort, direction }: WorkflowListParams = {}) => {
+    const params = new URLSearchParams({ page: String(page) })
+    if (search) params.set('search', search)
+    if (sort) params.set('sort', sort)
+    if (direction) params.set('direction', direction)
+    return api.get<PaginatedResponse<Workflow>>(`/workflows?${params}`)
+  },
 
   show: (id: number) =>
     api.get<ApiResponse<Workflow>>(`/workflows/${id}`),

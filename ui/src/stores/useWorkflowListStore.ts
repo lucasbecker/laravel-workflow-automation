@@ -8,7 +8,12 @@ interface WorkflowListStore {
   lastPage: number
   total: number
   isLoading: boolean
+  search: string
+  sort: 'name' | 'created_at' | 'updated_at'
+  direction: 'asc' | 'desc'
   fetchWorkflows: (page?: number) => Promise<void>
+  setSearch: (search: string) => void
+  setSort: (sort: WorkflowListStore['sort'], direction: WorkflowListStore['direction']) => void
   createWorkflow: (name: string, description?: string) => Promise<Workflow>
   deleteWorkflow: (id: number) => Promise<void>
   duplicateWorkflow: (id: number) => Promise<void>
@@ -21,11 +26,15 @@ export const useWorkflowListStore = create<WorkflowListStore>((set, get) => ({
   lastPage: 1,
   total: 0,
   isLoading: false,
+  search: '',
+  sort: 'created_at',
+  direction: 'desc',
 
   fetchWorkflows: async (page = 1) => {
+    const { search, sort, direction } = get()
     set({ isLoading: true })
     try {
-      const res = await workflowsApi.list(page)
+      const res = await workflowsApi.list({ page, search: search || undefined, sort, direction })
       set({
         workflows: res.data,
         currentPage: res.meta.current_page,
@@ -35,6 +44,16 @@ export const useWorkflowListStore = create<WorkflowListStore>((set, get) => ({
     } finally {
       set({ isLoading: false })
     }
+  },
+
+  setSearch: (search) => {
+    set({ search })
+    get().fetchWorkflows(1)
+  },
+
+  setSort: (sort, direction) => {
+    set({ sort, direction })
+    get().fetchWorkflows(1)
   },
 
   createWorkflow: async (name, description) => {

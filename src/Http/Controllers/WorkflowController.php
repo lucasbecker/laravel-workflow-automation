@@ -21,10 +21,16 @@ class WorkflowController extends Controller
 
     public function index(Request $request): AnonymousResourceCollection
     {
+        $sortField = in_array($request->input('sort'), ['name', 'created_at', 'updated_at'], true)
+            ? $request->input('sort')
+            : 'created_at';
+        $sortDir = $request->input('direction') === 'asc' ? 'asc' : 'desc';
+
         $workflows = Workflow::query()
+            ->when($request->filled('search'), fn ($q) => $q->where('name', 'like', '%'.$request->string('search').'%'))
             ->when($request->boolean('active_only'), fn ($q) => $q->where('is_active', true))
-            ->latest()
-            ->paginate($request->integer('per_page', 15));
+            ->orderBy($sortField, $sortDir)
+            ->paginate(min($request->integer('per_page', 15), 100));
 
         return WorkflowResource::collection($workflows);
     }

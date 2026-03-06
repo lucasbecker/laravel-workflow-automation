@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Plus,
@@ -11,6 +11,8 @@ import {
   ChevronRight,
   Sun,
   Moon,
+  Search,
+  ArrowUpDown,
 } from 'lucide-react'
 import { useWorkflowListStore } from '../../stores/useWorkflowListStore'
 import { useRegistryStore } from '../../stores/useRegistryStore'
@@ -20,6 +22,14 @@ import { ConfirmDialog } from '../shared/ConfirmDialog'
 import { ImportWorkflowModal } from './ImportWorkflowModal'
 import type { Workflow } from '../../api/types'
 
+const sortOptions = [
+  { label: 'Newest first', sort: 'created_at' as const, direction: 'desc' as const },
+  { label: 'Oldest first', sort: 'created_at' as const, direction: 'asc' as const },
+  { label: 'Recently updated', sort: 'updated_at' as const, direction: 'desc' as const },
+  { label: 'Name A-Z', sort: 'name' as const, direction: 'asc' as const },
+  { label: 'Name Z-A', sort: 'name' as const, direction: 'desc' as const },
+]
+
 export function WorkflowListPage() {
   const navigate = useNavigate()
   const {
@@ -28,7 +38,12 @@ export function WorkflowListPage() {
     lastPage,
     total,
     isLoading,
+    search,
+    sort,
+    direction,
     fetchWorkflows,
+    setSearch,
+    setSort,
     createWorkflow,
     deleteWorkflow,
     duplicateWorkflow,
@@ -43,10 +58,23 @@ export function WorkflowListPage() {
   const [newDesc, setNewDesc] = useState('')
   const [deleteId, setDeleteId] = useState<number | null>(null)
   const [duplicateId, setDuplicateId] = useState<number | null>(null)
+  const [searchInput, setSearchInput] = useState(search)
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined)
 
+  // search/sort/direction are intentionally excluded — setSearch/setSort call fetchWorkflows directly
   useEffect(() => {
     fetchWorkflows()
   }, [fetchWorkflows])
+
+  useEffect(() => {
+    return () => clearTimeout(debounceRef.current)
+  }, [])
+
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchInput(value)
+    clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => setSearch(value), 300)
+  }, [setSearch])
 
   const handleCreate = async () => {
     if (!newName.trim()) return
@@ -101,6 +129,38 @@ export function WorkflowListPage() {
             <Plus size={16} />
             <span className="hidden sm:inline">New Workflow</span>
           </button>
+        </div>
+      </div>
+
+      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative flex-1">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            placeholder="Search workflows..."
+            className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-9 pr-3 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+          />
+        </div>
+        <div className="relative">
+          <div className="flex items-center gap-1.5">
+            <ArrowUpDown size={14} className="text-gray-400 dark:text-gray-500" />
+            <select
+              value={`${sort}:${direction}`}
+              onChange={(e) => {
+                const opt = sortOptions.find(o => `${o.sort}:${o.direction}` === e.target.value)
+                if (opt) setSort(opt.sort, opt.direction)
+              }}
+              className="appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-2 pr-8 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
+            >
+              {sortOptions.map((opt) => (
+                <option key={`${opt.sort}:${opt.direction}`} value={`${opt.sort}:${opt.direction}`}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
