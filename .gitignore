@@ -34,3 +34,4 @@ ui/dist/
 # Laravel test artifacts
 storage/
 bootstrap/cache/
+CLAUDE.md
