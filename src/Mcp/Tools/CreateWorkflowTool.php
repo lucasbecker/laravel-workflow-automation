@@ -36,14 +36,10 @@ class CreateWorkflowTool extends Tool
             'name' => $request->get('name'),
             'description' => $request->get('description'),
             'folder_id' => $request->get('folder_id'),
+            'tag_ids' => $request->get('tag_ids'),
         ], fn ($v) => ! is_null($v));
 
         $workflow = $this->service->create($data);
-
-        if ($tagIds = $request->get('tag_ids')) {
-            $workflow->tags()->sync($tagIds);
-            $workflow->load('tags');
-        }
 
         return Response::json([
             'workflow' => [

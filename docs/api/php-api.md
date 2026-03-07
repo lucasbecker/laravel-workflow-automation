@@ -12,6 +12,16 @@ use Aftandilmmd\WorkflowAutomation\Models\Workflow;
 $workflow = Workflow::create([
     'name'        => 'My Workflow',
     'description' => 'Optional description',
+    'folder_id'   => $folder->id,  // Optional: assign to folder
+]);
+```
+
+With tags (via service or facade):
+
+```php
+$workflow = Workflow::create([
+    'name'    => 'My Workflow',
+    'tag_ids' => [$tag1->id, $tag2->id],
 ]);
 ```
 
@@ -102,10 +112,36 @@ $run = $workflow->start([
 $errors = $workflow->validateGraph(): array // Returns string[] of errors
 ```
 
+### Tags & Folders
+
+```php
+// Assign tags (replaces existing)
+$workflow->attachTags([$tag1->id, $tag2->id]): static
+
+// Remove specific tags
+$workflow->detachTags([$tag1->id]): static
+
+// Remove all tags
+$workflow->detachTags(): static
+
+// Move to a folder
+$workflow->moveToFolder($folder): static       // WorkflowFolder instance
+$workflow->moveToFolder($folder->id): static   // or integer ID
+
+// Remove from folder
+$workflow->moveToFolder(null): static
+```
+
+All methods return `$this` for chaining:
+
+```php
+$workflow->attachTags([1, 2])->moveToFolder($folder)->activate();
+```
+
 ### Other Operations
 
 ```php
-$copy = $workflow->duplicate(): Workflow  // Deep copy with all nodes and edges
+$copy = $workflow->duplicate(): Workflow  // Deep copy with nodes, edges, and tags
 $workflow->removeNode(int $nodeId): void
 $workflow->removeEdge(int $edgeId): void
 ```
@@ -133,10 +169,10 @@ Workflow::retryNode(int|WorkflowRun $run, int $nodeId): WorkflowRun
 ### CRUD
 
 ```php
-Workflow::create(array $data): Workflow
-Workflow::update(int|Workflow $workflow, array $data): Workflow
+Workflow::create(array $data): Workflow           // $data may include 'tag_ids' => [...]
+Workflow::update(int|Workflow $workflow, array $data): Workflow  // same
 Workflow::delete(int|Workflow $workflow): void
-Workflow::duplicate(int|Workflow $workflow): Workflow
+Workflow::duplicate(int|Workflow $workflow): Workflow            // copies tags
 ```
 
 ### State

@@ -133,13 +133,31 @@ class WorkflowService
 
     public function create(array $data): Workflow
     {
-        return Workflow::create($data);
+        $tagIds = $data['tag_ids'] ?? null;
+        unset($data['tag_ids']);
+
+        $workflow = Workflow::create($data);
+
+        if ($tagIds !== null) {
+            $workflow->tags()->sync($tagIds);
+            $workflow->load('tags');
+        }
+
+        return $workflow;
     }
 
     public function update(int|Workflow $workflow, array $data): Workflow
     {
         $workflow = $this->resolveWorkflow($workflow);
+
+        $tagIds = $data['tag_ids'] ?? null;
+        unset($data['tag_ids']);
+
         $workflow->update($data);
+
+        if ($tagIds !== null) {
+            $workflow->tags()->sync($tagIds);
+        }
 
         return $workflow->fresh();
     }
@@ -177,7 +195,9 @@ class WorkflowService
             ]);
         }
 
-        return $new->load(['nodes', 'edges']);
+        $new->tags()->sync($workflow->tags->pluck('id'));
+
+        return $new->load(['nodes', 'edges', 'tags']);
     }
 
     // ── State ──────────────────────────────────────────────────────

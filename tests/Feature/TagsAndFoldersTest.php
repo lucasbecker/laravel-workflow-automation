@@ -3,6 +3,7 @@
 use Aftandilmmd\WorkflowAutomation\Models\Workflow;
 use Aftandilmmd\WorkflowAutomation\Models\WorkflowFolder;
 use Aftandilmmd\WorkflowAutomation\Models\WorkflowTag;
+use Aftandilmmd\WorkflowAutomation\Services\WorkflowService;
 
 // ── Tags CRUD ───────────────────────────────────────────────────
 
@@ -223,4 +224,107 @@ it('searches tags by name', function () {
     $this->getJson('/workflow-engine/tags?search=prod')
         ->assertOk()
         ->assertJsonCount(1, 'data');
+});
+
+// ── Service: tag_ids in create/update ──────────────────────────
+
+it('creates workflow with tag_ids via service', function () {
+    $service = app(WorkflowService::class);
+    $tags = WorkflowTag::factory()->count(2)->create();
+
+    $workflow = $service->create([
+        'name' => 'Service Test',
+        'tag_ids' => $tags->pluck('id')->all(),
+    ]);
+
+    expect($workflow->tags)->toHaveCount(2);
+});
+
+it('updates workflow tag_ids via service', function () {
+    $service = app(WorkflowService::class);
+    $workflow = Workflow::factory()->create();
+    $tag1 = WorkflowTag::factory()->create();
+    $tag2 = WorkflowTag::factory()->create();
+    $workflow->tags()->attach($tag1);
+
+    $workflow = $service->update($workflow, ['tag_ids' => [$tag2->id]]);
+
+    expect($workflow->tags)->toHaveCount(1);
+    expect($workflow->tags->first()->id)->toBe($tag2->id);
+});
+
+it('duplicates workflow with tags', function () {
+    $service = app(WorkflowService::class);
+    $workflow = Workflow::factory()->create();
+    $tags = WorkflowTag::factory()->count(2)->create();
+    $workflow->tags()->sync($tags->pluck('id'));
+
+    $copy = $service->duplicate($workflow);
+
+    expect($copy->tags)->toHaveCount(2);
+    expect($copy->tags->pluck('id')->sort()->values()->all())
+        ->toBe($tags->pluck('id')->sort()->values()->all());
+});
+
+// ── Fluent API: attachTags, detachTags, moveToFolder ───────────
+
+it('attaches tags via fluent API', function () {
+    $workflow = Workflow::factory()->create();
+    $tags = WorkflowTag::factory()->count(3)->create();
+
+    $result = $workflow->attachTags($tags->pluck('id')->all());
+
+    expect($result)->toBe($workflow);
+    expect($workflow->tags)->toHaveCount(3);
+});
+
+it('detaches specific tags via fluent API', function () {
+    $workflow = Workflow::factory()->create();
+    $tags = WorkflowTag::factory()->count(3)->create();
+    $workflow->tags()->sync($tags->pluck('id'));
+
+    $workflow->detachTags([$tags[0]->id]);
+
+    expect($workflow->tags)->toHaveCount(2);
+});
+
+it('detaches all tags via fluent API', function () {
+    $workflow = Workflow::factory()->create();
+    $tags = WorkflowTag::factory()->count(3)->create();
+    $workflow->tags()->sync($tags->pluck('id'));
+
+    $workflow->detachTags();
+
+    expect($workflow->tags)->toHaveCount(0);
+});
+
+it('moves workflow to folder via fluent API', function () {
+    $workflow = Workflow::factory()->create();
+    $folder = WorkflowFolder::factory()->create();
+
+    $result = $workflow->moveToFolder($folder);
+
+    expect($result)->toBe($workflow);
+    expect($workflow->folder_id)->toBe($folder->id);
+    expect($workflow->folder->id)->toBe($folder->id);
+});
+
+it('removes workflow from folder via fluent API', function () {
+    $folder = WorkflowFolder::factory()->create();
+    $workflow = Workflow::factory()->create(['folder_id' => $folder->id]);
+
+    $workflow->moveToFolder(null);
+
+    expect($workflow->folder_id)->toBeNull();
+});
+
+it('chains fluent tag and folder methods', function () {
+    $workflow = Workflow::factory()->create();
+    $tag = WorkflowTag::factory()->create();
+    $folder = WorkflowFolder::factory()->create();
+
+    $workflow->attachTags([$tag->id])->moveToFolder($folder);
+
+    expect($workflow->tags)->toHaveCount(1);
+    expect($workflow->folder_id)->toBe($folder->id);
 });

@@ -37,14 +37,10 @@ class UpdateWorkflowTool extends Tool
             'name' => $request->get('name'),
             'description' => $request->get('description'),
             'folder_id' => $request->get('folder_id'),
+            'tag_ids' => $request->get('tag_ids'),
         ], fn ($value) => ! is_null($value));
 
         $workflow = $this->service->update($request->get('workflow_id'), $data);
-
-        if ($request->get('tag_ids') !== null) {
-            $workflow->tags()->sync($request->get('tag_ids'));
-            $workflow->load('tags');
-        }
 
         return Response::json([
             'workflow' => [

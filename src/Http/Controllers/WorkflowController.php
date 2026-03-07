@@ -48,11 +48,7 @@ class WorkflowController extends Controller
 
     public function store(StoreWorkflowRequest $request): WorkflowResource
     {
-        $workflow = $this->service->create($request->safe()->except('tag_ids'));
-
-        if ($request->has('tag_ids')) {
-            $workflow->tags()->sync($request->input('tag_ids'));
-        }
+        $workflow = $this->service->create($request->validated());
 
         return new WorkflowResource($workflow->load(['tags', 'folder']));
     }
@@ -66,11 +62,7 @@ class WorkflowController extends Controller
 
     public function update(UpdateWorkflowRequest $request, Workflow $workflow): WorkflowResource
     {
-        $workflow = $this->service->update($workflow, $request->safe()->except('tag_ids'));
-
-        if ($request->has('tag_ids')) {
-            $workflow->tags()->sync($request->input('tag_ids'));
-        }
+        $workflow = $this->service->update($workflow, $request->validated());
 
         return new WorkflowResource($workflow->load(['tags', 'folder']));
     }

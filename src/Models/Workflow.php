@@ -148,6 +148,36 @@ class Workflow extends Model
         $this->service()->removeEdge($edgeId);
     }
 
+    public function attachTags(array $tagIds): static
+    {
+        $this->tags()->sync($tagIds);
+        $this->load('tags');
+
+        return $this;
+    }
+
+    public function detachTags(array $tagIds = []): static
+    {
+        if (empty($tagIds)) {
+            $this->tags()->detach();
+        } else {
+            $this->tags()->detach($tagIds);
+        }
+
+        $this->load('tags');
+
+        return $this;
+    }
+
+    public function moveToFolder(int|WorkflowFolder|null $folder): static
+    {
+        $folderId = $folder instanceof WorkflowFolder ? $folder->id : $folder;
+        $this->update(['folder_id' => $folderId]);
+        $this->load('folder');
+
+        return $this;
+    }
+
     private function service(): WorkflowService
     {
         return app(WorkflowService::class);
