@@ -441,6 +441,7 @@ const highlightedCode = computed(() => {
   margin: 0 auto;
   padding: 0 24px;
   position: relative;
+  overflow-x: hidden;
 }
 
 .grid-bg {
@@ -623,6 +624,7 @@ const highlightedCode = computed(() => {
   padding: 0 16px;
   border-bottom: 1px solid var(--vp-c-divider);
   background: var(--vp-c-bg);
+  overflow: hidden;
 }
 
 .code-tabs {
@@ -655,6 +657,11 @@ const highlightedCode = computed(() => {
   font-size: 13px;
   color: var(--vp-c-text-3);
   font-family: var(--vp-font-family-mono);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .code-body {
@@ -717,14 +724,55 @@ html.dark .code-body :deep(.shiki span) {
 }
 
 @media (max-width: 640px) {
+  .home-page {
+    padding: 0 16px;
+  }
+  .hero {
+    padding: 48px 0 24px;
+  }
   .hero-title {
     font-size: 32px;
+  }
+  .hero-description {
+    font-size: 15px;
   }
   .features-grid {
     grid-template-columns: 1fr;
   }
+  .feature-card {
+    padding: 20px;
+  }
   .why-header h2 {
     font-size: 24px;
+  }
+  .why-card {
+    padding: 20px;
+  }
+  .why-section {
+    padding: 48px 0;
+  }
+  .code-filename {
+    display: none;
+  }
+  .code-tab {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  .code-body :deep(pre) {
+    padding: 16px;
+    font-size: 12px;
+  }
+  .cta-code {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+  .cta-section h2 {
+    font-size: 24px;
+  }
+  .browser-address span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
@@ -735,8 +783,17 @@ html.dark .code-body :deep(.shiki span) {
   .features-grid {
     grid-template-columns: 1fr;
   }
+  .feature-card {
+    padding: 24px;
+  }
   .why-header h2 {
     font-size: 28px;
+  }
+  .why-card {
+    padding: 24px;
+  }
+  .cta-code {
+    font-size: 14px;
   }
 }
 
@@ -997,6 +1054,7 @@ html:not(.dark) .screenshot-light { display: block; }
 
 .cta-code {
   display: inline-block;
+  max-width: 100%;
   padding: 14px 28px;
   border-radius: 8px;
   background: var(--vp-c-bg-soft);
@@ -1004,5 +1062,8 @@ html:not(.dark) .screenshot-light { display: block; }
   font-family: var(--vp-font-family-mono);
   font-size: 15px;
   color: var(--vp-c-text-1);
+  overflow-wrap: break-word;
+  word-break: break-all;
+  box-sizing: border-box;
 }
 </style>
