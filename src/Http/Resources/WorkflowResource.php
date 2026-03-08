@@ -19,6 +19,9 @@ class WorkflowResource extends JsonResource
             'created_via' => $this->created_via?->value,
             'created_at'  => $this->created_at?->toISOString(),
             'updated_at'  => $this->updated_at?->toISOString(),
+            'folder_id'   => $this->folder_id,
+            'folder'      => new WorkflowFolderResource($this->whenLoaded('folder')),
+            'tags'        => WorkflowTagResource::collection($this->whenLoaded('tags')),
             'nodes'       => WorkflowNodeResource::collection($this->whenLoaded('nodes')),
             'edges'       => WorkflowEdgeResource::collection($this->whenLoaded('edges')),
         ];

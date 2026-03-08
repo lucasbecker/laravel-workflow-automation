@@ -18,6 +18,9 @@ return [
         'runs'       => 'workflow_runs',
         'node_runs'    => 'workflow_node_runs',
         'credentials'  => 'workflow_credentials',
+        'tags'         => 'workflow_tags',
+        'tag_pivot'    => 'workflow_tag_pivot',
+        'folders'      => 'workflow_folders',
     ],
 
     /*
@@ -36,6 +39,8 @@ return [
         'run'       => Aftandilmmd\WorkflowAutomation\Models\WorkflowRun::class,
         'node_run'    => Aftandilmmd\WorkflowAutomation\Models\WorkflowNodeRun::class,
         'credential'  => Aftandilmmd\WorkflowAutomation\Models\WorkflowCredential::class,
+        'tag'         => Aftandilmmd\WorkflowAutomation\Models\WorkflowTag::class,
+        'folder'      => Aftandilmmd\WorkflowAutomation\Models\WorkflowFolder::class,
     ],
 
     /*

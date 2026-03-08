@@ -27,7 +27,7 @@ interface WorkflowEditorStore {
   selectedRegistryNode: RegistryNode | undefined
 
   loadWorkflow: (id: number, registryLookup: (key: string) => RegistryNode | undefined) => Promise<void>
-  updateWorkflowMeta: (data: { name?: string; description?: string }) => Promise<void>
+  updateWorkflowMeta: (data: { name?: string; description?: string; folder_id?: number | null; tag_ids?: number[] }) => Promise<void>
 
   addNode: (
     nodeKey: string,

@@ -23,6 +23,10 @@ class ListWorkflowsTool extends Tool
         return [
             'page' => $schema->integer()->description('Page number')->default(1),
             'per_page' => $schema->integer()->description('Items per page')->default(15),
+            'search' => $schema->string()->description('Search workflows by name'),
+            'folder_id' => $schema->integer()->description('Filter by folder ID'),
+            'tag_id' => $schema->integer()->description('Filter by tag ID'),
+            'tag' => $schema->string()->description('Filter by tag name'),
         ];
     }
 
@@ -31,14 +35,30 @@ class ListWorkflowsTool extends Tool
         $page = $request->get('page') ?? 1;
         $perPage = $request->get('per_page') ?? 15;
 
-        $paginator = Workflow::withCount(['nodes', 'edges'])
-            ->paginate($perPage, ['*'], 'page', $page);
+        $query = Workflow::withCount(['nodes', 'edges'])->with('tags');
+
+        if ($search = $request->get('search')) {
+            $query->where('name', 'like', "%{$search}%");
+        }
+        if ($folderId = $request->get('folder_id')) {
+            $query->where('folder_id', $folderId);
+        }
+        if ($tagId = $request->get('tag_id')) {
+            $query->whereHas('tags', fn ($q) => $q->where($q->getModel()->getTable().'.id', $tagId));
+        }
+        if ($tagName = $request->get('tag')) {
+            $query->whereHas('tags', fn ($q) => $q->where('name', $tagName));
+        }
+
+        $paginator = $query->paginate($perPage, ['*'], 'page', $page);
 
         $items = collect($paginator->items())->map(fn (Workflow $w) => [
             'id' => $w->id,
             'name' => $w->name,
             'description' => $w->description,
             'is_active' => $w->is_active,
+            'folder_id' => $w->folder_id,
+            'tags' => $w->tags->map(fn ($t) => ['id' => $t->id, 'name' => $t->name, 'color' => $t->color])->all(),
             'nodes_count' => $w->nodes_count,
             'edges_count' => $w->edges_count,
         ])->all();

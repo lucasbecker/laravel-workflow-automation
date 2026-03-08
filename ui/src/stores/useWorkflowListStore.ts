@@ -1,6 +1,8 @@
 import { create } from 'zustand'
-import type { Workflow } from '../api/types'
+import type { Workflow, WorkflowTag, WorkflowFolder } from '../api/types'
 import { workflowsApi } from '../api/workflows'
+import { tagsApi } from '../api/tags'
+import { foldersApi } from '../api/folders'
 
 interface WorkflowListStore {
   workflows: Workflow[]
@@ -11,9 +13,24 @@ interface WorkflowListStore {
   search: string
   sort: 'name' | 'created_at' | 'updated_at'
   direction: 'asc' | 'desc'
+
+  // Tags & Folders
+  tags: WorkflowTag[]
+  folders: WorkflowFolder[]
+  selectedTagId: number | null
+  selectedFolderId: number | null | 'uncategorized'
+
   fetchWorkflows: (page?: number) => Promise<void>
   setSearch: (search: string) => void
   setSort: (sort: WorkflowListStore['sort'], direction: WorkflowListStore['direction']) => void
+  setSelectedTagId: (id: number | null) => void
+  setSelectedFolderId: (id: number | null | 'uncategorized') => void
+  fetchTags: () => Promise<void>
+  fetchFolders: () => Promise<void>
+  createTag: (name: string, color?: string) => Promise<WorkflowTag>
+  deleteTag: (id: number) => Promise<void>
+  createFolder: (name: string, parentId?: number | null) => Promise<WorkflowFolder>
+  deleteFolder: (id: number) => Promise<void>
   createWorkflow: (name: string, description?: string) => Promise<Workflow>
   deleteWorkflow: (id: number) => Promise<void>
   duplicateWorkflow: (id: number) => Promise<void>
@@ -29,12 +46,24 @@ export const useWorkflowListStore = create<WorkflowListStore>((set, get) => ({
   search: '',
   sort: 'created_at',
   direction: 'desc',
+  tags: [],
+  folders: [],
+  selectedTagId: null,
+  selectedFolderId: null,
 
   fetchWorkflows: async (page = 1) => {
-    const { search, sort, direction } = get()
+    const { search, sort, direction, selectedTagId, selectedFolderId } = get()
     set({ isLoading: true })
     try {
-      const res = await workflowsApi.list({ page, search: search || undefined, sort, direction })
+      const res = await workflowsApi.list({
+        page,
+        search: search || undefined,
+        sort,
+        direction,
+        tag_id: selectedTagId ?? undefined,
+        folder_id: selectedFolderId === 'uncategorized' ? undefined : (selectedFolderId ?? undefined),
+        uncategorized: selectedFolderId === 'uncategorized' ? true : undefined,
+      })
       set({
         workflows: res.data,
         currentPage: res.meta.current_page,
@@ -54,6 +83,52 @@ export const useWorkflowListStore = create<WorkflowListStore>((set, get) => ({
   setSort: (sort, direction) => {
     set({ sort, direction })
     get().fetchWorkflows(1)
+  },
+
+  setSelectedTagId: (id) => {
+    set({ selectedTagId: id })
+    get().fetchWorkflows(1)
+  },
+
+  setSelectedFolderId: (id) => {
+    set({ selectedFolderId: id })
+    get().fetchWorkflows(1)
+  },
+
+  fetchTags: async () => {
+    const res = await tagsApi.list()
+    set({ tags: res.data })
+  },
+
+  fetchFolders: async () => {
+    const res = await foldersApi.list(true)
+    set({ folders: res.data })
+  },
+
+  createTag: async (name, color) => {
+    const res = await tagsApi.create({ name, color })
+    await get().fetchTags()
+    return res.data
+  },
+
+  deleteTag: async (id) => {
+    await tagsApi.destroy(id)
+    if (get().selectedTagId === id) set({ selectedTagId: null })
+    await get().fetchTags()
+    await get().fetchWorkflows(1)
+  },
+
+  createFolder: async (name, parentId) => {
+    const res = await foldersApi.create({ name, parent_id: parentId })
+    await get().fetchFolders()
+    return res.data
+  },
+
+  deleteFolder: async (id) => {
+    await foldersApi.destroy(id)
+    if (get().selectedFolderId === id) set({ selectedFolderId: null })
+    await get().fetchFolders()
+    await get().fetchWorkflows(1)
   },
 
   createWorkflow: async (name, description) => {

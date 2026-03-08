@@ -2,8 +2,10 @@
 
 use Aftandilmmd\WorkflowAutomation\Http\Controllers\AiBuilderController;
 use Aftandilmmd\WorkflowAutomation\Http\Controllers\CredentialController;
+use Aftandilmmd\WorkflowAutomation\Http\Controllers\FolderController;
 use Aftandilmmd\WorkflowAutomation\Http\Controllers\MetadataController;
 use Aftandilmmd\WorkflowAutomation\Http\Controllers\NodeRegistryController;
+use Aftandilmmd\WorkflowAutomation\Http\Controllers\TagController;
 use Aftandilmmd\WorkflowAutomation\Http\Controllers\WebhookController;
 use Aftandilmmd\WorkflowAutomation\Http\Controllers\WorkflowController;
 use Aftandilmmd\WorkflowAutomation\Http\Controllers\WorkflowEdgeController;
@@ -59,6 +61,12 @@ if (config('workflow-automation.api_routes', true)) {
             // ── Metadata (models, events) ──────────────────────────
             Route::get('metadata/models', [MetadataController::class, 'models']);
             Route::get('metadata/model-events', [MetadataController::class, 'modelEvents']);
+
+            // ── Tags ──────────────────────────────────────────────────
+            Route::apiResource('tags', TagController::class)->except(['show']);
+
+            // ── Folders ───────────────────────────────────────────────
+            Route::apiResource('folders', FolderController::class)->except(['show']);
 
             // ── Credentials ───────────────────────────────────────────
             Route::apiResource('credentials', CredentialController::class);

@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState } from 'react'
+import { useEffect, useCallback, useState, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -12,6 +12,11 @@ import {
   Moon,
   Menu,
   Bot,
+  Tag,
+  Folder,
+  X,
+  Check,
+  Plus,
 } from 'lucide-react'
 import { ReactFlowProvider } from '@xyflow/react'
 
@@ -21,6 +26,9 @@ import { useRunStore } from '../../stores/useRunStore'
 import { useThemeStore } from '../../stores/useThemeStore'
 import { useAiBuilderStore } from '../../stores/useAiBuilderStore'
 import { workflowsApi } from '../../api/workflows'
+import { tagsApi } from '../../api/tags'
+import { foldersApi } from '../../api/folders'
+import type { WorkflowTag, WorkflowFolder } from '../../api/types'
 import { Canvas } from './Canvas'
 import { ExportDropdown } from './ExportDropdown'
 import { NodePalette } from '../palette/NodePalette'
@@ -36,7 +44,7 @@ type SidebarTab = 'palette' | 'runs'
 export function WorkflowEditorPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { workflow, isLoading, loadWorkflow, reset, selectedNodeId, selectNode, autoLayout } = useWorkflowEditorStore()
+  const { workflow, isLoading, loadWorkflow, updateWorkflowMeta, reset, selectedNodeId, selectNode, autoLayout } = useWorkflowEditorStore()
   const { fetchRegistry } = useRegistryStore()
   const { fetchRuns } = useRunStore()
   const { theme, toggle: toggleTheme } = useThemeStore()
@@ -48,10 +56,24 @@ export function WorkflowEditorPage() {
   const [mobileLeftOpen, setMobileLeftOpen] = useState(false)
   const [mobileRightOpen, setMobileRightOpen] = useState(false)
   const [configTab, setConfigTab] = useState<'config' | 'output' | 'docs'>('config')
+  const [allTags, setAllTags] = useState<WorkflowTag[]>([])
+  const [allFolders, setAllFolders] = useState<WorkflowFolder[]>([])
+  const [showTagPicker, setShowTagPicker] = useState(false)
+  const [showFolderPicker, setShowFolderPicker] = useState(false)
+  const [newTagName, setNewTagName] = useState('')
+  const tagPickerRef = useRef<HTMLDivElement>(null)
+  const folderPickerRef = useRef<HTMLDivElement>(null)
+
+  const loadTagsAndFolders = useCallback(async () => {
+    const [tagsRes, foldersRes] = await Promise.all([tagsApi.list(), foldersApi.list()])
+    setAllTags(tagsRes.data)
+    setAllFolders(foldersRes.data)
+  }, [])
 
   useEffect(() => {
     const init = async () => {
       await fetchRegistry()
+      await loadTagsAndFolders()
       if (id) {
         loadWorkflow(parseInt(id), useRegistryStore.getState().getByKey)
       }
@@ -63,6 +85,16 @@ export function WorkflowEditorPage() {
       aiBuilder.reset()
     }
   }, [id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Close pickers on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (tagPickerRef.current && !tagPickerRef.current.contains(e.target as HTMLElement)) setShowTagPicker(false)
+      if (folderPickerRef.current && !folderPickerRef.current.contains(e.target as HTMLElement)) setShowFolderPicker(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
 
   // Node selected → close AI panel; AI opened → deselect node
   useEffect(() => {
@@ -88,6 +120,31 @@ export function WorkflowEditorPage() {
       setTimeout(() => autoLayout(), 200)
     })
   }, [workflow, loadWorkflow, autoLayout])
+
+  const handleToggleTag = async (tagId: number) => {
+    if (!workflow) return
+    const currentTagIds = (workflow.tags ?? []).map((t) => t.id)
+    const newTagIds = currentTagIds.includes(tagId)
+      ? currentTagIds.filter((id) => id !== tagId)
+      : [...currentTagIds, tagId]
+    await updateWorkflowMeta({ tag_ids: newTagIds })
+    loadWorkflow(workflow.id, useRegistryStore.getState().getByKey)
+  }
+
+  const handleSetFolder = async (folderId: number | null) => {
+    if (!workflow) return
+    await updateWorkflowMeta({ folder_id: folderId })
+    loadWorkflow(workflow.id, useRegistryStore.getState().getByKey)
+    setShowFolderPicker(false)
+  }
+
+  const handleCreateTag = async () => {
+    if (!newTagName.trim()) return
+    const res = await tagsApi.create({ name: newTagName.trim() })
+    setNewTagName('')
+    setAllTags((prev) => [...prev, res.data])
+    await handleToggleTag(res.data.id)
+  }
 
   const handleDuplicate = async () => {
     if (!workflow || isDuplicating) return
@@ -134,6 +191,110 @@ export function WorkflowEditorPage() {
           >
             {workflow.is_active ? 'Active' : 'Inactive'}
           </span>
+
+          {/* Folder indicator */}
+          <div className="relative hidden md:block" ref={folderPickerRef}>
+            <button
+              onClick={() => { setShowFolderPicker(!showFolderPicker); setShowTagPicker(false) }}
+              className="flex items-center gap-1 rounded-md px-2 py-1 text-[10px] text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+              title="Set folder"
+            >
+              <Folder size={12} />
+              <span className="max-w-20 truncate">
+                {workflow.folder ? workflow.folder.name : 'No folder'}
+              </span>
+            </button>
+            {showFolderPicker && (
+              <div className="absolute left-0 top-full z-50 mt-1 w-48 rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-600 dark:bg-gray-800">
+                <button
+                  onClick={() => handleSetFolder(null)}
+                  className={`flex w-full items-center gap-2 px-3 py-1.5 text-xs hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                    !workflow.folder_id ? 'font-medium text-blue-600' : 'text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  {!workflow.folder_id && <Check size={12} />}
+                  <span className={!workflow.folder_id ? '' : 'ml-5'}>No folder</span>
+                </button>
+                {allFolders.map((f) => (
+                  <button
+                    key={f.id}
+                    onClick={() => handleSetFolder(f.id)}
+                    className={`flex w-full items-center gap-2 px-3 py-1.5 text-xs hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                      workflow.folder_id === f.id ? 'font-medium text-blue-600' : 'text-gray-700 dark:text-gray-300'
+                    }`}
+                  >
+                    {workflow.folder_id === f.id && <Check size={12} />}
+                    <Folder size={12} className={workflow.folder_id === f.id ? '' : 'ml-5'} />
+                    {f.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Tag badges + picker */}
+          <div className="relative hidden items-center gap-1 md:flex" ref={tagPickerRef}>
+            {(workflow.tags ?? []).map((tag) => (
+              <span
+                key={tag.id}
+                className="inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[10px] font-medium"
+                style={{
+                  backgroundColor: (tag.color ?? '#6B7280') + '20',
+                  color: tag.color ?? '#6B7280',
+                }}
+              >
+                <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ backgroundColor: tag.color ?? '#6B7280' }} />
+                {tag.name}
+                <button onClick={() => handleToggleTag(tag.id)} className="ml-0.5 rounded-full p-0.5 hover:bg-black/10">
+                  <X size={8} />
+                </button>
+              </span>
+            ))}
+            <button
+              onClick={() => { setShowTagPicker(!showTagPicker); setShowFolderPicker(false) }}
+              className="rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+              title="Manage tags"
+            >
+              <Tag size={12} />
+            </button>
+            {showTagPicker && (
+              <div className="absolute left-0 top-full z-50 mt-1 w-52 rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-600 dark:bg-gray-800">
+                {allTags.map((tag) => {
+                  const isActive = (workflow.tags ?? []).some((t) => t.id === tag.id)
+                  return (
+                    <button
+                      key={tag.id}
+                      onClick={() => handleToggleTag(tag.id)}
+                      className="flex w-full items-center gap-2 px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700"
+                    >
+                      <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded border border-gray-300 dark:border-gray-600"
+                        style={isActive ? { backgroundColor: tag.color ?? '#3B82F6', borderColor: tag.color ?? '#3B82F6' } : {}}
+                      >
+                        {isActive && <Check size={10} className="text-white" />}
+                      </span>
+                      <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: tag.color ?? '#6B7280' }} />
+                      {tag.name}
+                    </button>
+                  )
+                })}
+                <div className="border-t border-gray-100 px-2 py-1.5 dark:border-gray-700">
+                  <div className="flex gap-1">
+                    <input
+                      type="text"
+                      value={newTagName}
+                      onChange={(e) => setNewTagName(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleCreateTag()}
+                      placeholder="New tag..."
+                      className="w-full rounded border border-gray-300 px-2 py-1 text-xs dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                    />
+                    <button onClick={handleCreateTag} className="rounded bg-blue-600 px-2 py-1 text-xs text-white hover:bg-blue-700">
+                      <Plus size={12} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <button

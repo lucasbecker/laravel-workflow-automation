@@ -13,14 +13,20 @@ export interface WorkflowListParams {
   search?: string
   sort?: 'name' | 'created_at' | 'updated_at'
   direction?: 'asc' | 'desc'
+  folder_id?: number | null
+  uncategorized?: boolean
+  tag_id?: number | null
 }
 
 export const workflowsApi = {
-  list: ({ page = 1, search, sort, direction }: WorkflowListParams = {}) => {
+  list: ({ page = 1, search, sort, direction, folder_id, uncategorized, tag_id }: WorkflowListParams = {}) => {
     const params = new URLSearchParams({ page: String(page) })
     if (search) params.set('search', search)
     if (sort) params.set('sort', sort)
     if (direction) params.set('direction', direction)
+    if (folder_id != null) params.set('folder_id', String(folder_id))
+    if (uncategorized) params.set('uncategorized', '1')
+    if (tag_id != null) params.set('tag_id', String(tag_id))
     return api.get<PaginatedResponse<Workflow>>(`/workflows?${params}`)
   },
 

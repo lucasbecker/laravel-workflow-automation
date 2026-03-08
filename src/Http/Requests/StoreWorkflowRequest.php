@@ -19,6 +19,9 @@ class StoreWorkflowRequest extends FormRequest
             'is_active'   => ['boolean'],
             'run_async'   => ['boolean'],
             'settings'    => ['nullable', 'array'],
+            'folder_id'   => ['nullable', 'integer', 'exists:'.config('workflow-automation.tables.folders', 'workflow_folders').',id'],
+            'tag_ids'     => ['nullable', 'array'],
+            'tag_ids.*'   => ['integer', 'exists:'.config('workflow-automation.tables.tags', 'workflow_tags').',id'],
             'created_via' => ['nullable', 'string', 'in:editor,import,code,api,duplicate'],
         ];
     }

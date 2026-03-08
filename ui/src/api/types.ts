@@ -1,5 +1,24 @@
 // ── API Response Types (matches Laravel Resources exactly) ──
 
+export interface WorkflowTag {
+  id: number
+  name: string
+  color: string | null
+  workflows_count?: number
+  created_at: string
+  updated_at: string
+}
+
+export interface WorkflowFolder {
+  id: number
+  name: string
+  parent_id: number | null
+  children?: WorkflowFolder[]
+  workflows_count?: number
+  created_at: string
+  updated_at: string
+}
+
 export interface Workflow {
   id: number
   name: string
@@ -8,6 +27,9 @@ export interface Workflow {
   run_async: boolean
   settings: Record<string, unknown> | null
   created_via: CreatedVia | null
+  folder_id: number | null
+  folder?: WorkflowFolder | null
+  tags?: WorkflowTag[]
   created_at: string
   updated_at: string
   nodes?: WorkflowNode[]
@@ -203,11 +225,15 @@ export interface CreateWorkflowPayload {
   description?: string
   is_active?: boolean
   created_via?: CreatedVia
+  folder_id?: number | null
+  tag_ids?: number[]
 }
 
 export interface UpdateWorkflowPayload {
   name?: string
   description?: string
+  folder_id?: number | null
+  tag_ids?: number[]
 }
 
 export interface CreateNodePayload {
