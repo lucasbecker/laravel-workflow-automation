@@ -171,9 +171,14 @@ export function WorkflowListPage() {
           )}
           {selectedFolderId === folder.id ? <FolderOpen size={14} /> : <Folder size={14} />}
           <span className="truncate">{folder.name}</span>
+          {folder.workflows_count != null && folder.workflows_count > 0 && (
+            <span className="ml-auto shrink-0 rounded-full bg-gray-200 px-1.5 py-0.5 text-[10px] font-medium leading-none text-gray-600 dark:bg-gray-600 dark:text-gray-300">
+              {folder.workflows_count}
+            </span>
+          )}
           <button
             onClick={(e) => { e.stopPropagation(); deleteFolder(folder.id) }}
-            className="ml-auto hidden shrink-0 rounded p-0.5 text-gray-400 hover:text-red-500 group-hover/folder:block"
+            className="hidden shrink-0 rounded p-0.5 text-gray-400 hover:text-red-500 group-hover/folder:block"
           >
             <X size={12} />
           </button>
@@ -229,6 +234,11 @@ export function WorkflowListPage() {
                 >
                   <Folder size={14} />
                   <span>All Workflows</span>
+                  {total > 0 && (
+                    <span className="ml-auto shrink-0 rounded-full bg-gray-200 px-1.5 py-0.5 text-[10px] font-medium leading-none text-gray-600 dark:bg-gray-600 dark:text-gray-300">
+                      {total}
+                    </span>
+                  )}
                 </div>
                 {renderFolderTree(folders)}
                 <div
@@ -301,6 +311,11 @@ export function WorkflowListPage() {
                       style={{ backgroundColor: tag.color ?? '#6B7280' }}
                     />
                     {tag.name}
+                    {tag.workflows_count != null && tag.workflows_count > 0 && (
+                      <span className="ml-0.5 rounded-full bg-black/10 px-1.5 py-0.5 text-[10px] font-medium leading-none">
+                        {tag.workflows_count}
+                      </span>
+                    )}
                     <span
                       onClick={(e) => { e.stopPropagation(); deleteTag(tag.id) }}
                       className="ml-0.5 hidden cursor-pointer rounded-full p-0.5 hover:bg-black/10 group-hover/tag:inline-flex"

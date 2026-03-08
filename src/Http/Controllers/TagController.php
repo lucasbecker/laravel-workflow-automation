@@ -14,6 +14,7 @@ class TagController extends Controller
     public function index(Request $request): AnonymousResourceCollection
     {
         $tags = WorkflowTag::query()
+            ->withCount('workflows')
             ->when($request->filled('search'), fn ($q) => $q->where('name', 'like', '%'.$request->string('search').'%'))
             ->orderBy('name')
             ->get();

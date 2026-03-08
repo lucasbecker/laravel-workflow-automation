@@ -4,6 +4,7 @@ export interface WorkflowTag {
   id: number
   name: string
   color: string | null
+  workflows_count?: number
   created_at: string
   updated_at: string
 }
@@ -13,6 +14,7 @@ export interface WorkflowFolder {
   name: string
   parent_id: number | null
   children?: WorkflowFolder[]
+  workflows_count?: number
   created_at: string
   updated_at: string
 }

@@ -14,9 +14,10 @@ class FolderController extends Controller
     public function index(Request $request): AnonymousResourceCollection
     {
         $folders = WorkflowFolder::query()
+            ->withCount('workflows')
             ->when(
                 $request->boolean('tree'),
-                fn ($q) => $q->whereNull('parent_id')->with('children'),
+                fn ($q) => $q->whereNull('parent_id')->with(['children' => fn ($q) => $q->withCount('workflows')]),
                 fn ($q) => $q->orderBy('name'),
             )
             ->get();
