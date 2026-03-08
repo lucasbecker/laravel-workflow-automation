@@ -1,6 +1,6 @@
 # Database Schema
 
-The package creates 6 tables. All table names are configurable in `config/workflow-automation.php`.
+The package creates 9 tables. All table names are configurable in `config/workflow-automation.php`.
 
 ## workflows
 
@@ -14,6 +14,8 @@ The main workflow container.
 | `is_active` | boolean | `false` | Whether the workflow can be triggered |
 | `run_async` | boolean | `true` | Default async execution behavior |
 | `settings` | json | null | Global settings (e.g. `{"retry_count": 3}`) |
+| `created_via` | varchar | null | How the workflow was created (e.g. `ui`, `api`, `mcp`) |
+| `folder_id` | bigint (FK) | null | Parent folder (set null on delete) |
 | `created_at` | timestamp | — | — |
 | `updated_at` | timestamp | — | — |
 | `deleted_at` | timestamp | null | Soft delete |
@@ -117,19 +119,61 @@ Encrypted credential storage for sensitive values (API keys, tokens, passwords).
 The `data` column is encrypted at rest using your `APP_KEY`. Never expose this column directly — use the `WorkflowCredential` model which handles encryption/decryption automatically.
 :::
 
+## workflow_tags
+
+Tags for categorizing workflows.
+
+| Column | Type | Default | Description |
+|--------|------|---------|-------------|
+| `id` | bigint (PK) | auto | Primary key |
+| `name` | varchar | — | Tag name (unique) |
+| `color` | varchar(7) | null | Hex color code (e.g. `#6366f1`) |
+| `created_at` | timestamp | — | — |
+| `updated_at` | timestamp | — | — |
+
+**Indexes:** unique `name`
+
+## workflow_tag_pivot
+
+Many-to-many relationship between workflows and tags.
+
+| Column | Type | Default | Description |
+|--------|------|---------|-------------|
+| `id` | bigint (PK) | auto | Primary key |
+| `workflow_id` | bigint (FK) | — | Workflow (cascades on delete) |
+| `tag_id` | bigint (FK) | — | Tag (cascades on delete) |
+
+**Indexes:** unique `(workflow_id, tag_id)`
+
+## workflow_folders
+
+Hierarchical folder structure for organizing workflows.
+
+| Column | Type | Default | Description |
+|--------|------|---------|-------------|
+| `id` | bigint (PK) | auto | Primary key |
+| `name` | varchar | — | Folder name |
+| `parent_id` | bigint (FK) | null | Parent folder for nesting (cascades on delete) |
+| `created_at` | timestamp | — | — |
+| `updated_at` | timestamp | — | — |
+
 ## Relationships
 
 ```
 workflows ─┬─ workflow_nodes
             ├─ workflow_edges
-            └─ workflow_runs ── workflow_node_runs
+            ├─ workflow_runs ── workflow_node_runs
+            └─ workflow_tag_pivot ── workflow_tags
 
 workflow_credentials (standalone, referenced by node config via credential_id)
+workflow_folders (self-referencing via parent_id, referenced by workflows.folder_id)
 ```
 
-- Deleting a workflow cascades to nodes, edges, and (via runs) node runs
+- Deleting a workflow cascades to nodes, edges, runs (and their node runs), and tag pivot entries
 - Deleting a node cascades to its edges
 - Deleting a run cascades to its node runs
+- Deleting a tag cascades its pivot entries
+- Deleting a folder cascades to child folders; workflows in that folder get `folder_id` set to null
 - Credentials are standalone — deleting a credential does not affect nodes that reference it
 
 ## Custom Table Names
@@ -145,5 +189,8 @@ Change before running migrations:
     'runs'         => 'custom_workflow_runs',
     'node_runs'    => 'custom_workflow_node_runs',
     'credentials'  => 'custom_workflow_credentials',
+    'tags'         => 'custom_workflow_tags',
+    'tag_pivot'    => 'custom_workflow_tag_pivot',
+    'folders'      => 'custom_workflow_folders',
 ],
 ```

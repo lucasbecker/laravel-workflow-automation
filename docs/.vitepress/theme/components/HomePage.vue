@@ -550,14 +550,23 @@ html.dark .code-body :deep(.shiki span) {
   gap: 20px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 640px) {
+  .hero-title {
+    font-size: 32px;
+  }
   .features-grid {
     grid-template-columns: 1fr;
   }
+  .why-header h2 {
+    font-size: 24px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
   .hero-title {
     font-size: 36px;
   }
-  .why-grid {
+  .features-grid {
     grid-template-columns: 1fr;
   }
   .why-header h2 {
@@ -565,7 +574,7 @@ html.dark .code-body :deep(.shiki span) {
   }
 }
 
-@media (max-width: 1024px) and (min-width: 769px) {
+@media (min-width: 769px) and (max-width: 1024px) {
   .features-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -677,8 +686,14 @@ html.dark .code-body :deep(.shiki span) {
 
 .why-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr;
   gap: 20px;
+}
+
+@media (min-width: 1025px) {
+  .why-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .why-card {
