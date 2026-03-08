@@ -75,13 +75,13 @@ const highlightedCode = computed(() => {
       <div class="hero-content">
         <div class="hero-badge">Open Source Laravel Package</div>
         <h1 class="hero-title">
-          Build workflows,<br>
-          <span class="hero-highlight">not boilerplate</span>
+          Automate anything.<br>
+          <span class="hero-highlight">Deploy nothing.</span>
         </h1>
         <p class="hero-description">
-          Laravel Workflow Automation is a graph-based engine that lets you design
-          trigger → condition → action flows visually or through code.
-          Like n8n, but native to your Laravel app.
+          Chain triggers, conditions, loops, AI calls, and actions into
+          multi-step workflows — visually or in PHP. Ship new business logic
+          without changing a single controller.
         </p>
         <div class="hero-actions">
           <a href="/getting-started/installation" class="btn btn-primary">Get started</a>
