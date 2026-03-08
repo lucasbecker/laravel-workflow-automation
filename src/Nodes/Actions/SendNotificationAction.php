@@ -15,8 +15,8 @@ class SendNotificationAction extends BaseNode
     {
         return [
             ['key' => 'notification_class', 'type' => 'string', 'label' => 'Notification Class', 'required' => true],
-            ['key' => 'notifiable_model', 'type' => 'string', 'label' => 'Notifiable Model', 'required' => true],
-            ['key' => 'notifiable_id_field', 'type' => 'string', 'label' => 'ID field from item', 'required' => true, 'supports_expression' => true],
+            ['key' => 'notifiable_class', 'type' => 'string', 'label' => 'Notifiable Class', 'required' => true],
+            ['key' => 'notifiable_id', 'type' => 'string', 'label' => 'Notifiable ID', 'required' => true, 'supports_expression' => true],
         ];
     }
 
@@ -35,8 +35,8 @@ class SendNotificationAction extends BaseNode
 
         foreach ($input->items as $item) {
             try {
-                $notifiable = app($config['notifiable_model'])
-                    ->find($item[$config['notifiable_id_field']] ?? null);
+                $notifiable = app($config['notifiable_class'])
+                    ->find($config['notifiable_id']);
 
                 if ($notifiable) {
                     $notifiable->notify(new $config['notification_class']($item));

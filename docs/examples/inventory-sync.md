@@ -101,9 +101,9 @@ class SetupInventorySync extends Command
 
         // 5a. Notify — send notification for unexpected errors
         $notifyOps = $workflow->addNode('Notify Ops Team', 'send_notification', [
-            'notification_class'  => 'App\\Notifications\\InventoryError',
-            'notifiable_model'    => 'App\\Models\\User',
-            'notifiable_id_field' => '{{ env.OPS_TEAM_USER_ID }}',
+            'notification_class' => 'App\\Notifications\\InventoryError',
+            'notifiable_class'   => 'App\\Models\\User',
+            'notifiable_id'      => '{{ env.OPS_TEAM_USER_ID }}',
         ]);
 
         // 5b. Retry — re-attempt the stock update

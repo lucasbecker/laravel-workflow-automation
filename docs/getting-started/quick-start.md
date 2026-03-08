@@ -41,9 +41,9 @@ $sendMail = $workflow->addNode('Send Welcome', 'send_mail', [
 
 // Action — notifies the admin about the new signup
 $notifyAdmin = $workflow->addNode('Notify Admin', 'send_notification', [
-    'notification_class'  => \App\Notifications\NewUserSignup::class,
-    'notifiable_model'    => User::class,
-    'notifiable_id_field' => 'id',
+    'notification_class' => \App\Notifications\NewUserSignup::class,
+    'notifiable_class'   => User::class,
+    'notifiable_id'      => '{{ item.id }}',
 ]);
 ```
 

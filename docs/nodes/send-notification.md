@@ -9,8 +9,8 @@ Sends a Laravel notification to a notifiable model for each item.
 | Key | Type | Required | Expression | Description |
 | --- | --- | --- | --- | --- |
 | `notification_class` | string | Yes | No | Fully qualified notification class |
-| `notifiable_model` | string | Yes | No | Fully qualified notifiable model class |
-| `notifiable_id_field` | string | Yes | Yes | Field containing the notifiable's ID |
+| `notifiable_class` | string | Yes | No | Fully qualified notifiable model class |
+| `notifiable_id` | string | Yes | Yes | Notifiable model ID (value or expression) |
 
 ## Ports
 
@@ -24,8 +24,8 @@ Sends a Laravel notification to a notifiable model for each item.
 
 For each input item:
 
-1. Evaluates `notifiable_id_field` to extract the notifiable model's ID
-2. Finds the model via `NotifiableModel::findOrFail($id)`
+1. Resolves `notifiable_id` to get the notifiable model's ID
+2. Finds the model via `NotifiableClass::find($id)`
 3. Instantiates the notification, passing the **full item array** to its constructor
 4. Calls `$notifiable->notify($notification)`
 5. Adds `notification_sent: true` to the output item
@@ -34,9 +34,9 @@ For each input item:
 
 ```php
 $notify = $workflow->addNode('Notify Customer', 'send_notification', [
-    'notification_class'  => 'App\\Notifications\\OrderShipped',
-    'notifiable_model'    => 'App\\Models\\User',
-    'notifiable_id_field' => '{{ item.user_id }}',
+    'notification_class' => 'App\\Notifications\\OrderShipped',
+    'notifiable_class'   => 'App\\Models\\User',
+    'notifiable_id'      => '{{ item.user_id }}',
 ]);
 ```
 

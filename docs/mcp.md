@@ -155,7 +155,7 @@ Add to your Claude Desktop MCP configuration:
 {
   "mcpServers": {
     "workflow": {
-      "url": "http://your-app.test/mcp/workflow"
+      "url": "http://myapp.test/mcp/workflow"
     }
   }
 }
@@ -166,7 +166,7 @@ Add to your Claude Desktop MCP configuration:
 Add the MCP server URL in Cursor's settings under the MCP section:
 
 ```
-http://your-app.test/mcp/workflow
+http://myapp.test/mcp/workflow
 ```
 
 ### Any MCP Client
@@ -174,7 +174,7 @@ http://your-app.test/mcp/workflow
 The server supports the standard MCP protocol over HTTP. Point any MCP-compatible client to:
 
 ```
-POST http://your-app.test/mcp/workflow
+POST http://myapp.test/mcp/workflow
 ```
 
 ## Security

@@ -9,12 +9,110 @@ The package includes a React-based visual workflow editor that lets you build wo
 The editor is available at `/workflow-editor` once the package is installed:
 
 ```
-http://your-app.test/workflow-editor
+http://myapp.test/workflow-editor
 ```
 
 No extra setup is required — the UI is served directly from the package.
 
-![Workflow Editor](./screenshots/workflow-editor.png)
+</div>
+
+<div class="browser-mock">
+  <div class="browser-chrome">
+    <div class="browser-dots">
+      <span class="dot dot-red"></span>
+      <span class="dot dot-yellow"></span>
+      <span class="dot dot-green"></span>
+    </div>
+    <div class="browser-nav">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+    </div>
+    <div class="browser-address">
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <span>myapp.test/workflow-editor</span>
+    </div>
+  </div>
+  <img class="screenshot-dark" src="./screenshots/workflow-editor.png" alt="Workflow Editor" />
+  <img class="screenshot-light" src="./screenshots/workflow-editor-light.png" alt="Workflow Editor" />
+</div>
+
+<style>
+.browser-mock {
+  margin: 1.5rem 0;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--vp-c-divider);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
+}
+.browser-chrome {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: var(--vp-c-bg);
+  border-bottom: 1px solid var(--vp-c-divider);
+}
+.browser-dots {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.dot-red { background: #ff5f57; }
+.dot-yellow { background: #febc2e; }
+.dot-green { background: #28c840; }
+.browser-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--vp-c-text-3);
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+@media (max-width: 640px) {
+  .browser-nav { display: none; }
+}
+.browser-address {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--vp-c-bg-soft);
+  font-size: 12px;
+  font-family: var(--vp-font-family-mono);
+  color: var(--vp-c-text-3);
+}
+.browser-address svg {
+  flex-shrink: 0;
+  color: var(--vp-c-text-3);
+  opacity: 0.6;
+}
+.browser-mock img {
+  width: 100%;
+  display: block;
+}
+/* Default: use prefers-color-scheme for SSR/initial load */
+.screenshot-dark { display: none; }
+.screenshot-light { display: block; }
+@media (prefers-color-scheme: dark) {
+  .screenshot-dark { display: block; }
+  .screenshot-light { display: none; }
+}
+/* Once VitePress hydrates, html class takes priority */
+html.dark .screenshot-dark { display: block; }
+html.dark .screenshot-light { display: none; }
+html:not(.dark) .screenshot-dark { display: none; }
+html:not(.dark) .screenshot-light { display: block; }
+</style>
+
+<div v-pre>
 
 ::: tip Build Required
 If you installed the package via Composer, the pre-built UI files are included. If you cloned the repository directly, you need to build the UI first:
