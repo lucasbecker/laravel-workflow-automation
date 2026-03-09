@@ -20,7 +20,7 @@ function drawGrid() {
 
   const dpr = window.devicePixelRatio || 1
   const w = window.innerWidth
-  const h = canvas.parentElement.offsetHeight
+  const h = window.innerHeight
 
   if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
     canvas.width = w * dpr
@@ -163,8 +163,6 @@ $workflow->activate();
 // a confirmation email + team notification.`,
 }
 
-let gridResizeObserver = null
-
 onMounted(async () => {
   highlighter.value = await createHighlighter({
     themes: ['github-dark', 'github-light'],
@@ -174,15 +172,14 @@ onMounted(async () => {
   if (gridCanvas.value) {
     gridCtx = gridCanvas.value.getContext('2d')
     drawGrid()
-    gridResizeObserver = new ResizeObserver(() => drawGrid())
-    gridResizeObserver.observe(gridCanvas.value.parentElement)
+    window.addEventListener('resize', drawGrid)
     document.addEventListener('mousemove', onGridMouseMove)
     document.addEventListener('mouseleave', onGridMouseLeave)
   }
 })
 
 onUnmounted(() => {
-  if (gridResizeObserver) gridResizeObserver.disconnect()
+  window.removeEventListener('resize', drawGrid)
   if (gridAnimFrame) cancelAnimationFrame(gridAnimFrame)
   document.removeEventListener('mousemove', onGridMouseMove)
   document.removeEventListener('mouseleave', onGridMouseLeave)
@@ -445,11 +442,11 @@ const highlightedCode = computed(() => {
 }
 
 .grid-bg {
-  position: absolute;
+  position: fixed;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  height: 100%;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   pointer-events: none;
   z-index: 0;
 }
