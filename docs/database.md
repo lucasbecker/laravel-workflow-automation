@@ -160,7 +160,7 @@ Hierarchical folder structure for organizing workflows.
 ## Relationships
 
 ```
-workflows ─┬─ workflow_nodes
+workflows  ─┬─ workflow_nodes
             ├─ workflow_edges
             ├─ workflow_runs ── workflow_node_runs
             └─ workflow_tag_pivot ── workflow_tags

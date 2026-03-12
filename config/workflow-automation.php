@@ -239,6 +239,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Workflow Chaining
+    |--------------------------------------------------------------------------
+    |
+    | Controls for workflow-to-workflow chaining via the Workflow Trigger node.
+    |
+    | 'max_depth' — Maximum chain depth to prevent infinite loops.
+    |               When workflow A triggers B triggers C... this limits how
+    |               deep the chain can go. Set 0 to disable chaining.
+    |
+    */
+
+    'chaining' => [
+        'max_depth' => env('WORKFLOW_CHAIN_MAX_DEPTH', 10),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Log Retention
     |--------------------------------------------------------------------------
     |

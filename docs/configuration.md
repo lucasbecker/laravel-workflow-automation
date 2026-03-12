@@ -75,6 +75,11 @@ return [
         'max_tokens'       => env('WORKFLOW_AI_MAX_TOKENS', 4096),
     ],
 
+    // Workflow chaining
+    'chaining' => [
+        'max_depth' => env('WORKFLOW_CHAIN_MAX_DEPTH', 10),
+    ],
+
     // Log retention (days, 0 = disabled)
     'log_retention_days' => env('WORKFLOW_LOG_RETENTION', 30),
 ];
@@ -105,6 +110,7 @@ return [
 | `ai.default_provider` | string | `null` | Default AI provider (e.g. `openai`, `anthropic`) |
 | `ai.default_model` | string | `null` | Default AI model (e.g. `gpt-4o`) |
 | `ai.max_tokens` | int | `4096` | Default max tokens for AI responses |
+| `chaining.max_depth` | int | `10` | Maximum chain depth to prevent infinite loops (0 = disabled) |
 | `log_retention_days` | int | `30` | Prune runs older than this (0 = disabled) |
 
 ## Environment Variables
@@ -121,6 +127,7 @@ return [
 | `WORKFLOW_AI_PROVIDER` | `ai.default_provider` | `null` |
 | `WORKFLOW_AI_MODEL` | `ai.default_model` | `null` |
 | `WORKFLOW_AI_MAX_TOKENS` | `ai.max_tokens` | `4096` |
+| `WORKFLOW_CHAIN_MAX_DEPTH` | `chaining.max_depth` | `10` |
 | `WORKFLOW_LOG_RETENTION` | `log_retention_days` | `30` |
 
 ## Extending Models

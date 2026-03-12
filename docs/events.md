@@ -7,8 +7,8 @@ The package dispatches events during workflow execution. Listen for them in your
 | Event | When | Payload |
 |-------|------|---------|
 | `WorkflowStarted` | A workflow run begins | `$run` |
-| `WorkflowCompleted` | A workflow run finishes successfully | `$run` |
-| `WorkflowFailed` | A workflow run fails with an exception | `$run`, `$exception` |
+| `WorkflowCompleted` | A workflow run finishes successfully | `$run`, `$outputData` |
+| `WorkflowFailed` | A workflow run fails with an exception | `$run`, `$exception`, `$outputData` |
 | `WorkflowResumed` | A paused workflow is resumed | `$run`, `$payload` |
 | `NodeExecuted` | A node finishes successfully | `$nodeRun` |
 | `NodeFailed` | A node execution fails | `$nodeRun`, `$exception` |
@@ -30,7 +30,8 @@ $event->run;  // WorkflowRun model
 use Aftandilmmd\WorkflowAutomation\Events\WorkflowCompleted;
 
 // Properties
-$event->run;  // WorkflowRun model
+$event->run;         // WorkflowRun model
+$event->outputData;  // array — all node outputs (context)
 ```
 
 ### WorkflowFailed
@@ -39,8 +40,9 @@ $event->run;  // WorkflowRun model
 use Aftandilmmd\WorkflowAutomation\Events\WorkflowFailed;
 
 // Properties
-$event->run;        // WorkflowRun model
-$event->exception;  // \Throwable
+$event->run;         // WorkflowRun model
+$event->exception;   // \Throwable
+$event->outputData;  // array — node outputs collected before failure
 ```
 
 ### WorkflowResumed

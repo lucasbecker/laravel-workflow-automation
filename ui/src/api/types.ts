@@ -146,7 +146,7 @@ export interface ConfigSchemaField {
     | 'string' | 'textarea' | 'select' | 'boolean' | 'integer' | 'json'
     | 'keyvalue' | 'array_of_objects' | 'multiselect' | 'model_select'
     | 'number' | 'color' | 'url' | 'password' | 'slider' | 'code'
-    | 'info' | 'section' | 'custom' | 'credential'
+    | 'info' | 'section' | 'custom' | 'credential' | 'workflow_select'
   label: string
   required?: boolean
   options?: string[]

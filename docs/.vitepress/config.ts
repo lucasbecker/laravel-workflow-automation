@@ -7,6 +7,7 @@ const advancedSection = {
     { text: 'Credential Vault', link: '/advanced/credentials' },
     { text: 'Plugins', link: '/advanced/plugins' },
     { text: 'Custom Nodes', link: '/advanced/custom-nodes' },
+    { text: 'Workflow Chaining', link: '/advanced/workflow-chaining' },
     { text: 'Execution Engine', link: '/advanced/execution-engine' },
     { text: 'Error Handling', link: '/advanced/error-handling' },
     { text: 'Rate Limiting', link: '/advanced/rate-limiting' },
@@ -65,6 +66,7 @@ export default defineConfig({
             { text: 'Event', link: '/triggers/event' },
             { text: 'Webhook', link: '/triggers/webhook' },
             { text: 'Schedule', link: '/triggers/schedule' },
+            { text: 'Workflow', link: '/triggers/workflow' },
           ],
         },
         {

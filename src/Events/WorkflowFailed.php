@@ -12,5 +12,6 @@ class WorkflowFailed
     public function __construct(
         public readonly WorkflowRun $run,
         public readonly \Throwable  $exception,
+        public readonly array       $outputData = [],
     ) {}
 }

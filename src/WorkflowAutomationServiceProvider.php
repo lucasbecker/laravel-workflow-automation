@@ -104,6 +104,7 @@ class WorkflowAutomationServiceProvider extends ServiceProvider
         $this->app->booted(function () {
             Listeners\ModelEventListener::register();
             Listeners\EventListener::register();
+            Listeners\WorkflowChainListener::register();
         });
     }
 

@@ -11,5 +11,6 @@ class WorkflowCompleted
 
     public function __construct(
         public readonly WorkflowRun $run,
+        public readonly array       $outputData = [],
     ) {}
 }

@@ -59,6 +59,22 @@ class WorkflowRun extends Model
         );
     }
 
+    public function parentRun(): BelongsTo
+    {
+        return $this->belongsTo(
+            config('workflow-automation.models.run', self::class),
+            'parent_run_id',
+        );
+    }
+
+    public function childRuns(): HasMany
+    {
+        return $this->hasMany(
+            config('workflow-automation.models.run', self::class),
+            'parent_run_id',
+        );
+    }
+
     public function isRunning(): bool
     {
         return $this->status === RunStatus::Running;

@@ -37,7 +37,7 @@ class GraphExecutor
     /**
      * Execute a workflow synchronously and return the run record.
      */
-    public function execute(Workflow $workflow, array $initialPayload = [], ?int $triggerNodeId = null): WorkflowRun
+    public function execute(Workflow $workflow, array $initialPayload = [], ?int $triggerNodeId = null, ?int $parentRunId = null): WorkflowRun
     {
         $this->concurrencyGuard->acquire($workflow);
 
@@ -46,6 +46,7 @@ class GraphExecutor
             'status'          => RunStatus::Pending,
             'trigger_node_id' => $triggerNodeId,
             'initial_payload' => $initialPayload,
+            'parent_run_id'   => $parentRunId,
         ]);
 
         try {
@@ -62,7 +63,7 @@ class GraphExecutor
                 'finished_at'   => now(),
             ]);
 
-            event(new WorkflowFailed($run, $e));
+            event(new WorkflowFailed($run, $e, $run->context ?? []));
         }
 
         return $run->fresh();
@@ -117,7 +118,7 @@ class GraphExecutor
                 'finished_at' => now(),
             ]);
 
-            event(new WorkflowCompleted($run));
+            event(new WorkflowCompleted($run, $context->getAllOutputs()));
         } catch (\Throwable $e) {
             $run->update([
                 'status'        => RunStatus::Failed,
@@ -125,7 +126,7 @@ class GraphExecutor
                 'finished_at'   => now(),
             ]);
 
-            event(new WorkflowFailed($run, $e));
+            event(new WorkflowFailed($run, $e, $context->getAllOutputs()));
         }
 
         return $run->fresh();
@@ -215,7 +216,7 @@ class GraphExecutor
                     'finished_at' => now(),
                 ]);
 
-                event(new WorkflowCompleted($newRun));
+                event(new WorkflowCompleted($newRun, $context->getAllOutputs()));
             } else {
                 $newRun->update(['context' => $context->getAllOutputs()]);
             }
@@ -227,7 +228,7 @@ class GraphExecutor
                 'finished_at'   => now(),
             ]);
 
-            event(new WorkflowFailed($newRun, $e));
+            event(new WorkflowFailed($newRun, $e, $context->getAllOutputs()));
         }
 
         return $newRun->fresh();
@@ -258,7 +259,7 @@ class GraphExecutor
                 'finished_at'   => now(),
             ]);
 
-            event(new WorkflowFailed($run, $e));
+            event(new WorkflowFailed($run, $e, $run->context ?? []));
         }
 
         return $run->fresh();
@@ -309,7 +310,7 @@ class GraphExecutor
                 'finished_at' => now(),
             ]);
 
-            event(new WorkflowCompleted($run));
+            event(new WorkflowCompleted($run, $context->getAllOutputs()));
 
             return;
         }
@@ -356,7 +357,7 @@ class GraphExecutor
             'finished_at' => now(),
         ]);
 
-        event(new WorkflowCompleted($run));
+        event(new WorkflowCompleted($run, $context->getAllOutputs()));
     }
 
     /**

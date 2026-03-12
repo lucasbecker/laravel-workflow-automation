@@ -49,9 +49,9 @@ External Service (Stripe, GitHub, etc.)
           │ POST /workflow-webhook/{uuid}
           │ Body: {"event": "payment.success", "amount": 99.90}
           ▼
-   ┌──────────────────┐
+   ┌───────────────────┐
    │ Webhook Trigger   │
-   └──────┬───────────┘
+   └──────┬────────────┘
           │ main
           ▼
    [{"event": "payment.success", "amount": 99.90}]

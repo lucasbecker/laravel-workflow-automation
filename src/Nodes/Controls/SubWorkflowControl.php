@@ -7,6 +7,7 @@ use Aftandilmmd\WorkflowAutomation\DTOs\NodeInput;
 use Aftandilmmd\WorkflowAutomation\DTOs\NodeOutput;
 use Aftandilmmd\WorkflowAutomation\Engine\GraphExecutor;
 use Aftandilmmd\WorkflowAutomation\Enums\NodeType;
+use Aftandilmmd\WorkflowAutomation\Enums\RunStatus;
 use Aftandilmmd\WorkflowAutomation\Jobs\ExecuteWorkflowJob;
 use Aftandilmmd\WorkflowAutomation\Models\Workflow;
 use Aftandilmmd\WorkflowAutomation\Nodes\BaseNode;
@@ -20,6 +21,17 @@ class SubWorkflowControl extends BaseNode
             ['key' => 'workflow_id', 'type' => 'workflow_select', 'label' => 'Workflow', 'required' => true],
             ['key' => 'pass_items', 'type' => 'boolean', 'label' => 'Pass items as payload', 'required' => false],
             ['key' => 'wait_for_result', 'type' => 'boolean', 'label' => 'Wait for result', 'required' => false],
+        ];
+    }
+
+    public static function outputSchema(): array
+    {
+        return [
+            'main' => [
+                ['key' => 'sub_workflow_run_id', 'type' => 'number', 'label' => 'Sub Workflow Run ID'],
+                ['key' => 'status', 'type' => 'string', 'label' => 'Run Status'],
+                ['key' => 'output', 'type' => 'object', 'label' => 'Sub Workflow Output (sync only)'],
+            ],
         ];
     }
 
@@ -38,11 +50,24 @@ class SubWorkflowControl extends BaseNode
 
         if ($config['wait_for_result'] ?? false) {
             $executor = app(GraphExecutor::class);
-            $run = $executor->execute($workflow, $payload);
+            $parentRunId = $input->context->workflowRunId;
+            $run = $executor->execute($workflow, $payload, parentRunId: $parentRunId);
+
+            if ($run->status === RunStatus::Failed) {
+                return NodeOutput::ports([
+                    'main'  => [],
+                    'error' => [[
+                        'sub_workflow_run_id' => $run->id,
+                        'status'              => $run->status->value,
+                        'error_message'       => $run->error_message,
+                    ]],
+                ]);
+            }
 
             return NodeOutput::main([[
                 'sub_workflow_run_id' => $run->id,
                 'status'              => $run->status->value,
+                'output'              => $run->context ?? [],
             ]]);
         }
 
