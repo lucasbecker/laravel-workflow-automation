@@ -32,9 +32,9 @@ If you create a new workflow while the app is running, the trigger will be picke
 event(new OrderPlaced($order))
           │
           ▼ (Laravel event dispatcher)
-   ┌──────────────────┐
+   ┌───────────────────┐
    │ Event Trigger     │
-   └──────┬───────────┘
+   └──────┬────────────┘
           │ main
           ▼
    [{'order': {'id': 1, 'total': 250}, 'user': {'id': 5, 'name': 'Alice'}}]

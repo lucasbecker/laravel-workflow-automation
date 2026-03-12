@@ -24,9 +24,9 @@ The manual trigger is a pass-through: whatever items you pass to `start()` are f
 start([{name: "Alice"}, {name: "Bob"}])
           │
           ▼
-   ┌──────────────┐
+   ┌───────────────┐
    │ Manual Trigger│
-   └──────┬───────┘
+   └──────┬────────┘
           │ main
           ▼
    [{name: "Alice"}, {name: "Bob"}]

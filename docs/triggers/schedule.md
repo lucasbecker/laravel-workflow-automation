@@ -45,9 +45,9 @@ Every minute, the scheduler runs:
           │
           │ (checks if cron/interval matches current time)
           ▼
-   ┌──────────────────┐
+   ┌───────────────────┐
    │ Schedule Trigger  │
-   └──────┬───────────┘
+   └──────┬────────────┘
           │ main
           ▼
    [{"triggered_at": "2024-01-15T08:00:00Z"}]

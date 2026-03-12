@@ -57,7 +57,7 @@ Some nodes have multiple output ports. For example, the IF Condition node has `t
 
 ```
                     ┌─ true ──▶ [Send VIP Email]
-[IF Condition] ────┤
+[IF Condition] ─────┤
                     └─ false ─▶ [Send Standard Email]
 ```
 

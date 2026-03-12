@@ -32,10 +32,10 @@ If you create a new workflow while the app is running, the trigger will be picke
 User::create(['name' => 'Alice', 'email' => 'alice@example.com'])
           │
           ▼ (Eloquent 'created' event fires)
-   ┌──────────────────┐
+   ┌───────────────────┐
    │ Model Event       │
    │ Trigger           │
-   └──────┬───────────┘
+   └──────┬────────────┘
           │ main
           ▼
    [{'id': 1, 'name': 'Alice', 'email': 'alice@example.com', ...}]
