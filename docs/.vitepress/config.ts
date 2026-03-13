@@ -4,6 +4,7 @@ const advancedSection = {
   text: 'Advanced',
   collapsed: false,
   items: [
+    { text: 'Authorization', link: '/advanced/authorization' },
     { text: 'Credential Vault', link: '/advanced/credentials' },
     { text: 'Plugins', link: '/advanced/plugins' },
     { text: 'Custom Nodes', link: '/advanced/custom-nodes' },

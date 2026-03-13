@@ -18,6 +18,7 @@ use Aftandilmmd\WorkflowAutomation\Plugin\PluginRegistry;
 use Aftandilmmd\WorkflowAutomation\Registry\NodeRegistry;
 use Aftandilmmd\WorkflowAutomation\Services\ConcurrencyGuard;
 use Aftandilmmd\WorkflowAutomation\Services\WorkflowService;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
@@ -91,12 +92,42 @@ class WorkflowAutomationServiceProvider extends ServiceProvider
             ], 'workflow-automation-editor');
         }
 
+        $this->authorization();
+
         $this->registerBuiltInNodes();
         $this->registerBuiltInCredentialTypes();
         $this->registerConfigPlugins();
         $this->bootPlugins();
         $this->registerListeners();
         $this->registerMcpServer();
+    }
+
+    /**
+     * Register the default authorization gate.
+     *
+     * This gate determines who can access Workflow Automation in non-local
+     * environments. In local, access is always allowed.
+     *
+     * Override in your AppServiceProvider:
+     *
+     *     Gate::define('viewWorkflowAutomation', function ($user) {
+     *         return in_array($user->email, ['admin@example.com']);
+     *     });
+     */
+    protected function authorization(): void
+    {
+        $this->gate();
+    }
+
+    protected function gate(): void
+    {
+        if (Gate::has('viewWorkflowAutomation')) {
+            return;
+        }
+
+        Gate::define('viewWorkflowAutomation', function ($user = null) {
+            return false;
+        });
     }
 
     private function registerListeners(): void

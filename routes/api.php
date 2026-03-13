@@ -12,6 +12,7 @@ use Aftandilmmd\WorkflowAutomation\Http\Controllers\WorkflowController;
 use Aftandilmmd\WorkflowAutomation\Http\Controllers\WorkflowEdgeController;
 use Aftandilmmd\WorkflowAutomation\Http\Controllers\WorkflowNodeController;
 use Aftandilmmd\WorkflowAutomation\Http\Controllers\WorkflowRunController;
+use Aftandilmmd\WorkflowAutomation\Http\Middleware\Authorize;
 use Illuminate\Support\Facades\Route;
 
 $prefix     = config('workflow-automation.prefix', 'workflow-engine');
@@ -20,7 +21,7 @@ $middleware = config('workflow-automation.middleware', ['api']);
 // ── API Routes (CRUD + execution) ──────────────────────────────
 if (config('workflow-automation.api_routes', true)) {
     Route::prefix($prefix)
-        ->middleware($middleware)
+        ->middleware([...$middleware, Authorize::class])
         ->group(function () {
             // ── Workflows ────────────────────────────────────────────
             Route::apiResource('workflows', WorkflowController::class);

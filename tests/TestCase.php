@@ -4,6 +4,7 @@ namespace Aftandilmmd\WorkflowAutomation\Tests;
 
 use Aftandilmmd\WorkflowAutomation\WorkflowAutomationServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Gate;
 use Orchestra\Testbench\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
@@ -28,5 +29,12 @@ abstract class TestCase extends BaseTestCase
 
         $app['config']->set('workflow-automation.async', false);
         $app['config']->set('workflow-automation.routes', true);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Gate::define('viewWorkflowAutomation', fn ($user = null) => true);
     }
 }

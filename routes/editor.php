@@ -1,5 +1,6 @@
 <?php
 
+use Aftandilmmd\WorkflowAutomation\Http\Middleware\Authorize;
 use Illuminate\Support\Facades\Route;
 
 $spaHandler = function () {
@@ -43,5 +44,7 @@ $assetHandler = function (string $file) {
 Route::get('workflow-editor/assets/{file}', $assetHandler)->name('workflow.ui.assets');
 
 // SPA catch-all — two routes to avoid optional parameter issues
-Route::get('workflow-editor', $spaHandler)->name('workflow.ui');
-Route::get('workflow-editor/{path}', $spaHandler)->where('path', '.*')->name('workflow.ui.spa');
+Route::middleware(Authorize::class)->group(function () use ($spaHandler) {
+    Route::get('workflow-editor', $spaHandler)->name('workflow.ui');
+    Route::get('workflow-editor/{path}', $spaHandler)->where('path', '.*')->name('workflow.ui.spa');
+});
